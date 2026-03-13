@@ -1,0 +1,42 @@
+<div class="text-center mb-8">
+  <h2 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+    Payment Methods</h2>
+  <p class="text-slate-600 text-lg">Manage your payment methods and billing preferences</p>
+</div>
+
+<div class="rounded-lg bg-card text-card-foreground border-0 shadow-xl bg-gradient-to-br from-white to-blue-50">
+  <div class="flex flex-col space-y-1.5 p-6">
+    <h3 class="font-semibold tracking-tight flex items-center justify-between text-xl">
+      <div class="flex items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-credit-card h-6 w-6 text-blue-600 mr-3">
+          <rect width="20" height="14" x="2" y="5" rx="2"></rect>
+          <line x1="2" x2="22" y1="10" y2="10"></line>
+        </svg>Current Payment Method
+      </div>
+      <button
+        class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 h-10 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white cursor-pointer"
+        type="button"
+        (click)="onAddNewPaymentMethod()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-plus h-4 w-4 mr-2">
+          <path d="M5 12h14"></path>
+          <path d="M12 5v14"></path>
+        </svg>Add New
+      </button>
+    </h3>
+  </div>
+  <div class="p-6 pt-0">
+    <div class="space-y-4">
+      @for(method of paymentMethods; track method.id) {
+        <app-payment-method-card
+          [paymentMethod]="method"
+          (setAsDefault)="onSetAsDefault($event)"
+          (deletePaymentMethod)="onDeletePaymentMethod($event)">
+        </app-payment-method-card>
+      }
+    </div>
+  </div>
+</div>

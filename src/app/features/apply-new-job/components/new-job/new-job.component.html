@@ -1,0 +1,270 @@
+
+<div class="bg-white/80 backdrop-blur-sm rounded-2xl shadow-lg border-0 p-6">
+    @if(!atsMatch() && !isProcessing()) {
+      <div [formGroup]="atsForm">
+
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
+        <!--
+          TODO: Future Improvements
+          - Need to remove "handleFileUpload" template block
+        -->
+        <div>
+          <input type="file" class="flex w-full border px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-14 h-12 bg-white/70 border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+          (change)="handleFileUpload($event)">
+        </div>
+
+          <div class="space-y-3">
+            <label class="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sm font-semibold text-slate-700"
+              for="company">Company Name</label>
+            <div class="relative">
+              <div class="absolute left-3 top-1/2 transform -translate-y-1/2">
+                <div
+                  class="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-building2 h-4 w-4 text-white">
+                    <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path>
+                    <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path>
+                    <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path>
+                    <path d="M10 6h4"></path>
+                    <path d="M10 10h4"></path>
+                    <path d="M10 14h4"></path>
+                    <path d="M10 18h4"></path>
+                  </svg>
+                </div>
+              </div>
+              <input formControlName="companyName" name="companyName" id="companyName"
+                class="flex w-full border px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-14 h-12 bg-white/70 border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-blue-500/20 focus:border-blue-400"
+                placeholder="e.g., Google, Microsoft">
+            </div>
+            @if (controls['companyName'] && controls['companyName'].invalid && (controls['companyName'].touched || controls['companyName'].dirty)) {
+              @if (controls['companyName'].errors?.['required']) {
+                <p class="mt-0 text-xs text-red-600">Company Name is required.</p>
+              }
+
+              @if (controls['companyName'].errors?.['maxlength']) {
+                <p class="mt-0 text-xs text-red-600">Company Name cannot exceed 100 characters.</p>
+              }
+            }
+          </div>
+          <div class="space-y-3">
+            <label
+              class="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sm font-semibold text-slate-700"
+              for="position">Position Title</label>
+            <div class="relative">
+              <div class="absolute left-3 top-1/2 transform -translate-y-1/2">
+                <div
+                  class="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-file-text h-4 w-4 text-white">
+                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                    <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                    <path d="M10 9H8"></path>
+                    <path d="M16 13H8"></path>
+                    <path d="M16 17H8"></path>
+                  </svg>
+                </div>
+              </div>
+              <input formControlName="jobPosition" name="jobPosition" id="jobPosition"
+                class="flex w-full border px-3 py-2 text-base ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium file:text-foreground placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 md:text-sm pl-14 h-12 bg-white/70 border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-400"
+                placeholder="e.g., Software Engineer">
+            </div>
+            @if (controls['jobPosition'] && controls['jobPosition'].invalid && (controls['jobPosition'].touched || controls['jobPosition'].dirty)) {
+              @if (controls['jobPosition'].errors?.['required']) {
+                <p class="mt-1 text-xs text-red-600">Job position is required.</p>
+              }
+
+              @if (controls['jobPosition'].errors?.['maxlength']) {
+                <p class="mt-1 text-xs text-red-600">Job position cannot exceed 100 characters.</p>
+              }
+            }
+          </div>
+        </div>
+        <div class="space-y-3">
+          <label class="peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sm font-semibold text-slate-700"
+            for="jobDescription">Job Description</label>
+          <textarea formControlName="jobDescription" name="jobDescription" id="jobDescription"
+            class="flex w-full border px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 min-h-[200px] resize-none bg-white/70 border-slate-200 rounded-xl shadow-sm focus:ring-2 focus:ring-purple-500/20 focus:border-purple-400"
+            placeholder="Paste the complete job description here...">
+          </textarea>
+          @if (controls['jobDescription'] && controls['jobDescription'].invalid && (controls['jobDescription'].touched || controls['jobDescription'].dirty)) {
+            @if (controls['jobDescription'].errors?.['required']) {
+              <p class="mt-1 text-xs text-red-600">Job description is required.</p>
+            }
+            @if (controls['jobDescription'].errors?.['maxlength']) {
+              <p class="mt-1 text-xs text-red-600">Job description cannot exceed 1000 characters.</p>
+            }
+          }
+          <p class="text-xs text-slate-500 bg-slate-50/80 rounded-lg p-3">💡 Include requirements, responsibilities, and
+            preferred qualifications for better analysis</p>
+        </div>
+      </div>
+
+      <div class="flex justify-end pt-4">
+        <app-button
+          size="lg"
+          iconAlign="left"
+          (onClick)="handleAnalyze()"
+          [disabled]="atsForm.invalid">
+          ✨ Analyze Match
+        </app-button>
+
+      </div>
+    }
+
+    @if (isProcessing()) {
+      <div class="flex flex-col items-center justify-center space-y-6">
+        <div class="relative">
+          <div class="w-20 h-20 rounded-full border-4 border-purple-200 border-t-purple-500 animate-spin"></div>
+          <div
+            class="absolute inset-0 w-10 h-10 m-auto bg-gradient-to-br from-purple-500 to-indigo-600 rounded-full flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-target h-6 w-6 text-white">
+              <circle cx="12" cy="12" r="10"></circle>
+              <circle cx="12" cy="12" r="6"></circle>
+              <circle cx="12" cy="12" r="2"></circle>
+            </svg>
+          </div>
+        </div>
+        <div class="text-center space-y-3">
+          <h3 class="text-xl font-bold bg-gradient-to-r from-slate-900 to-purple-900 bg-clip-text text-transparent">🎯
+            Analyzing Resume Match</h3>
+          <p class="text-slate-600">Comparing your
+            resume with job requirements using AI...</p>
+        </div>
+        <div class="w-full max-w-md">
+          <div class="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-full p-1">
+            <div aria-valuemax="100" aria-valuemin="0" role="progressbar" data-state="indeterminate" data-max="100"
+              class="relative h-2 overflow-hidden rounded-full w-full bg-white/80">
+              <div class="h-full w-full flex-1 bg-primary transition-all" [style.width.%]="progress()"
+                style="transform: translateX(0%);">
+              </div>
+            </div>
+          </div>
+          <p class="text-center text-sm text-slate-500 mt-3 font-medium">
+            {{ progress() }}% Complete
+          </p>
+        </div>
+      </div>
+    }
+
+    @if (atsMatch()) {
+      <div class="flex items-center justify-between mb-6">
+        <div class="flex items-center gap-3">
+          <div
+            class="w-10 h-10 bg-gradient-to-br from-slate-800 to-slate-900 rounded-xl flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-trending-up h-5 w-5 text-white">
+              <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+              <polyline points="16 7 22 7 22 13"></polyline>
+            </svg>
+          </div>
+          <h3 class="text-xl font-bold bg-gradient-to-r from-slate-900 to-blue-900 bg-clip-text text-transparent">ATS
+            Match Score
+          </h3>
+        </div>
+        <div class="px-4 py-2 bg-slate-100 rounded-xl text-lg font-bold text-slate-700">{{atsMatch()?.score}}%</div>
+      </div>
+      <div class="space-y-3 mb-6">
+        <div class="bg-gradient-to-r from-purple-100 to-indigo-100 rounded-full p-1">
+          <div aria-valuemax="100" aria-valuemin="0" role="progressbar" data-state="indeterminate" data-max="100"
+            class="relative h-2 overflow-hidden rounded-full w-full bg-white/80">
+            <div data-state="indeterminate" data-max="100" class="h-full w-full flex-1 bg-primary transition-all"
+              style="transform: translateX(-{{atsMatch()?.score}}%);"></div>
+          </div>
+        </div>
+        <p class="text-sm text-slate-600 text-center">Resume compatibility with job requirements</p>
+      </div>
+      <div class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+        <div class="flex items-center gap-3 p-4 bg-white/60 rounded-xl border border-slate-200">
+          <div class="w-8 h-8 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-lg flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-circle-check-big h-4 w-4 text-white">
+              <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
+              <path d="m9 11 3 3L22 4"></path>
+            </svg>
+          </div>
+          <span class="text-sm font-medium text-slate-700">Keywords matched</span>
+        </div>
+        <div class="flex items-center gap-3 p-4 bg-white/60 rounded-xl border border-slate-200">
+          <div class="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-circle-alert h-4 w-4 text-white">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" x2="12" y1="8" y2="12"></line>
+              <line x1="12" x2="12.01" y1="16" y2="16"></line>
+            </svg>
+          </div>
+          <span class="text-sm font-medium text-slate-700">Skills alignment</span>
+        </div>
+        <div class="flex items-center gap-3 p-4 bg-white/60 rounded-xl border border-slate-200">
+          <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-clock h-4 w-4 text-white">
+              <circle cx="12" cy="12" r="10"></circle>
+              <polyline points="12 6 12 12 16 14"></polyline>
+            </svg>
+          </div>
+          <span class="text-sm font-medium text-slate-700">Experience relevance</span>
+        </div>
+      </div>
+      <div class="bg-gradient-to-br from-amber-50 to-orange-50 rounded-xl p-4 border border-amber-200 mb-6">
+        <div class="flex items-start gap-3">
+          <div
+            class="w-8 h-8 bg-gradient-to-br from-amber-500 to-orange-500 rounded-lg flex items-center justify-center flex-shrink-0 mt-0.5">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-circle-alert h-4 w-4 text-white">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" x2="12" y1="8" y2="12"></line>
+              <line x1="12" x2="12.01" y1="16" y2="16"></line>
+            </svg>
+          </div>
+          <div class="space-y-1">
+            <h4 class="font-bold text-amber-900">💡 Recommendation</h4>
+            <p class="text-sm text-amber-800">Your score could be improved! Consider tailoring your resume to better
+              match the job requirements and increase your chances.</p>
+          </div>
+        </div>
+      </div>
+      <div class="flex gap-3">
+        <button (click)="handleTailorResume()"
+          class="justify-center whitespace-nowrap text-sm font-medium ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 px-4 py-2 flex items-center gap-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-700 hover:to-indigo-700 text-white rounded-xl shadow-lg transition-all duration-300 hover:shadow-xl">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-sparkles h-4 w-4">
+            <path
+              d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z">
+            </path>
+            <path d="M20 3v4"></path>
+            <path d="M22 5h-4"></path>
+            <path d="M4 17v2"></path>
+            <path d="M5 18H3"></path>
+          </svg>
+          ✨ Tailor Resume
+        </button>
+        <button (click)="handleTrackJob()"
+          class="justify-center whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border bg-background hover:text-accent-foreground h-10 px-4 py-2 flex items-center gap-2 rounded-xl border-slate-300 hover:bg-slate-50">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-building2 h-4 w-4">
+            <path d="M6 22V4a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v18Z"></path>
+            <path d="M6 12H4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h2"></path>
+            <path d="M18 9h2a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2h-2"></path>
+            <path d="M10 6h4"></path>
+            <path d="M10 10h4"></path>
+            <path d="M10 14h4"></path>
+            <path d="M10 18h4"></path>
+          </svg>
+          Apply & Track Job
+        </button>
+      </div>
+    }
+</div>

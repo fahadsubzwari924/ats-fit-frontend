@@ -1,0 +1,17 @@
+<div class="text-center mb-8">
+  <h2 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
+    Billing History</h2>
+  <p class="text-slate-600 text-lg">View and download your past invoices and payments</p>
+</div>
+<div class="rounded-lg text-card-foreground border-0 shadow-xl bg-white">
+  <div class="p-0">
+    <div class="space-y-0">
+      @for (item of subscriptionHistory(); track item.id) {
+        <app-billing-history-card
+          [item]="item"
+          (downloadInvoice)="onDownloadInvoice($event)">
+        </app-billing-history-card>
+      }
+    </div>
+  </div>
+</div>

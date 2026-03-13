@@ -1,0 +1,20 @@
+[
+  {
+    "stars": 5,
+    "description": "ATS Fit helped me land my dream job at a tech giant. The AI tailoring feature saved me hours of manual work!",
+    "writtenBy": "Sarah Chen",
+    "jobTile": "Software Engineer"
+  },
+  {
+    "stars": 5,
+    "description": "The ATS scoring feature gave me confidence that my resume would actually get past the initial screening.",
+    "writtenBy": "Marcus Johnson",
+    "jobTile": "Marketing Manager"
+  },
+  {
+    "stars": 5,
+    "description": "I went from 2% to 40% interview callback rate after using ATS Fit. Absolutely game-changing!",
+    "writtenBy": "Elena Rodriguez",
+    "jobTile": "Data Analyst"
+  }
+]

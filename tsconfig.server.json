@@ -1,0 +1,9 @@
+{
+    "extends": "./tsconfig.json",
+    "compilerOptions": {
+      "outDir": "./dist/server",
+      "target": "es2019",
+      "types": ["node"]
+    },
+    "files": ["src/main.server.ts"]
+}

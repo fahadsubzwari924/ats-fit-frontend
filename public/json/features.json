@@ -1,0 +1,17 @@
+[
+  {
+      "title": "AI-Powered Resume Tailoring",
+      "description": "Upload your resume and job description, select from ATS-friendly templates, and get a customized resume in under a minute.",
+      "icon": "/images/feature/tailoring.svg"
+    },
+    {
+      "title": "ATS Match Scoring",
+      "description": "Get an instant score showing how well your resume matches the job description for ATS compatibility.",
+      "icon": "/images/feature/ats.svg"
+    },
+    {
+      "title": "Smart Analytics",
+      "description": "Track your progress with detailed insights on your resume optimization journey.",
+      "icon": "/images/feature/analytics.svg"
+    }
+]

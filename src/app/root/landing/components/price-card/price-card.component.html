@@ -1,0 +1,50 @@
+
+
+<div
+  class="rounded-lg bg-card text-card-foreground relative"
+  [ngClass]="{
+    'border shadow-sm border-slate-200': !priceCard()?.isPopular,
+    'border-blue-500 border-2 shadow-xl': priceCard()?.isPopular
+  }"
+  >
+
+  @if (priceCard()?.isPopular) {
+    <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white">
+      Most Popular
+    </div>
+  }
+
+  <div class="flex flex-col space-y-1.5 p-6 text-center">
+    <h3 class="font-semibold tracking-tight text-2xl">{{ priceCard()?.title }}</h3>
+    <div class="text-4xl font-bold text-blue-600">{{ priceCard()?.price }}</div>
+    <p class="text-sm text-muted-foreground">{{priceCard()?.description}}</p>
+  </div>
+  <div class="p-6 pt-0 space-y-4">
+    <ul class="space-y-3">
+
+
+      @for (feature of priceCard()?.features; track feature) {
+        <li class="flex items-center"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+          stroke-linejoin="round"
+          class="lucide lucide-circle-check-big h-5 w-5 text-green-500 mr-3 flex-shrink-0">
+          <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
+          <path d="m9 11 3 3L22 4"></path>
+        </svg><span class="text-slate-700">{{feature}}</span>
+      </li>
+      }
+    </ul>
+
+    @if (priceCard()?.isPopular) {
+      <a
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-md px-8 w-full mt-6"
+      href="/">{{priceCard()?.buttonText}}</a>
+    } @else {
+      <a
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 rounded-md px-8 w-full mt-6 btn-border-color"
+      href="/">{{priceCard()?.buttonText}}</a>
+
+    }
+
+  </div>
+</div>

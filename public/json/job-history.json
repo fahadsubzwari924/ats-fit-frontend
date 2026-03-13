@@ -1,0 +1,34 @@
+[
+  {
+    "title": "Software Engineer",
+    "company": "Systems Limited",
+    "description": "Job details for Software Engineer position",
+    "appliedAt": "Applied Aug 16, 2025",
+    "atsScore": "42%",
+    "status": "Initial Screening"
+  },
+  {
+    "title": "Frontend Developer",
+    "company": "TechCorp Solutions",
+    "description": "React.js and Angular development position",
+    "appliedAt": "Applied Aug 12, 2025",
+    "atsScore": "78%",
+    "status": "Technical Interview"
+  },
+  {
+    "title": "Full Stack Developer",
+    "company": "Innovation Labs",
+    "description": "Node.js and React full stack development role",
+    "appliedAt": "Applied Aug 8, 2025",
+    "atsScore": "65%",
+    "status": "Final Round"
+  },
+  {
+    "title": "Senior Software Engineer",
+    "company": "Global Tech Inc",
+    "description": "Senior level position with team leadership responsibilities",
+    "appliedAt": "Applied Aug 5, 2025",
+    "atsScore": "89%",
+    "status": "Offer Received"
+  }
+]

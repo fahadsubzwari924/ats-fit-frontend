@@ -1,0 +1,32 @@
+[
+  {
+    "id": 1,
+    "title": "Software Engineer - TechCorp",
+    "description": "Resume Generated",
+    "duration": "Checked Aug 16, 2025",
+    "stat": "92%",
+    "icon": "images/resume.svg",
+    "statIcon": "images/stat-up.svg",
+    "statTitle": "ATS Check"
+  },
+  {
+    "id": 2,
+    "title": "Project Manager - BuildIt",
+    "description": "Resume Updated",
+    "duration": "Checked Aug 16, 2025",
+    "stat": "85%",
+    "icon": "images/ats.svg",
+    "statIcon": "images/stat-up.svg",
+    "statTitle": "ATS Check"
+  },
+  {
+    "id": 3,
+    "title": "Data Analyst - DataWise",
+    "description": "Resume Reviewed",
+    "duration": "Checked Aug 16, 2025",
+    "stat": "78%",
+    "icon": "images/resume.svg",
+    "statIcon": "images/stat-up.svg",
+    "statTitle": "Analysis"
+  }
+]

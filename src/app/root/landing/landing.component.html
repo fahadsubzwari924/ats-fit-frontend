@@ -1,0 +1,132 @@
+
+  <section class="pt-24 pb-16 px-4">
+    <div class="max-w-7xl mx-auto text-center">
+      <div
+        class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent mb-6 bg-blue-100 text-blue-800 hover:bg-blue-200">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-zap h-3 w-3 mr-1">
+          <path
+            d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z">
+          </path>
+        </svg>
+        AI-Powered Resume Optimization
+      </div>
+      <h1
+        class="text-5xl md:text-7xl font-bold bg-gradient-to-r from-slate-900 via-blue-900 to-indigo-900 bg-clip-text text-transparent mb-6 leading-tight">
+        Tailor Your Resume in
+        <span class="block text-blue-600">Under a Minute</span>
+      </h1>
+      <p class="text-xl text-slate-600 mb-8 max-w-3xl mx-auto leading-relaxed">
+        Beat the ATS and land more interviews with AI-powered resume tailoring
+        and compatibility scoring. Join thousands of job seekers who've
+        transformed their job search success.
+      </p>
+      <div class="flex flex-col sm:flex-row gap-4 justify-center mb-12">
+        <button type="button" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 h-11 rounded-md bg-blue-600 hover:bg-blue-700 text-white px-8 py-4 text-lg cursor-pointer"
+        (click)="openResumeModal()">
+          Try Resume Tailoring
+        </button>
+        <button type="button" (click)="openAtsModal()" class="inline-flex items-center justify-center gap-2 whitespace-nowrap font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 rounded-md px-8 py-4 text-lg border-2 cursor-pointer">
+          Try ATS Scoring
+        </button>
+      </div>
+      <div class="bg-white/80 backdrop-blur-sm rounded-2xl p-8 shadow-xl max-w-4xl mx-auto">
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 text-center">
+          <div>
+            <div class="text-3xl font-bold text-blue-600 mb-2">95%</div>
+            <div class="text-slate-600">ATS Compatibility Rate</div>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-green-600 mb-2">3x</div>
+            <div class="text-slate-600">More Interview Callbacks</div>
+          </div>
+          <div>
+            <div class="text-3xl font-bold text-purple-600 mb-2">&lt;60s</div>
+            <div class="text-slate-600">Average Generation Time</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 px-4 bg-white">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-slate-900 mb-6">The Job Search Struggle is Real</h2>
+        <p class="text-xl text-slate-600 max-w-3xl mx-auto">90% of large companies use Applicant Tracking Systems (ATS)
+          that filter out resumes before human eyes ever see them. Don't let your perfect qualifications get lost in the
+          digital void.</p>
+      </div>
+      <div class="grid md:grid-cols-2 gap-12 items-center">
+        <div class="space-y-6">
+          <div class="bg-red-50 border-l-4 border-red-400 p-6 rounded-r-lg">
+            <h3 class="font-semibold text-red-800 mb-2">❌ The Problem</h3>
+            <ul class="space-y-2 text-red-700">
+              <li>• Sending the same resume to every job</li>
+              <li>• No idea if your resume is ATS-compatible</li>
+              <li>• Spending hours manually tailoring each application</li>
+              <li>• Getting rejected before human review</li>
+            </ul>
+          </div>
+        </div>
+        <div class="space-y-6">
+          <div class="bg-green-50 border-l-4 border-green-400 p-6 rounded-r-lg">
+            <h3 class="font-semibold text-green-800 mb-2">✅ Our Solution</h3>
+            <ul class="space-y-2 text-green-700">
+              <li>• AI tailors your resume for each specific job</li>
+              <li>• Instant ATS compatibility scoring</li>
+              <li>• Professional templates optimized for ATS</li>
+              <li>• Get past filters and into human hands</li>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 px-4 bg-slate-50">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-slate-900 mb-6">Powerful Features for Job Search Success</h2>
+        <p class="text-xl text-slate-600">Everything you need to optimize your resume and beat the ATS</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+        @for(feature of features(); track $index) {
+          <app-feature-card [feature]="feature"
+            class="rounded-lg bg-card text-card-foreground border-0 shadow-lg hover:shadow-xl transition-all duration-300 hover:-translate-y-1">
+          </app-feature-card>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 px-4 bg-white">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-slate-900 mb-6">Choose Your Plan</h2>
+        <p class="text-xl text-slate-600">Start free and upgrade as your job search accelerates</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+        @for (plan of pricingPlans(); track $index) {
+          <app-price-card [priceCard]="plan"></app-price-card>
+        }
+      </div>
+    </div>
+  </section>
+
+  <section class="py-16 px-4 bg-slate-50">
+    <div class="max-w-6xl mx-auto">
+      <div class="text-center mb-16">
+        <h2 class="text-4xl font-bold text-slate-900 mb-6">Success Stories from Job Seekers Like You</h2>
+        <p class="text-xl text-slate-600">See how ATS Fit has transformed careers</p>
+      </div>
+      <div class="grid md:grid-cols-3 gap-8">
+
+        @for (testimonial of testimonials(); track $index) {
+          <app-job-story-card [testimonial]="testimonial"></app-job-story-card>
+        }
+      </div>
+    </div>
+  </section>
+

@@ -1,0 +1,141 @@
+<!-- <div class="relative p-6 rounded-2xl border-2 transition-all hover:shadow-lg flex flex-col"
+  [ngClass]="{
+    'border-emerald-400 bg-gradient-to-br from-emerald-50 to-green-50': selected(),
+    'border-slate-200 bg-white hover:border-blue-300': !selected()
+  }"
+>
+  @if (selected()) {
+    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+      <div
+        class="inline-flex items-center rounded-full border text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus-ring-offset-2 border-transparent hover:bg-primary/80 bg-emerald-500 text-white px-3 py-1">
+        Current Plan</div>
+    </div>
+  }
+  <div class="text-center mb-6">
+    <h3 class="text-xl font-bold text-slate-900 mb-2">Free Account</h3>
+    <div class="text-3xl font-bold text-blue-600 mb-2">Free</div>
+    <p class="text-slate-600 text-sm">Perfect for getting started</p>
+  </div>
+  <ul class="space-y-3 mb-6 flex-grow">
+    <li class="flex items-center text-sm"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" class="lucide lucide-circle-check-big h-4 w-4 text-emerald-500 mr-3 flex-shrink-0">
+        <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
+        <path d="m9 11 3 3L22 4"></path>
+      </svg><span class="text-slate-800 font-medium">12 Resume generations/month</span></li>
+    <li class="flex items-center text-sm"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" class="lucide lucide-circle-check-big h-4 w-4 text-emerald-500 mr-3 flex-shrink-0">
+        <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
+        <path d="m9 11 3 3L22 4"></path>
+      </svg><span class="text-slate-800 font-medium">30 ATS scores/month</span></li>
+    <li class="flex items-center text-sm"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" class="lucide lucide-circle-check-big h-4 w-4 text-emerald-500 mr-3 flex-shrink-0">
+        <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
+        <path d="m9 11 3 3L22 4"></path>
+      </svg><span class="text-slate-800 font-medium">Past 5 days history</span></li>
+    <li class="flex items-center text-sm"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" class="lucide lucide-circle-check-big h-4 w-4 text-emerald-500 mr-3 flex-shrink-0">
+        <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
+        <path d="m9 11 3 3L22 4"></path>
+      </svg><span class="text-slate-800 font-medium">Basic templates</span></li>
+    <li class="flex items-center text-sm"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
+        viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"
+        stroke-linejoin="round" class="lucide lucide-circle-check-big h-4 w-4 text-emerald-500 mr-3 flex-shrink-0">
+        <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
+        <path d="m9 11 3 3L22 4"></path>
+      </svg><span class="text-slate-800 font-medium">Email support</span></li>
+  </ul>
+
+
+
+  @if (selected()) {
+    <button
+      class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-primary/90 h-10 px-4 w-full py-3 rounded-xl font-semibold transition-all mt-auto bg-emerald-100 text-emerald-800 border border-emerald-300 cursor-default"
+      disabled="">
+      <div class="flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-circle-check-big h-4 w-4 mr-2">
+          <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
+          <path d="m9 11 3 3L22 4"></path>
+        </svg>Current Plan
+      </div>
+    </button>
+  } @else {
+    <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 bg-primary hover:bg-primary/90 h-10 px-4 w-full py-3 rounded-xl font-semibold transition-all mt-auto bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white transform hover:scale-105">
+      Current Plan
+    </button>
+  }
+</div> -->
+
+<div class="relative p-6 rounded-2xl border-2 transition-all hover:shadow-lg flex flex-col"
+  [ngClass]="{
+    'border-emerald-400 bg-gradient-to-br from-emerald-50 to-green-50': selected(),
+    'border-slate-200 bg-white hover:border-blue-300': !selected()
+  }"
+>
+  <!-- Current Plan Badge -->
+  @if (selected()) {
+    <div class="absolute -top-3 left-1/2 transform -translate-x-1/2">
+      <div
+        class="inline-flex items-center rounded-full border text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus-ring-offset-2 border-transparent hover:bg-primary/80 bg-emerald-500 text-white px-3 py-1">
+        Current Plan</div>
+    </div>
+  }
+
+  <!-- Plan Header -->
+  <div class="text-center mb-6">
+    <h3 class="text-xl font-bold text-slate-900 mb-2">{{ plan().planName }}</h3>
+    <div class="text-3xl font-bold text-blue-600 mb-2">{{ plan().price }}</div>
+    <p class="text-slate-600 text-sm">{{ plan().description }}</p>
+  </div>
+
+  <!-- Features List -->
+  <ul class="space-y-3 mb-6 flex-grow">
+    @for (feature of plan().features; track feature) {
+      <li class="flex items-center text-sm">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-circle-check-big h-4 w-4 text-emerald-500 mr-3 flex-shrink-0">
+          <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
+          <path d="m9 11 3 3L22 4"></path>
+        </svg>
+        <span class="text-slate-800 font-medium">{{ feature }}</span>
+      </li>
+    }
+  </ul>
+
+  <!-- Action Button -->
+  <button
+    class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 h-10 px-4 w-full py-3 rounded-xl font-semibold transition-all mt-auto cursor-pointer"
+    [ngClass]="{
+      'bg-gradient-to-r from-blue-600 to-cyan-600 hover:from-blue-700 hover:to-cyan-700 text-white transform hover:scale-105': !selected(),
+      'bg-emerald-100 text-emerald-800 border border-emerald-300 cursor-default': selected()
+    }"
+    [disabled]="selected()"
+    (click)="handlePlanButtonClick(plan())">
+
+    <!-- Current Plan Button Content -->
+    @if (selected()) {
+      <div class="flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+          class="lucide lucide-circle-check-big h-4 w-4 mr-2">
+          <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
+          <path d="m9 11 3 3L22 4"></path>
+        </svg>
+        Current Plan
+      </div>
+    }
+
+
+    <!-- Other Button Content -->
+    @if(!selected()) {
+      <span>Subscribe</span>
+    }
+
+  </button>
+</div>

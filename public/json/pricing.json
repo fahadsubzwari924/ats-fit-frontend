@@ -1,0 +1,50 @@
+[
+    {
+      "title": "Guest",
+      "price": "Free",
+      "description": "Try our platform with basic features",
+      "icon": "/images/pricing-card/price-card-1.svg",
+      "isPopular": false,
+      "buttonText": "Try Started Free",
+      "buttonLink": "/signup",
+      "type": "guest",
+      "features": [
+        "6 Resume generations/month",
+        "15 ATS scores/month",
+        "No history access",
+        "No resume saving"
+      ]
+    },
+    {
+      "title": "Free Account",
+      "price": "Free",
+      "description": "Get started with enhanced features",
+      "icon": "/images/pricing-card/price-card-1.svg",
+      "isPopular": false,
+      "buttonText": "Signup for free",
+      "buttonLink": "/signup",
+      "type": "registered",
+      "features": [
+        "12 Resume generations/month",
+        "30 ATS scores/month",
+        "Past 5 days history",
+        "No resume saving"
+      ]
+    },
+    {
+      "title": "Premium",
+      "price": "$19/month",
+      "description": "Unlock full potential for serious job seekers",
+      "icon": "/images/pricing-card/price-card-2.svg",
+      "isPopular": true,
+      "buttonText": "Go Premium",
+      "buttonLink": "/signup",
+      "type": "premium",
+      "features": [
+        "50 Resume generations/month",
+        "60 ATS scores/month",
+        "Unlimited history access",
+        "Resume saving & management"
+      ]
+    }
+  ]
