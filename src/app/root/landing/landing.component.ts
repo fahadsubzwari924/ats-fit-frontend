@@ -6,8 +6,7 @@ import { forkJoin } from 'rxjs';
 import { FeatureCardComponent } from '@root/landing/components/feature-card/feature-card.component';
 import { PriceCardComponent } from '@root/landing/components/price-card/price-card.component';
 import { JobStoryCardComponent } from '@root/landing/components/job-stroy-card/job-story-card.component';
-import { ResumeTailoringModalComponent } from '@features/resume-tailoring/resume-tailoring-modal.component';
-import { AtsScoringModalComponent } from '@features/ats-scoring/ats-scoring-modal.component';
+import { TailorApplyModalComponent } from '@features/tailor-apply/tailor-apply-modal.component';
 // Services
 import { PlatformDataService } from '@root/landing/services/platform-data.service';
 import { ModalService } from '@shared/services/modal.service';
@@ -114,11 +113,11 @@ export class LandingComponent implements OnInit, OnDestroy {
   }
 
   public openResumeModal(): void {
-    this.modalService.openModal(ResumeTailoringModalComponent);
+    this.modalService.openModal(TailorApplyModalComponent, undefined, { width: '620px', maxWidth: '95vw', panelClass: 'tailor-modal-panel' });
   }
 
   public openAtsModal(): void {
-    this.modalService.openModal(AtsScoringModalComponent);
+    this.modalService.openModal(TailorApplyModalComponent, undefined, { width: '620px', maxWidth: '95vw', panelClass: 'tailor-modal-panel' });
   }
 
   handleGetStarted(): void {

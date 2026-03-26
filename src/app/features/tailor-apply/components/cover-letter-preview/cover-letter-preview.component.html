@@ -1,0 +1,79 @@
+<div class="space-y-4 animate-fade-in-up">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between">
+    <div class="flex items-center gap-2">
+      <div class="w-7 h-7 bg-gradient-to-br from-violet-500 to-indigo-500 rounded-lg flex items-center justify-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" class="text-white">
+          <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+          <polyline points="14 2 14 8 20 8"></polyline>
+          <line x1="16" x2="8" y1="13" y2="13"></line>
+          <line x1="16" x2="8" y1="17" y2="17"></line>
+          <line x1="10" x2="8" y1="9" y2="9"></line>
+        </svg>
+      </div>
+      <div>
+        <p class="text-sm font-semibold text-slate-800">Cover Letter</p>
+        @if (coverLetter().metadata.wordCount) {
+          <p class="text-xs text-slate-500">{{ coverLetter().metadata.wordCount }} words</p>
+        }
+      </div>
+    </div>
+    <div class="flex items-center gap-1.5">
+      @if (coverLetter().metadata.keyThemesAddressed.length) {
+        <div class="flex gap-1">
+          @for (theme of coverLetter().metadata.keyThemesAddressed.slice(0, 2); track theme) {
+            <span class="text-[10px] font-medium bg-violet-100 text-violet-700 px-2 py-0.5 rounded-full">{{ theme }}</span>
+          }
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- Cover letter content -->
+  @if (coverLetter().coverLetter) {
+    <div class="bg-white rounded-xl border border-slate-200 p-5 space-y-3.5 max-h-72 overflow-y-auto text-sm text-slate-700 leading-relaxed">
+      <p class="font-medium">{{ coverLetter().coverLetter.greeting }}</p>
+      <p>{{ coverLetter().coverLetter.opening }}</p>
+      @for (para of coverLetter().coverLetter.body; track $index) {
+        <p>{{ para }}</p>
+      }
+      <p>{{ coverLetter().coverLetter.closing }}</p>
+      <div>
+        <p>{{ coverLetter().coverLetter.signoff }}</p>
+        <p class="font-semibold text-slate-800 mt-1">{{ coverLetter().coverLetter.candidateName }}</p>
+      </div>
+    </div>
+  }
+
+  <!-- Actions -->
+  <div class="grid grid-cols-2 gap-2">
+    <button (click)="onCopyText()"
+      class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-semibold border-2 border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/40 text-slate-700 hover:text-indigo-700 transition-all duration-200">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" class="shrink-0">
+        <rect width="14" height="14" x="8" y="8" rx="2" ry="2"></rect>
+        <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"></path>
+      </svg>
+      Copy Text
+    </button>
+    <button (click)="onDownloadText()"
+      class="flex items-center justify-center gap-2 py-2.5 px-3 rounded-xl text-sm font-semibold bg-gradient-to-r from-violet-600 to-indigo-600 hover:from-violet-700 hover:to-indigo-700 text-white shadow-md shadow-violet-200 transition-all duration-200">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" class="shrink-0">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="7 10 12 15 17 10"></polyline>
+        <line x1="12" x2="12" y1="15" y2="3"></line>
+      </svg>
+      Download
+    </button>
+  </div>
+
+  <!-- Close link -->
+  <button (click)="close.emit()"
+    class="w-full text-xs text-slate-400 hover:text-slate-600 transition-colors py-1">
+    ← Back to results
+  </button>
+
+</div>

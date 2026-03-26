@@ -1,16 +1,15 @@
 import { inject, Injectable } from "@angular/core";
-import { MatDialog, MatDialogRef } from "@angular/material/dialog";
+import { MatDialog, MatDialogConfig, MatDialogRef } from "@angular/material/dialog";
 
 @Injectable({
   providedIn: 'root',
 })
 export class ModalService {
-  // Using inject to get the MatDialog instance
   private matDialog = inject(MatDialog);
 
   constructor() {}
 
-  public openModal<T>(component: any, data?: any): MatDialogRef<T> {
+  public openModal<T>(component: any, data?: any, config?: Partial<MatDialogConfig>): MatDialogRef<T> {
     if (!component) {
       throw new Error('A valid component must be provided to openModal.');
     }
@@ -18,6 +17,7 @@ export class ModalService {
       hasBackdrop: true,
       disableClose: true,
       data: data,
+      ...config,
     });
   }
 

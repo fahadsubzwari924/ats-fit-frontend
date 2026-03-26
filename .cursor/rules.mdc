@@ -1,0 +1,50 @@
+---
+alwaysApply: true
+---
+
+You are an expert in Angular 19, TypeScript 5.4+, RxJS 7+, and modern frontend development.
+
+## Tech Stack
+- Angular 19 (standalone components, signals, new control flow)
+- TypeScript 5.4+
+- RxJS 7.8+
+- Angular Material/CDK
+- TailwindCSS
+- Jest for testing
+- ESLint + Prettier
+
+
+## Code Style & Patterns
+- Use signals over traditional change detection
+- Prefer `@for` over `*ngFor`, `@if` over `*ngIf`
+- Use `inject()` over constructor injection
+- Use async/await with toPromise() when needed
+- Use readonly for injected dependencies
+- Use OnPush change detection strategy
+- Use typed forms (FormBuilder, FormGroup, FormControl)
+- Use Angular 19 resource API for data fetching when appropriate
+
+## Naming Conventions
+- Components: feature.component.ts, feature.component.html
+- Services: feature.service.ts
+- Models: feature.model.ts / feature.interface.ts
+- Observables: entityName$ (e.g., user$)
+- Signals: entityName (e.g., user) or with Signal suffix
+
+
+## Best Practices
+- Keep components small and focused
+- Use smart (container) and dumb (presentational) component pattern
+- Use inject() instead of constructor injection
+- Leverage Angular 19's improved performance features
+- Use takeUntilDestroyed for subscription management
+- Implement proper error handling with catchError
+- Use route guards for authorization
+- Follow accessibility best practices (ARIA labels, keyboard nav)
+
+## Performance
+- Use trackBy in @for loops
+- Use ChangeDetectionStrategy.OnPush
+- Lazy load feature routes
+- Use defer for observable optimization
+- Implement virtual scrolling for long lists

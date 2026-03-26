@@ -1,0 +1,59 @@
+@let g = group();
+<div class="rounded-xl border transition-all duration-200"
+  [ngClass]="isGroupComplete(g) ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200'">
+  <button type="button" (click)="toggle()" class="w-full text-left">
+    <div class="flex items-center justify-between p-3">
+      <div class="flex items-center gap-3">
+        <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
+          [ngClass]="isGroupComplete(g) ? 'bg-gradient-to-br from-emerald-500 to-teal-500' : 'bg-gradient-to-br from-slate-400 to-slate-500'">
+          @if (isGroupComplete(g)) {
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white">
+              <path d="M3 21h18"></path>
+              <path d="M5 21V7l8-4v18"></path>
+              <path d="M19 21V11l-6-4"></path>
+            </svg>
+          }
+        </div>
+        <div>
+          <p class="text-sm font-medium text-slate-900">{{ g.companyName }}</p>
+          @if (g.jobTitle) {
+            <p class="text-xs text-slate-500">{{ g.jobTitle }}</p>
+          }
+        </div>
+      </div>
+      <div class="flex items-center gap-2">
+        <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
+          [ngClass]="isGroupComplete(g) ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'">
+          {{ companyAnswered(g) }}/{{ companyTotal(g) }}
+        </span>
+        @if (expanded()) {
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-slate-400">
+            <polyline points="18 15 12 9 6 15"></polyline>
+          </svg>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-slate-400">
+            <polyline points="6 9 12 15 18 9"></polyline>
+          </svg>
+        }
+      </div>
+    </div>
+  </button>
+  @if (expanded()) {
+    <div class="px-3 pb-3 space-y-3">
+      @for (q of g.questions; track q.id) {
+        <app-profile-question-item
+          [question]="q"
+          [isEditing]="isEditing(q)"
+          (saveAnswer)="onSaveAnswer($event)"
+          (skipQuestion)="onSkipQuestion($event)"
+          (startEdit)="onStartEdit(q.id)"
+          (cancelEdit)="onCancelEdit()">
+        </app-profile-question-item>
+      }
+    </div>
+  }
+</div>

@@ -34,87 +34,6 @@
         ></a
       >
     </div>
-    <div
-      class="rounded-lg border text-card-foreground shadow-sm mb-6 border-green-200 bg-green-50"
-    >
-      <div class="p-6 pt-4">
-        <h3 class="font-semibold text-green-800 mb-3">
-          Free Account Benefits:
-        </h3>
-        <ul class="space-y-2">
-          <li class="flex items-center text-sm text-green-700">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-circle-check-big h-4 w-4 mr-2 flex-shrink-0"
-            >
-              <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
-              <path d="m9 11 3 3L22 4"></path>
-              </svg>12 resume generations per month
-          </li>
-          <li class="flex items-center text-sm text-green-700">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-circle-check-big h-4 w-4 mr-2 flex-shrink-0"
-            >
-              <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
-              <path d="m9 11 3 3L22 4"></path>
-            </svg>
-            30 ATS scores per month
-          </li>
-          <li class="flex items-center text-sm text-green-700">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-circle-check-big h-4 w-4 mr-2 flex-shrink-0"
-            >
-              <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
-              <path d="m9 11 3 3L22 4"></path>
-              </svg>5-day history access
-          </li>
-          <li class="flex items-center text-sm text-green-700">
-            <svg
-              xmlns="http://www.w3.org/2000/svg"
-              width="24"
-              height="24"
-              viewBox="0 0 24 24"
-              fill="none"
-              stroke="currentColor"
-              stroke-width="2"
-              stroke-linecap="round"
-              stroke-linejoin="round"
-              class="lucide lucide-circle-check-big h-4 w-4 mr-2 flex-shrink-0"
-            >
-              <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
-              <path d="m9 11 3 3L22 4"></path>
-              </svg>
-              Free forever - no credit card required
-          </li>
-        </ul>
-      </div>
-    </div>
     <div class="rounded-lg bg-card text-card-foreground shadow-xl border-0">
       <div class="flex flex-col space-y-1.5 p-6 text-center">
         <h3 class="tracking-tight text-2xl font-bold">Create Your Account</h3>
@@ -172,12 +91,16 @@
                 placeholder="Confirm your password"
                 formControlName="confirmPassword"
                 [required]="true"
-                [customValidators]="confirmPasswordCustomValidators"
               ></app-input-field>
               <button type="button" class="absolute right-3 top-10 transform cursor-pointer" (click)="toggleConfirmPasswordVisibility()">
                 <mat-icon class="h-4 w-4 text-slate-400 material-icons">{{confirmPasswordFieldType() === InputType.PASSWORD ? 'visibility' : 'visibility_off'}}</mat-icon>
               </button>
             </div>
+            @if (signupForm.hasError('passwordsMismatch') && (signupForm.get('password')?.touched || signupForm.get('confirmPassword')?.touched)) {
+              <div class="text-xs text-red-600 mt-1">
+                <span>Passwords do not match.</span>
+              </div>
+            }
           </div>
           <div class="flex items-center space-x-2">
             <input type="checkbox" formControlName="terms" id="terms" class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground" />
@@ -214,13 +137,14 @@
             <span class="bg-white px-2 text-slate-500">Or</span>
           </div>
         </div>
-        <app-button
-          text="Try as Guest (Limited Features)"
-          variant="outline"
-          [fullWidth]="true"
-          customClass="mb-3"
-        >
-        </app-button>
+        <div class="mb-3">
+          <app-button
+            text="Try as Guest (Limited Features)"
+            variant="outline"
+            [fullWidth]="true"
+          >
+          </app-button>
+        </div>
         <div class="text-center">
           <p class="text-sm text-slate-600">
             Already have an account?

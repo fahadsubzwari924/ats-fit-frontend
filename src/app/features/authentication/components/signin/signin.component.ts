@@ -1,4 +1,5 @@
 import { Component, inject, signal } from '@angular/core';
+import { finalize } from 'rxjs';
 import { RouterLink, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
 import { MatIconModule } from "@angular/material/icon";
@@ -41,6 +42,8 @@ export class SigninComponent {
   // Component state
   public passwordFieldType = signal<string>(InputType.PASSWORD);
   public InputType = InputType;
+  /** Email/password request in flight — drives inline loading, form disable, and card progress. */
+  public isSubmitting = signal(false);
 
   ngOnInit() {
     this.initializeForm();
@@ -58,29 +61,44 @@ export class SigninComponent {
   }
 
   public login(): void {
-
-    if (this.signinForm.invalid) {
+    if (this.isSubmitting()) {
       return;
     }
 
-    this.authService.login(this.signinForm.value)
-    .subscribe({
-      next: (response) => {
-        if (!response.user || !response.accessToken) {
-          this.snackbarService.showError(Messages.LOGIN_FAILED);
-          return;
-        }
+    if (this.signinForm.invalid) {
+      this.signinForm.markAllAsTouched();
+      return;
+    }
 
-        // Type Cast the response data to Respective Model (Getting error if not done)
-        this.storageService.setToken(response.accessToken);
-        this.userState.setUser(response.user);
-        this.router.navigateByUrl(AppRoutes.DASHBOARD);
-      },
-      error: (error) => {
-        this.snackbarService.showError(error?.error?.message || error?.message || Messages.LOGIN_FAILED);
-        console.error('Login failed', error);
-      }
-    });
+    this.isSubmitting.set(true);
+    this.signinForm.disable({ emitEvent: false });
+
+    this.authService
+      .login(this.signinForm.getRawValue())
+      .pipe(
+        finalize(() => {
+          this.isSubmitting.set(false);
+          this.signinForm.enable({ emitEvent: false });
+        }),
+      )
+      .subscribe({
+        next: (response) => {
+          if (!response.user || !response.accessToken) {
+            this.snackbarService.showError(Messages.LOGIN_FAILED);
+            return;
+          }
+
+          this.storageService.setToken(response.accessToken);
+          this.userState.setUser(response.user);
+          this.router.navigateByUrl(AppRoutes.DASHBOARD);
+        },
+        error: (error) => {
+          this.snackbarService.showError(
+            error?.error?.message || error?.message || Messages.LOGIN_FAILED,
+          );
+          console.error('Login failed', error);
+        },
+      });
   }
 }
 

@@ -1,0 +1,25 @@
+<div class="form-group" *ngIf="label || error || hint">
+  <label class="form-group__label" *ngIf="label">{{ label }}</label>
+  <input
+    [ngClass]="inputClasses"
+    [type]="type"
+    [placeholder]="placeholder"
+    [disabled]="disabled"
+    [readonly]="readonly"
+    [value]="value"
+    (input)="onInput($event)"
+    (blur)="onBlur()" />
+  <div class="form-group__error" *ngIf="error">{{ error }}</div>
+  <div class="form-group__hint" *ngIf="hint && !error">{{ hint }}</div>
+</div>
+
+<input
+  *ngIf="!label && !error && !hint"
+  [ngClass]="inputClasses"
+  [type]="type"
+  [placeholder]="placeholder"
+  [disabled]="disabled"
+  [readonly]="readonly"
+  [value]="value"
+  (input)="onInput($event)"
+  (blur)="onBlur()" />

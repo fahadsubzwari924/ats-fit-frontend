@@ -1,0 +1,398 @@
+// ============================================================================
+// Mixins & Utility Functions
+// ============================================================================
+// Collection of SCSS mixins and functions for consistent styling
+
+@use 'sass:map';
+@use 'design-tokens' as *;
+
+// ============================================================================
+// Media Query Mixins
+// ============================================================================
+
+/// Responsive breakpoint mixin
+/// @param {String} $breakpoint - Breakpoint name (xs, sm, md, lg, xl, 2xl)
+@mixin respond-to($breakpoint) {
+  $value: map.get($breakpoints, $breakpoint);
+  @if $value != null {
+    @media (min-width: $value) {
+      @content;
+    }
+  } @else {
+    @warn "Breakpoint '#{$breakpoint}' not found";
+  }
+}
+
+/// Mobile-first responsive mixin
+/// @param {String} $breakpoint - Breakpoint name
+@mixin mobile-first($breakpoint) {
+  @include respond-to($breakpoint) {
+    @content;
+  }
+}
+
+/// Desktop-first responsive mixin
+/// @param {String} $breakpoint - Breakpoint name
+@mixin desktop-down($breakpoint) {
+  $value: map-get($breakpoints, $breakpoint);
+  @if $value != null {
+    @media (max-width: ($value - 1px)) {
+      @content;
+    }
+  }
+}
+
+// ============================================================================
+// Typography Mixins
+// ============================================================================
+
+/// Apply typography styles
+/// @param {String} $level - Typography level (xs, sm, base, lg, xl, 2xl, 3xl)
+@mixin typography($level) {
+  $config: map.get($typography, $level);
+  @if $config != null {
+    font-size: map.get($config, size);
+    font-weight: map.get($config, weight);
+    line-height: map.get($config, line-height);
+  } @else {
+    @warn "Typography level '#{$level}' not found";
+  }
+}
+
+/// Heading typography
+@mixin heading-1 {
+  @include typography(3xl);
+  letter-spacing: $letter-spacing-tight;
+}
+
+@mixin heading-2 {
+  @include typography(2xl);
+  letter-spacing: $letter-spacing-tight;
+}
+
+@mixin heading-3 {
+  @include typography(xl);
+  letter-spacing: $letter-spacing-normal;
+}
+
+@mixin heading-4 {
+  @include typography(lg);
+  letter-spacing: $letter-spacing-normal;
+}
+
+/// Body typography
+@mixin body-text {
+  @include typography(base);
+}
+
+@mixin body-small {
+  @include typography(sm);
+}
+
+/// Caption typography
+@mixin caption {
+  @include typography(xs);
+  color: $color-muted-foreground;
+}
+
+// ============================================================================
+// Flexbox Mixins
+// ============================================================================
+
+/// Flex container
+@mixin flex(
+  $direction: row,
+  $justify: center,
+  $align: center,
+  $wrap: nowrap,
+  $gap: null
+) {
+  display: flex;
+  flex-direction: $direction;
+  justify-content: $justify;
+  align-items: $align;
+  flex-wrap: $wrap;
+
+  @if $gap != null {
+    gap: $gap;
+  }
+}
+
+/// Flex center (shorthand)
+@mixin flex-center {
+  @include flex(row, center, center);
+}
+
+/// Flex between
+@mixin flex-between {
+  @include flex(row, space-between, center);
+}
+
+// ============================================================================
+// Grid Mixins
+// ============================================================================
+
+/// Grid container
+@mixin grid(
+  $columns: 1,
+  $gap: $spacing-md,
+  $align-items: auto,
+  $justify-items: auto
+) {
+  display: grid;
+  grid-template-columns: repeat($columns, 1fr);
+  gap: $gap;
+
+  @if $align-items != auto {
+    align-items: $align-items;
+  }
+
+  @if $justify-items != auto {
+    justify-items: $justify-items;
+  }
+}
+
+// ============================================================================
+// Shadow Mixins
+// ============================================================================
+
+/// Apply shadow
+/// @param {String} $level - Shadow level (none, xs, sm, md, lg, xl, 2xl)
+@mixin shadow($level: md) {
+  $value: map.get($shadow, $level);
+  @if $value != null {
+    box-shadow: $value;
+  } @else {
+    @warn "Shadow level '#{$level}' not found";
+  }
+}
+
+// ============================================================================
+// Border Mixins
+// ============================================================================
+
+/// Rounded corners
+/// @param {String} $size - Border radius size (sm, md, lg, xl, full)
+@mixin rounded($size: md) {
+  $value: map.get($radius, $size);
+  @if $value != null {
+    border-radius: $value;
+  } @else {
+    @warn "Radius size '#{$size}' not found";
+  }
+}
+
+/// Border utility
+@mixin border(
+  $width: 1px,
+  $style: solid,
+  $color: $color-border
+) {
+  border: $width $style $color;
+}
+
+/// All sides border
+@mixin border-all($width: 1px, $color: $color-border) {
+  border: $width solid $color;
+}
+
+// ============================================================================
+// Transition Mixins
+// ============================================================================
+
+/// Apply transition
+/// @param {String} $property - CSS property to transition
+/// @param {String} $duration - Duration (fast, normal, slow) or time value
+/// @param {String} $timing - Timing function
+@mixin transition(
+  $property: all,
+  $duration: normal,
+  $timing: $easing-ease-in-out
+) {
+  $duration-value: $duration;
+
+  @if $duration == fast {
+    $duration-value: $transition-fast;
+  } @else if $duration == normal {
+    $duration-value: $transition-normal;
+  } @else if $duration == slow {
+    $duration-value: $transition-slow;
+  }
+
+  transition: $property $duration-value $timing;
+}
+
+/// Transition all with duration
+@mixin transition-all($duration: normal) {
+  @include transition(all, $duration);
+}
+
+// ============================================================================
+// Focus & Interaction Mixins
+// ============================================================================
+
+/// Focus styles for accessibility
+@mixin focus-ring($offset: 2px, $width: 2px, $color: $color-ring) {
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 $offset $color-background,
+      0 0 0 calc($offset + $width) $color;
+  }
+}
+
+/// Hover state
+@mixin hover($opacity: 0.9) {
+  &:hover:not(:disabled) {
+    opacity: $opacity;
+    @content;
+  }
+}
+
+/// Active state
+@mixin active {
+  &:active:not(:disabled) {
+    @content;
+  }
+}
+
+/// Disabled state
+@mixin disabled {
+  &:disabled,
+  &[aria-disabled='true'] {
+    cursor: not-allowed;
+    opacity: 0.5;
+    @content;
+  }
+}
+
+// ============================================================================
+// Spacing Mixins
+// ============================================================================
+
+/// Margin utility
+@mixin margin(
+  $top: null,
+  $right: null,
+  $bottom: null,
+  $left: null
+) {
+  @if $top != null {
+    margin-top: $top;
+  }
+  @if $right != null {
+    margin-right: $right;
+  }
+  @if $bottom != null {
+    margin-bottom: $bottom;
+  }
+  @if $left != null {
+    margin-left: $left;
+  }
+}
+
+/// Padding utility
+@mixin padding(
+  $top: null,
+  $right: null,
+  $bottom: null,
+  $left: null
+) {
+  @if $top != null {
+    padding-top: $top;
+  }
+  @if $right != null {
+    padding-right: $right;
+  }
+  @if $bottom != null {
+    padding-bottom: $bottom;
+  }
+  @if $left != null {
+    padding-left: $left;
+  }
+}
+
+// ============================================================================
+// Text Mixins
+// ============================================================================
+
+/// Text truncate (single line)
+@mixin truncate {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+/// Text truncate (multiple lines)
+@mixin line-clamp($lines: 2) {
+  display: -webkit-box;
+  -webkit-line-clamp: $lines;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+// ============================================================================
+// Visually Hidden
+// ============================================================================
+
+/// Visually hide element but keep it accessible
+@mixin sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
+
+// ============================================================================
+// Utility Mixins
+// ============================================================================
+
+/// Absolute center
+@mixin absolute-center {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+/// Absolute cover (fill parent)
+@mixin absolute-cover {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+}
+
+/// Aspect ratio
+@mixin aspect-ratio($width: 16, $height: 9) {
+  position: relative;
+
+  &::before {
+    content: '';
+    display: block;
+    padding-bottom: percentage(calc($height / $width));
+  }
+}
+
+// ============================================================================
+// Dark Mode Mixin
+// ============================================================================
+
+/// Apply dark mode styles
+@mixin dark-mode {
+  :global(.dark) & {
+    @content;
+  }
+}
+
+/// Prefers dark mode (respects system preference)
+@mixin prefer-dark {
+  @media (prefers-color-scheme: dark) {
+    @content;
+  }
+}

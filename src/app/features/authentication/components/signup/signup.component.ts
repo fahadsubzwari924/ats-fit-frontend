@@ -13,7 +13,6 @@ import { SnackbarService } from '@shared/services/snackbar.service';
 import { Messages } from '@core/enums/messages.enum';
 import { InputType } from '@shared/components/ui/input-field/enum/input-type.enum';
 //Interfaces
-import { InputFieldCustomValidator } from '@shared/components/ui/input-field/interface/input-field-custom-validator.interface';
 // Constants
 import { AppRoutes } from '@core/constants/app-routes.contant';
 
@@ -38,14 +37,6 @@ export class SignupComponent {
   confirmPasswordFieldType = signal<string>(InputType.PASSWORD);
 
   InputType = InputType;
-
-  public confirmPasswordCustomValidators: InputFieldCustomValidator[] = [
-    {
-      validator: this.passwordsMatchValidator,
-      errorKey: 'passwordsMismatch',
-      errorMessage: 'Passwords do not match.'
-    }
-  ]
 
   constructor(private fb: FormBuilder) { }
 

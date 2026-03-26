@@ -1,0 +1,22 @@
+@if (visible()) {
+  <div class="rounded-lg border border-blue-200 bg-gradient-to-r from-blue-50 to-indigo-50 p-3">
+    <div class="flex items-center justify-between gap-3">
+      <div class="flex items-center gap-2 min-w-0 flex-1">
+        <span class="text-blue-600 flex-shrink-0" aria-hidden="true">💡</span>
+        <p class="text-sm text-blue-800">
+          Your resume has been analyzed. Answer
+          <strong>{{ questionsRemaining() }} question{{ questionsRemaining() !== 1 ? 's' : '' }}</strong>
+          to unlock precision tailoring with your real metrics.
+        </p>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <button
+          (click)="onAnswerNow()"
+          class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-medium h-8 px-3 bg-blue-600 hover:bg-blue-700 text-white transition-colors cursor-pointer">
+          Get Started
+        </button>
+        <button type="button" class="inline-flex items-center justify-center w-6 h-6 rounded hover:bg-blue-100 text-blue-600 cursor-pointer" aria-label="Dismiss" (click)="dismiss()">×</button>
+      </div>
+    </div>
+  </div>
+}

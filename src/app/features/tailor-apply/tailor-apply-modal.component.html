@@ -1,0 +1,95 @@
+<div class="relative flex flex-col h-full" style="max-height:90vh;">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100 shrink-0">
+    <div>
+      <h2 class="text-lg font-bold text-slate-900">Tailor Resume</h2>
+      <p class="text-xs text-slate-500 mt-0.5">AI-powered optimization for your next role</p>
+    </div>
+    <button (click)="closeModal()"
+      class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors text-slate-400 hover:text-slate-600">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2.5">
+        <path d="M18 6 6 18"></path>
+        <path d="m6 6 12 12"></path>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Step indicator (only show steps 1-3; step 4 replaced by success icon) -->
+  @if (currentStep() < 4) {
+    <div class="px-6 pt-4 pb-2 shrink-0">
+      <div class="flex items-center gap-1.5">
+        @for (step of [1, 2, 3]; track step) {
+          <button
+            (click)="goToStep($any(step))"
+            class="flex items-center gap-1.5 text-xs font-medium transition-colors"
+            [ngClass]="step < currentStep() ? 'text-indigo-600 cursor-pointer' : step === currentStep() ? 'text-slate-800 cursor-default' : 'text-slate-300 cursor-default'">
+            <div class="w-5 h-5 rounded-full flex items-center justify-center text-xs transition-all"
+              [ngClass]="step < currentStep()
+                ? 'bg-indigo-100 text-indigo-600'
+                : step === currentStep()
+                  ? 'bg-indigo-600 text-white'
+                  : 'bg-slate-100 text-slate-400'">
+              @if (step < currentStep()) {
+                <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="3">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              } @else {
+                {{ step }}
+              }
+            </div>
+            <span class="hidden sm:inline">{{ STEP_LABELS[step] }}</span>
+          </button>
+          @if (step < 3) {
+            <div class="flex-1 h-px"
+              [ngClass]="step < currentStep() ? 'bg-indigo-200' : 'bg-slate-100'">
+            </div>
+          }
+        }
+      </div>
+    </div>
+  }
+
+  <!-- Content area (scrollable) -->
+  <div class="flex-1 overflow-y-auto px-6 py-5">
+
+    @switch (currentStep()) {
+      @case (1) {
+        <app-step-job-details
+          [form]="form"
+          (next)="onNext()">
+        </app-step-job-details>
+      }
+      @case (2) {
+        <app-step-resume-source
+          [resumeFile]="resumeFile()"
+          (fileSelected)="onFileSelected($event)"
+          (next)="onNext()">
+        </app-step-resume-source>
+      }
+      @case (3) {
+        <app-step-template-select
+          [form]="form"
+          [isProcessing]="isProcessing()"
+          [progress]="progress()"
+          (generate)="onGenerate()"
+          (answerQuestionsFirst)="onAnswerQuestionsFirst()"
+          (minimize)="onMinimize()">
+        </app-step-template-select>
+      }
+      @case (4) {
+        @if (tailoredResume()) {
+          <app-step-results
+            [tailoredResume]="tailoredResume()!"
+            (createAnother)="onCreateAnother()"
+            (answerQuestionsFirst)="onAnswerQuestionsFirst()"
+            (trackApplication)="onTrackApplication($event)">
+          </app-step-results>
+        }
+      }
+    }
+
+  </div>
+</div>

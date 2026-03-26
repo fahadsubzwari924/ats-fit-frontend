@@ -1,1 +1,16 @@
-<div id="google-signin-button"></div>
+<div class="google-auth-host" [attr.aria-busy]="isCompletingSignIn() ? true : null">
+  <div
+    id="google-signin-button"
+    [class.google-auth-host__button--dimmed]="isCompletingSignIn()"
+  ></div>
+  @if (isCompletingSignIn()) {
+    <div class="google-auth-status" role="status" aria-live="polite">
+      <span class="google-auth-bars" aria-hidden="true">
+        <span></span>
+        <span></span>
+        <span></span>
+      </span>
+      <span class="google-auth-status__text">Signing you in…</span>
+    </div>
+  }
+</div>

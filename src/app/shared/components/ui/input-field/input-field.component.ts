@@ -96,8 +96,11 @@ export class InputFieldComponent {
     });
   }
 
-  setDisabledState(isDisabled: boolean): void {
-    isDisabled ? this.control.disable() : this.control.enable();
+  setDisabledState(_isDisabled: boolean): void {
+    // No-op: `validate()` assigns `this.control` to the parent FormControl. Calling
+    // disable()/enable() here would mutate that same control while Angular is syncing
+    // the CVA and causes infinite recursion (Maximum call stack size exceeded).
+    // The template’s `[formControl]="control"` already reflects disabled state on the input.
   }
 
   validate(control: AbstractControl): ValidationErrors | null {

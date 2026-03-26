@@ -9,6 +9,7 @@ import { ApiResponse } from '@core/models/response/api-response.model';
 import { FeatureUsage } from '@core/models/user/feature-usage.model';
 import { TailoredResume } from '@features/resume-tailoring/models/tailored-resume.model';
 import { ResumeTemplate } from '@features/resume-tailoring/models/resume-template.model';
+import { ResumeHistoryItem } from '@features/dashboard/models/resume-history.model';
 // Interfaces
 import { IResumeUpload } from '@features/dashboard/enums/resume-upload.interface';
 
@@ -42,14 +43,19 @@ export class ResumeService {
       })
       .pipe(
         map((response) => {
-          // Extract headers
+          const tailoringHeader = response.headers.get('x-tailoring-mode');
+          const tailoringMode = (tailoringHeader ?? 'standard') as import('@features/dashboard/models/resume-profile.model').TailoringMode;
           const data = {
-            atsScore: response.headers.get('x-ats-score'),
-            fileName: response.headers.get('x-filename'),
-            resumeGenerationId: response.headers.get('x-resume-generation-id'),
+            atsScore: response.headers.get('x-ats-score') ?? undefined,
+            filename: response.headers.get('x-filename') ?? undefined,
+            resumeGenerationId: response.headers.get('x-resume-generation-id') ?? undefined,
             blob: response.body as Blob,
+            tailoringMode: ['standard', 'enhanced', 'precision', 'none'].includes(tailoringHeader ?? '') ? tailoringMode : 'standard',
+            keywordsAdded: Number(response.headers.get('x-keywords-added') ?? 0),
+            sectionsOptimized: Number(response.headers.get('x-sections-optimized') ?? 0),
+            achievementsQuantified: Number(response.headers.get('x-achievements-quantified') ?? 0),
+            optimizationConfidence: Number(response.headers.get('x-optimization-confidence') ?? 0),
           };
-
           return new TailoredResume(data);
         })
       );
@@ -111,5 +117,21 @@ export class ResumeService {
           (response.data || [])?.map((item: any) => new FeatureUsage(item))
         )
       );
+  }
+
+  public getResumeHistory(limit = 10): Observable<ResumeHistoryItem[]> {
+    return this._http
+      .get<ApiResponse<ResumeHistoryItem[]>>(
+        API_ROUTES.createAPIRoute(API_ROUTES.RESUME.HISTORY),
+        { params: { limit } }
+      )
+      .pipe(map((res) => (Array.isArray(res?.data) ? res.data : [])));
+  }
+
+  public downloadResumeById(generationId: string): Observable<Blob> {
+    return this._http.get(
+      API_ROUTES.createAPIRoute(`${API_ROUTES.RESUME.DOWNLOAD}/${generationId}`),
+      { responseType: 'blob' }
+    );
   }
 }
