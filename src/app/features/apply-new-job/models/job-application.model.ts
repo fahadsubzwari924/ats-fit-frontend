@@ -1,5 +1,3 @@
-import { ApplicationSource } from '@features/apply-new-job/enums/application-source.enum';
-
 export class JobApplication {
   // camelCase properties
   id: string;
@@ -11,7 +9,7 @@ export class JobApplication {
   currentSalary: number;
   expectedSalary: number;
   status: string;
-  applicationSource: ApplicationSource;
+  applicationSource: string;
   applicationDeadline: Date;
   appliedAt: Date;
   atsScore: number;

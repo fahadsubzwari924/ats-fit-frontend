@@ -9,8 +9,11 @@ export const API_ROUTES = {
   RESUME: {
     GENERATE: 'resume-tailoring/generate',
     TEMPLATE: 'resume-tailoring/templates',
-    ATS_MATCH_SCORE: 'ats-match/score',
-    ATS_MATCH_HISTORY: 'ats-match/history',
+    HISTORY: 'resume-tailoring/history',
+    DOWNLOAD: 'resume-tailoring/download',
+    DIFF: 'resume-tailoring/diff',
+    COVER_LETTER: 'resume-tailoring/cover-letter',
+    BATCH_GENERATE: 'resume-tailoring/batch-generate',
   },
   JOBS: {
     APPLICATIONS: 'job-applications',
@@ -20,6 +23,12 @@ export const API_ROUTES = {
     UPLOAD_RESUME: 'users/upload-resume',
     DELETE_RESUME: 'users/delete-resume',
     FEATURE_USAGE: 'users/feature-usage',
+    RESUME_PROFILE_STATUS: 'users/resume-profile-status',
+  },
+  PROFILE: {
+    QUESTIONS: 'resume-tailoring/profile-questions',
+    ANSWER: 'resume-tailoring/profile-questions/answer',
+    COMPLETE: 'resume-tailoring/profile-questions/complete',
   },
   SUBSCRIPTIONS: {
     PLANS: 'subscriptions/plans',

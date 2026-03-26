@@ -1,0 +1,68 @@
+<div [formGroup]="form()" class="space-y-4">
+  <!-- Job Position + Company Name — side by side -->
+  <div class="grid grid-cols-2 gap-3">
+    <div>
+      <label class="block text-xs font-semibold text-slate-600 mb-1">
+        Job Position <span class="text-red-400">*</span>
+      </label>
+      <input
+        formControlName="jobPosition"
+        type="text"
+        placeholder="e.g. Senior Frontend Engineer"
+        class="w-full px-3 py-2 rounded-lg border text-sm transition-colors placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400"
+        [ngClass]="jobPosition?.invalid && jobPosition?.touched ? 'border-red-300 bg-red-50' : 'border-slate-200 bg-white'"
+      />
+      @if (jobPosition?.errors?.['required'] && jobPosition?.touched) {
+        <p class="mt-0.5 text-[11px] text-red-500">Required</p>
+      }
+    </div>
+    <div>
+      <label class="block text-xs font-semibold text-slate-600 mb-1">
+        Company Name <span class="text-red-400">*</span>
+      </label>
+      <input
+        formControlName="companyName"
+        type="text"
+        placeholder="e.g. Google"
+        class="w-full px-3 py-2 rounded-lg border text-sm transition-colors placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400"
+        [ngClass]="companyName?.invalid && companyName?.touched ? 'border-red-300 bg-red-50' : 'border-slate-200 bg-white'"
+      />
+      @if (companyName?.errors?.['required'] && companyName?.touched) {
+        <p class="mt-0.5 text-[11px] text-red-500">Required</p>
+      }
+    </div>
+  </div>
+
+  <!-- Job Description -->
+  <div>
+    <label class="block text-xs font-semibold text-slate-600 mb-1">
+      Job Description <span class="text-red-400">*</span>
+    </label>
+    <textarea
+      formControlName="jobDescription"
+      rows="5"
+      placeholder="Paste the full job description here..."
+      spellcheck="false"
+      class="w-full px-3 py-2 rounded-lg border text-sm resize-none transition-colors placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-indigo-300 focus:border-indigo-400"
+      [ngClass]="jobDescription?.invalid && jobDescription?.touched && jdLength < 20 ? 'border-red-300 bg-red-50' : 'border-slate-200 bg-white'"
+    ></textarea>
+    <div class="flex justify-between items-center mt-1">
+      <p class="text-[11px] text-slate-400">{{ jdLength }} characters</p>
+      <p class="text-[11px] font-medium" [ngClass]="jdLength >= 20 ? 'text-emerald-600' : 'text-slate-400'">
+        {{ jdLength >= 20 ? '✓ Ready' : 'Min 20 chars' }}
+      </p>
+    </div>
+  </div>
+
+  <!-- Next button -->
+  <button
+    (click)="onNext()"
+    [disabled]="!isStepValid"
+    class="w-full py-2.5 px-6 rounded-xl font-semibold text-sm transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+    [ngClass]="isStepValid
+      ? 'bg-indigo-600 hover:bg-indigo-700 text-white shadow-md hover:shadow-indigo-200 hover:shadow-lg'
+      : 'bg-slate-100 text-slate-400 cursor-not-allowed'"
+  >
+    Continue →
+  </button>
+</div>

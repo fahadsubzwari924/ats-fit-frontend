@@ -1,0 +1,85 @@
+// ============================================================================
+// Dashboard-specific component classes
+// ============================================================================
+// Only BEM-namespaced classes that don't conflict with Tailwind.
+// Card/container/alert/etc. styling is done via Tailwind classes in templates.
+
+@use 'design-tokens' as *;
+@use 'mixins' as *;
+
+// ============================================================================
+// Badge Component (used in dashboard for plan badges, status indicators)
+// ============================================================================
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  border-radius: 9999px;
+  padding: 0.125rem 0.625rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  white-space: nowrap;
+  transition: color 150ms, background-color 150ms;
+  border: 1px solid transparent;
+
+  svg {
+    width: 0.875em;
+    height: 0.875em;
+    flex-shrink: 0;
+  }
+}
+
+.badge--default {
+  background-color: $color-primary;
+  color: $color-primary-foreground;
+  border-color: $color-primary;
+}
+
+.badge--secondary {
+  background-color: $color-secondary;
+  color: $color-secondary-foreground;
+  border-color: $color-secondary;
+}
+
+.badge--destructive {
+  background-color: $color-destructive;
+  color: $color-destructive-foreground;
+  border-color: $color-destructive;
+}
+
+.badge--outline {
+  background-color: transparent;
+  color: $color-foreground;
+  border-color: $color-border;
+}
+
+.badge--yellow {
+  background-color: #eab308;
+  color: #fefce8;
+  border-color: #eab308;
+}
+
+.badge--amber {
+  background-color: #f59e0b;
+  color: #ffffff;
+  border-color: #f59e0b;
+}
+
+.badge--purple {
+  background-color: #a855f7;
+  color: #ffffff;
+  border-color: #a855f7;
+}
+
+.badge--blue {
+  background-color: #3b82f6;
+  color: #ffffff;
+  border-color: #3b82f6;
+}
+
+.badge--green {
+  background-color: #22c55e;
+  color: #ffffff;
+  border-color: #22c55e;
+}

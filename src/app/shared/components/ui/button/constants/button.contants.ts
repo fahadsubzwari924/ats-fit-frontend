@@ -1,13 +1,15 @@
+// Base classes matching the React prototype's button base (rounded-md, no shadow by default)
 export const BaseClasses = [
   'inline-flex',
   'items-center',
   'justify-center',
   'gap-2',
   'whitespace-nowrap',
+  'rounded-md',
+  'text-sm',
   'font-medium',
   'ring-offset-background',
-  'transition-all',
-  'duration-300',
+  'transition-colors',
   'focus-visible:outline-none',
   'focus-visible:ring-2',
   'focus-visible:ring-ring',
@@ -15,91 +17,79 @@ export const BaseClasses = [
   'disabled:pointer-events-none',
   'disabled:opacity-50',
   '[&_svg]:pointer-events-none',
-  '[&_svg]:shrink-0',
-  'rounded-xl',
-  'shadow-lg',
-  'hover:shadow-xl'
+  '[&_svg]:shrink-0'
 ];
 
-// Size classes
+// Size classes — h-11 for md matches React Login page buttons
 export const SizeClasses = {
-  xs: ['text-xs', 'h-6', 'px-2', 'py-1'],
-  sm: ['text-sm', 'h-8', 'px-3', 'py-1.5'],
-  md: ['text-sm', 'h-10', 'px-4', 'py-2'],
-  lg: ['text-base', 'h-12', 'px-6', 'py-3'],
-  xl: ['text-lg', 'h-14', 'px-8', 'py-4']
+  xs: ['h-7', 'px-2', 'text-xs'],
+  sm: ['h-9', 'px-3'],
+  md: ['h-11', 'px-4', 'py-2'],
+  lg: ['h-11', 'px-8'],
+  xl: ['h-12', 'px-10', 'text-base']
 };
 
-// Variant classes
+// Variant classes — matching React prototype's Shadcn/ui defaults
 export const VariantClasses = {
+  // Primary: solid blue matching React Login's Sign In button (bg-blue-600 hover:bg-blue-700)
   primary: [
-    'bg-gradient-to-r',
-    'from-purple-600',
-    'to-indigo-600',
-    'hover:from-purple-700',
-    'hover:to-indigo-700',
+    'bg-blue-600',
     'text-white',
-    'disabled:from-slate-400',
-    'disabled:to-slate-500'
+    'hover:bg-blue-700',
+    'disabled:bg-slate-400'
+  ],
+  // Default is same as primary
+  default: [
+    'bg-blue-600',
+    'text-white',
+    'hover:bg-blue-700',
+    'disabled:bg-slate-400'
   ],
   secondary: [
-    'bg-gradient-to-r',
-    'from-slate-600',
-    'to-slate-700',
-    'hover:from-slate-700',
-    'hover:to-slate-800',
+    'bg-slate-100',
+    'text-slate-900',
+    'hover:bg-slate-200',
+    'disabled:bg-slate-50',
+    'disabled:text-slate-400'
+  ],
+  destructive: [
+    'bg-red-500',
     'text-white',
-    'disabled:from-slate-400',
-    'disabled:to-slate-500'
+    'hover:bg-red-600',
+    'disabled:bg-slate-400'
   ],
   success: [
-    'bg-gradient-to-r',
-    'from-emerald-600',
-    'to-teal-600',
-    'hover:from-emerald-700',
-    'hover:to-teal-700',
+    'bg-emerald-600',
     'text-white',
-    'disabled:from-slate-400',
-    'disabled:to-slate-500'
+    'hover:bg-emerald-700',
+    'disabled:bg-slate-400'
   ],
   danger: [
-    'bg-gradient-to-r',
-    'from-red-600',
-    'to-rose-600',
-    'hover:from-red-700',
-    'hover:to-rose-700',
+    'bg-red-600',
     'text-white',
-    'disabled:from-slate-400',
-    'disabled:to-slate-500'
+    'hover:bg-red-700',
+    'disabled:bg-slate-400'
   ],
   warning: [
-    'bg-gradient-to-r',
-    'from-yellow-500',
-    'to-orange-500',
-    'hover:from-yellow-600',
-    'hover:to-orange-600',
+    'bg-amber-500',
     'text-white',
-    'disabled:from-slate-400',
-    'disabled:to-slate-500'
+    'hover:bg-amber-600',
+    'disabled:bg-slate-400'
   ],
   info: [
-    'bg-gradient-to-r',
-    'from-blue-600',
-    'to-cyan-600',
-    'hover:from-blue-700',
-    'hover:to-cyan-700',
+    'bg-blue-500',
     'text-white',
-    'disabled:from-slate-400',
-    'disabled:to-slate-500'
+    'hover:bg-blue-600',
+    'disabled:bg-slate-400'
   ],
+  // Outline: border with transparent bg — matching React prototype
   outline: [
-    'border-2',
-    'border-slate-300',
-    'bg-background',
+    'border',
+    'border-slate-200',
+    'bg-white',
     'hover:bg-slate-50',
-    'hover:border-purple-300',
-    'text-slate-700',
     'hover:text-slate-900',
+    'text-slate-700',
     'disabled:border-slate-200',
     'disabled:text-slate-400'
   ],
@@ -108,8 +98,13 @@ export const VariantClasses = {
     'hover:bg-slate-100',
     'text-slate-700',
     'hover:text-slate-900',
-    'shadow-none',
-    'hover:shadow-none',
     'disabled:text-slate-400'
+  ],
+  link: [
+    'text-blue-600',
+    'underline-offset-4',
+    'hover:underline',
+    'bg-transparent',
+    'shadow-none'
   ]
 };

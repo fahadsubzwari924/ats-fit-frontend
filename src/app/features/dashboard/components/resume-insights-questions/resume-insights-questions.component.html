@@ -1,0 +1,133 @@
+@if (visible() && totalQuestions() > 0 && !isProfileComplete()) {
+  <div class="rounded-lg border-0 shadow-sm bg-gradient-to-br from-amber-50/50 to-orange-50/50">
+    <div class="p-4">
+
+      @if (isEnriching()) {
+        <!-- Enriching state: all questions answered, building the profile -->
+        <div class="animate-fade-in-up">
+          <div class="rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 border border-blue-200 px-4 py-3">
+            <div class="flex items-center gap-3">
+              <div class="w-9 h-9 bg-gradient-to-br from-blue-500 to-indigo-500 rounded-lg flex items-center justify-center flex-shrink-0">
+                <svg class="animate-spin h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                  <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                  <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                </svg>
+              </div>
+              <div>
+                <p class="text-sm font-semibold text-blue-900">Building Your Precision Profile</p>
+                <p class="text-xs text-blue-700 leading-snug">Merging your answers with your resume — this takes a few seconds.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      } @else {
+        <!-- Active Q&A view -->
+        <!-- Header -->
+        <div class="flex items-start justify-between mb-4">
+          <div class="flex items-center gap-3">
+            <div class="w-10 h-10 bg-gradient-to-br from-amber-500 to-orange-500 rounded-xl flex items-center justify-center flex-shrink-0">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white">
+                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+                <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+                <path d="M10 9H8"></path>
+                <path d="M16 13H8"></path>
+                <path d="M16 17H8"></path>
+              </svg>
+            </div>
+            <div>
+              <h3 class="font-semibold text-sm text-slate-900">Enhance Your Resume</h3>
+              <p class="text-xs text-slate-600">Answer questions to improve tailoring accuracy</p>
+            </div>
+          </div>
+          <span class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium bg-amber-100 text-amber-700 border-0">
+            {{ answeredCount() }}/{{ totalQuestions() }} answered
+          </span>
+        </div>
+
+        <!-- Progress bar (percentage label removed to avoid duplication with badge) -->
+        <div class="mb-4">
+          <div class="h-1.5 rounded-full bg-amber-100 overflow-hidden">
+            <div
+              class="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all duration-500"
+              [style.width.%]="progressPercentage()">
+            </div>
+          </div>
+        </div>
+
+        <!-- Info banner -->
+        <div class="bg-gradient-to-r from-blue-50 to-indigo-50 rounded-lg p-3 mb-4 border border-blue-100">
+          <div class="flex items-center gap-2">
+            <span class="text-blue-600 flex-shrink-0" aria-hidden="true">💡</span>
+            <p class="text-xs text-blue-800 leading-relaxed">
+              We detected some work experiences missing specific metrics or business impact.
+              Providing this info helps AI generate more accurate, impactful resume bullets.
+            </p>
+          </div>
+        </div>
+
+        @if (saveError()) {
+          <div class="mb-4 p-2 rounded bg-red-50 border border-red-100 text-sm text-red-700">
+            {{ saveError() }}
+          </div>
+        }
+
+        @if (loading()) {
+          <p class="text-sm text-slate-500">Loading questions...</p>
+        } @else {
+          <!-- Employer groups -->
+          <div class="space-y-3">
+            @for (g of groups(); track g.workExperienceIndex) {
+              <app-employer-question-group
+                [group]="g"
+                [editingQuestionId]="editingQuestionId()"
+                (saveAnswer)="onSaveAnswer($event)"
+                (skipQuestion)="onSkipQuestion($event)"
+                (startEdit)="onStartEdit($event)"
+                (cancelEdit)="onCancelEdit()">
+              </app-employer-question-group>
+            }
+          </div>
+
+          <!-- Benefit hint while questions remain -->
+          @if (!allAnswered()) {
+            <div class="mt-4 p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-100">
+              <div class="flex items-center gap-2">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-emerald-600 flex-shrink-0">
+                  <polyline points="22 7 13.5 15.5 8.5 10.5 2 17"></polyline>
+                  <polyline points="16 7 22 7 22 13"></polyline>
+                </svg>
+                <p class="text-xs text-emerald-700">
+                  <span class="font-medium">Complete all questions</span> to unlock highly accurate,
+                  data-driven resume tailoring with real metrics.
+                </p>
+              </div>
+            </div>
+          }
+
+          <!-- Fallback: all answered locally but enrichment hasn't responded yet -->
+          @if (needsFallbackComplete()) {
+            <div class="mt-4 flex items-center justify-between p-3 bg-gradient-to-r from-emerald-50 to-teal-50 rounded-lg border border-emerald-200">
+              <p class="text-xs text-emerald-700 font-medium">
+                All questions answered! Finalize to activate precision tailoring.
+              </p>
+              <button
+                type="button"
+                [disabled]="completing()"
+                (click)="onComplete()"
+                class="inline-flex items-center justify-center gap-1.5 whitespace-nowrap rounded-md text-xs font-medium h-8 px-3 bg-emerald-600 hover:bg-emerald-700 disabled:opacity-50 text-white transition-colors cursor-pointer ml-3 flex-shrink-0">
+                @if (completing()) {
+                  <svg class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                    <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                    <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+                  </svg>
+                }
+                Finalize Profile
+              </button>
+            </div>
+          }
+        }
+      }
+
+    </div>
+  </div>
+}

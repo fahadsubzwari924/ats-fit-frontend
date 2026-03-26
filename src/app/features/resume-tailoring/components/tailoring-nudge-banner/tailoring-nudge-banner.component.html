@@ -1,0 +1,22 @@
+@if (visible()) {
+  <div class="rounded-lg border border-amber-200 bg-gradient-to-r from-amber-50 to-orange-50 p-3 mb-4">
+    <div class="flex flex-wrap items-start justify-between gap-2">
+      <div class="flex items-start gap-2 min-w-0 flex-1">
+        <span class="text-amber-600 flex-shrink-0 mt-0.5" aria-hidden="true">💡</span>
+        <p class="text-sm text-amber-800">
+          Your resume profile is {{ completenessPercent() }}% complete. This generation uses
+          standard AI optimization. Answer profile questions for fact-based precision with your real metrics.
+        </p>
+      </div>
+      <div class="flex items-center gap-2 flex-shrink-0">
+        <app-button text="Answer Questions First" (onClick)="onAnswerFirst()"
+          customClass="inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 bg-amber-600 hover:bg-amber-700 text-white border-0">
+        </app-button>
+        <app-button text="Continue" (onClick)="onContinue()"
+          customClass="inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700">
+        </app-button>
+        <button type="button" class="p-1 rounded hover:bg-amber-100 text-amber-600 text-lg font-bold leading-none" aria-label="Dismiss" (click)="dismiss()">×</button>
+      </div>
+    </div>
+  </div>
+}

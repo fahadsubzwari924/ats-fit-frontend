@@ -1,0 +1,141 @@
+@if (visible()) {
+  <div class="rounded-lg bg-card text-card-foreground border-0 shadow-sm">
+    <div class="p-4">
+      <div class="flex items-start justify-between mb-3">
+        <div class="flex items-center space-x-2">
+          <div class="w-8 h-8 bg-gradient-to-br from-blue-500 to-cyan-500 rounded-lg flex items-center justify-center flex-shrink-0">
+            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+              class="lucide lucide-file-text h-4 w-4 text-white">
+              <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"></path>
+              <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
+              <path d="M10 9H8"></path>
+              <path d="M16 13H8"></path>
+              <path d="M16 17H8"></path>
+            </svg>
+          </div>
+          <div>
+            <h3 class="font-medium text-sm text-slate-900">Resume Profile</h3>
+            <p class="text-xs text-slate-600">Upload and enrich for precision tailoring</p>
+          </div>
+        </div>
+      </div>
+
+      @switch (profileState()) {
+        @case (ProfileState.NO_RESUME) {
+          <div class="relative">
+            <input type="file" accept=".pdf" (change)="onFileSelected($event)" class="hidden" id="resume-profile-upload">
+            <label for="resume-profile-upload"
+              class="group cursor-pointer block border border-dashed border-slate-200 hover:border-blue-300 rounded-lg p-4 text-center transition-all duration-200 hover:bg-blue-50/50">
+              <div class="flex flex-col items-center">
+                <div class="w-10 h-10 bg-gradient-to-br from-slate-400 to-slate-500 group-hover:from-blue-500 group-hover:to-cyan-500 rounded-lg flex items-center justify-center mb-2 transition-all duration-200">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+                    stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+                    class="lucide lucide-upload h-5 w-5 text-white">
+                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                    <polyline points="17 8 12 3 7 8"></polyline>
+                    <line x1="12" x2="12" y1="3" y2="15"></line>
+                  </svg>
+                </div>
+                <p class="text-sm font-medium text-slate-700 mb-1">Upload your resume to get started</p>
+                <p class="text-xs text-slate-500">PDF files only</p>
+              </div>
+            </label>
+          </div>
+        }
+
+        @case (ProfileState.PROCESSING) {
+          <div class="space-y-3">
+            <div class="flex items-center gap-2 text-slate-700">
+              <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+                <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+                <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+              </svg>
+              <span class="text-sm font-medium">Analyzing your resume...</span>
+            </div>
+            <div class="h-1.5 rounded-full bg-slate-100 overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-blue-500 to-cyan-500 animate-pulse" style="width: 60%"></div>
+            </div>
+          </div>
+        }
+
+        @case (ProfileState.FAILED) {
+          <div class="rounded-lg p-3 bg-red-50 border border-red-100">
+            <p class="text-sm text-red-800">Resume analysis failed. Please try re-uploading.</p>
+            <input type="file" accept=".pdf" (change)="onFileSelected($event)" class="hidden" id="resume-profile-retry">
+            <label for="resume-profile-retry" class="inline-block mt-2 text-sm font-medium text-red-600 hover:text-red-700 cursor-pointer underline">Re-upload resume</label>
+          </div>
+        }
+
+        @case (ProfileState.QUESTIONS_PENDING) {
+          <div class="space-y-3">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-500">Completion</span>
+              <span class="font-medium text-amber-600">{{ questionsTotal() }} questions waiting</span>
+            </div>
+            <div class="h-1.5 rounded-full bg-amber-100 overflow-hidden">
+              <div class="h-full bg-amber-200 rounded-full" style="width: 0%"></div>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1">
+              <li class="flex items-center gap-2">✅ Resume uploaded</li>
+              <li class="flex items-center gap-2">✅ Content extracted</li>
+              <li class="flex items-center gap-2">⏳ {{ questionsTotal() }} questions pending</li>
+            </ul>
+            <p class="text-xs text-slate-500">Answering questions enables fact-based tailoring using your real achievements.</p>
+            <button
+              (click)="scrollToQuestionsSection()"
+              class="inline-flex items-center justify-center gap-2 whitespace-nowrap rounded-md text-xs font-medium h-8 px-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white transition-colors cursor-pointer">
+              Answer Questions
+            </button>
+          </div>
+        }
+
+        @case (ProfileState.QUESTIONS_PARTIAL) {
+          <div class="space-y-3">
+            <div class="flex items-center justify-between text-xs">
+              <span class="text-slate-500">Completion</span>
+              <span class="font-medium text-amber-600">{{ questionsProgress() }}</span>
+            </div>
+            <div class="h-1.5 rounded-full bg-amber-100 overflow-hidden">
+              <div class="h-full bg-gradient-to-r from-amber-500 to-orange-500 rounded-full transition-all" [style.width.%]="profileCompleteness() * 100"></div>
+            </div>
+            <ul class="text-xs text-slate-600 space-y-1">
+              <li class="flex items-center gap-2">✅ Resume uploaded</li>
+              <li class="flex items-center gap-2">✅ Content extracted</li>
+              <li class="flex items-center gap-2">
+                ⏳ Almost there! {{ questionsRemaining() }} question{{ questionsRemaining() !== 1 ? 's' : '' }} remaining
+              </li>
+            </ul>
+          </div>
+        }
+
+        @case (ProfileState.ENRICHING) {
+          <div class="flex items-center gap-2 text-slate-700">
+            <svg class="animate-spin h-5 w-5 text-blue-600" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+              <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+              <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+            </svg>
+            <span class="text-sm font-medium">Building your precision profile...</span>
+          </div>
+        }
+
+        @case (ProfileState.COMPLETE) {
+          <div class="flex items-center justify-between">
+            <div class="flex items-center gap-2">
+              <div class="w-5 h-5 rounded-full bg-emerald-100 flex items-center justify-center flex-shrink-0">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" class="text-emerald-600">
+                  <polyline points="20 6 9 17 4 12"></polyline>
+                </svg>
+              </div>
+              <span class="text-xs font-medium text-emerald-700">Precision Ready</span>
+              <span class="inline-flex items-center rounded-full px-2 py-0.5 text-xs font-medium bg-emerald-100 text-emerald-700">
+                Active
+              </span>
+            </div>
+            <span class="text-xs text-emerald-600 font-medium">100% Complete</span>
+          </div>
+        }
+      }
+    </div>
+  </div>
+}

@@ -50,4 +50,23 @@ export class StorageService {
     }
   }
 
+  public setItem(key: string, value: string): void {
+    if (this.platform.isBrowser) {
+      localStorage.setItem(key, value);
+    }
+  }
+
+  public getItem(key: string): string | null {
+    if (this.platform.isBrowser) {
+      return localStorage.getItem(key);
+    }
+    return null;
+  }
+
+  public removeItem(key: string): void {
+    if (this.platform.isBrowser) {
+      localStorage.removeItem(key);
+    }
+  }
+
 }

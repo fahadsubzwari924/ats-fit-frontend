@@ -33,7 +33,13 @@
         </span>
       </a>
     </div>
-    <div class="rounded-lg bg-card text-card-foreground shadow-xl border-0">
+    <div
+      class="signin-card relative overflow-hidden rounded-lg bg-card text-card-foreground shadow-xl border-0"
+      [attr.aria-busy]="isSubmitting() ? true : null"
+    >
+      @if (isSubmitting()) {
+        <div class="signin-linear-progress" role="progressbar" aria-label="Signing in"></div>
+      }
       <div class="flex flex-col space-y-1.5 p-6 text-center">
         <h3 class="tracking-tight text-2xl font-bold">Welcome Back</h3>
         <p class="text-sm text-muted-foreground">
@@ -41,7 +47,7 @@
         </p>
       </div>
       <div class="p-6 pt-0 space-y-6">
-        <form [formGroup]="signinForm" class="space-y-4">
+        <form [formGroup]="signinForm" class="space-y-4" (ngSubmit)="login()">
           <div class="space-y-2">
             <app-input-field
               formControlName="email"
@@ -69,6 +75,7 @@
                 (click)="togglePasswordVisibility()"
                 type="button"
                 class="absolute right-3 top-10 transform cursor-pointer"
+                [disabled]="isSubmitting()"
               >
                 <mat-icon class="h-4 w-4 text-slate-400">{{passwordFieldType() === InputType.PASSWORD ? 'visibility' : 'visibility_off'}}</mat-icon>
               </button>
@@ -77,9 +84,10 @@
 
           <app-button
             [fullWidth]="true"
-            text="Sign In"
+            [text]="isSubmitting() ? 'Signing in…' : 'Sign In'"
             type="submit"
-            (onClick)="login()"
+            [loading]="isSubmitting()"
+            loadingIndicator="dots"
           >
           </app-button>
         </form>
@@ -94,13 +102,15 @@
             <span class="bg-white px-2 text-slate-500">Or</span>
           </div>
         </div>
-        <app-button
-          text="Continue as Guest"
-          variant="outline"
-          [fullWidth]="true"
-          customClass="mb-3"
-        >
-        </app-button>
+        <div class="mb-3">
+          <app-button
+            text="Continue as Guest"
+            variant="outline"
+            [fullWidth]="true"
+            [disabled]="isSubmitting()"
+          >
+          </app-button>
+        </div>
 
         <div class="text-center space-y-2">
           <p class="text-sm text-slate-600">

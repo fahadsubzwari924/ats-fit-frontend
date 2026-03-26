@@ -1,0 +1,66 @@
+.google-auth-host {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+}
+
+.google-auth-host__button--dimmed {
+  pointer-events: none;
+  opacity: 0.48;
+  transition: opacity 0.2s ease;
+}
+
+.google-auth-status {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.65rem;
+  font-size: 0.875rem;
+  line-height: 1.25;
+  color: rgb(71 85 105);
+}
+
+.google-auth-status__text {
+  font-weight: 500;
+  letter-spacing: 0.01em;
+}
+
+.google-auth-bars {
+  display: inline-flex;
+  gap: 4px;
+  align-items: flex-end;
+  height: 14px;
+}
+
+.google-auth-bars span {
+  display: block;
+  width: 3px;
+  height: 100%;
+  border-radius: 1px;
+  background: rgb(79 70 229);
+  transform-origin: bottom center;
+  animation: google-auth-bar-wave 0.85s ease-in-out infinite;
+}
+
+.google-auth-bars span:nth-child(2) {
+  animation-delay: 0.1s;
+}
+
+.google-auth-bars span:nth-child(3) {
+  animation-delay: 0.2s;
+}
+
+@keyframes google-auth-bar-wave {
+  0%,
+  100% {
+    transform: scaleY(0.38);
+    opacity: 0.55;
+  }
+
+  50% {
+    transform: scaleY(1);
+    opacity: 1;
+  }
+}

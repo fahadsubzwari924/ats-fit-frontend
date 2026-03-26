@@ -1,4 +1,5 @@
-import { ChangeDetectorRef, Component, inject } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, signal } from '@angular/core';
+import { finalize } from 'rxjs';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@core/constants/app-routes.contant';
 import { Messages } from '@core/enums/messages.enum';
@@ -11,11 +12,15 @@ declare const google: any;
 
 @Component({
   selector: 'app-google-auth-button',
+  standalone: true,
   imports: [],
   templateUrl: './google-auth-button.component.html',
-  styleUrl: './google-auth-button.component.scss'
+  styleUrl: './google-auth-button.component.scss',
 })
 export class GoogleAuthButtonComponent {
+
+  /** Backend token exchange in flight after Google credential. */
+  public isCompletingSignIn = signal(false);
 
   // Inject dependencies
   private router = inject(Router);
@@ -30,8 +35,12 @@ export class GoogleAuthButtonComponent {
   }
 
   initializeGoogleSignIn(): void {
+    if (typeof google === 'undefined' || !google?.accounts?.id) {
+      return;
+    }
+
     google.accounts.id.initialize({
-      client_id: environment.googleClientId, // <--- Your actual Google Client ID
+      client_id: environment.googleClientId,
       callback: (response: any) => this.handleCredentialResponse(response),
     });
 
@@ -42,37 +51,45 @@ export class GoogleAuthButtonComponent {
         size: 'large',
         shape: 'rectangular',
         text: 'continue_with'
-      } // Button customization
+      }
     );
-    // You can also use google.accounts.id.prompt() for the One Tap dialog
   }
 
   public handleCredentialResponse(googleResponse: any): void {
-    // response.credential is the JWT ID token
     const token = googleResponse.credential;
+    if (!token) {
+      return;
+    }
 
+    this.isCompletingSignIn.set(true);
     this.cdr.detectChanges();
-    this.authService.googleAuth({ token })
-    .subscribe({
-      next: (response) => {
-        if (!response.user || !response.accessToken) {
-          this.snackbarService.showError(Messages.LOGIN_FAILED);
-          return;
-        }
 
-        // Type Cast the response data to Respective Model (Getting error if not done)
-        this.storageService.setToken(response.accessToken);
-        this.userState.setUser(response.user);
-        this.cdr.detectChanges();
-        // Navigate to a protected route
-        this.router.navigateByUrl(AppRoutes.DASHBOARD);
-      },
-      error: (err) => {
-        console.error('Google authentication failed:', err);
-        this.snackbarService.showError(err?.error?.message || err?.message || Messages.GOOGLE_AUTH_FAILED);
-        this.cdr.detectChanges();
-      },
-    });
+    this.authService
+      .googleAuth({ token })
+      .pipe(
+        finalize(() => {
+          this.isCompletingSignIn.set(false);
+          this.cdr.detectChanges();
+        }),
+      )
+      .subscribe({
+        next: (response) => {
+          if (!response.user || !response.accessToken) {
+            this.snackbarService.showError(Messages.LOGIN_FAILED);
+            return;
+          }
+
+          this.storageService.setToken(response.accessToken);
+          this.userState.setUser(response.user);
+          this.router.navigateByUrl(AppRoutes.DASHBOARD);
+        },
+        error: (err) => {
+          console.error('Google authentication failed:', err);
+          this.snackbarService.showError(
+            err?.error?.message || err?.message || Messages.GOOGLE_AUTH_FAILED,
+          );
+        },
+      });
   }
 
 }

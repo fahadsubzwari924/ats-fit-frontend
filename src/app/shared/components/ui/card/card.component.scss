@@ -1,0 +1,16 @@
+// Card component styles
+// All styling is inherited from global .card class and related utilities
+
+:host {
+  display: block;
+}
+
+.card {
+  &--elevated {
+    @include shadow(lg);
+  }
+
+  &--outlined {
+    @include shadow(none);
+  }
+}

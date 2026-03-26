@@ -1,0 +1,39 @@
+@let m = mode();
+@let used = enhancedSectionsUsed();
+@let total = enhancedSectionsTotal();
+<div class="rounded-lg border p-3 text-sm"
+  [class.bg-slate-50]="m === 'standard'"
+  [class.border-slate-200]="m === 'standard'"
+  [class.bg-amber-50]="m === 'enhanced'"
+  [class.border-amber-200]="m === 'enhanced'"
+  [class.bg-emerald-50]="m === 'precision'"
+  [class.border-emerald-200]="m === 'precision'">
+  @switch (m) {
+    @case ('standard') {
+      <p class="font-medium text-slate-800 mb-1">Tailoring Mode: Standard</p>
+      <p class="text-slate-600 mb-2">Optimized for keywords and ATS formatting.</p>
+      <p class="text-slate-500 text-xs mb-2">Complete your profile questions to use your real metrics next time.</p>
+      <app-button text="Answer Questions →" (onClick)="onAnswerQuestions()"
+        customClass="text-xs h-8 bg-slate-200 hover:bg-slate-300 text-slate-800 border-0">
+      </app-button>
+    }
+    @case ('enhanced') {
+      <p class="font-medium text-amber-800 mb-1">Tailoring Mode: Enhanced {{ total ? '(' + completenessPercent + '%)' : '' }}</p>
+      @if (used !== undefined && total) {
+        <p class="text-amber-700 mb-2">{{ used }} of {{ total }} experience sections used your verified facts.</p>
+      }
+      <p class="text-amber-600 text-xs mb-2">Answer more questions to reach full precision.</p>
+      <app-button text="Continue →" (onClick)="onAnswerQuestions()"
+        customClass="text-xs h-8 bg-amber-200 hover:bg-amber-300 text-amber-800 border-0">
+      </app-button>
+    }
+    @case ('precision') {
+      <p class="font-medium text-emerald-800 mb-1">Tailoring Mode: Precision ✓</p>
+      <p class="text-emerald-700">All bullet points use your verified achievements. Zero AI guessing.</p>
+    }
+    @default {
+      <p class="font-medium text-slate-800">Tailoring Mode: Standard</p>
+      <p class="text-slate-600">Optimized for keywords and ATS formatting.</p>
+    }
+  }
+</div>

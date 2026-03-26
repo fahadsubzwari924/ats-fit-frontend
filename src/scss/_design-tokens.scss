@@ -1,0 +1,261 @@
+// ============================================================================
+// Design Tokens
+// ============================================================================
+// This file defines all design tokens including colors, spacing, typography,
+// border radius, shadows, and transitions following a design system approach.
+// All colors are defined in HSL format for better color manipulation.
+
+// ============================================================================
+// Color Palette - HSL Format
+// ============================================================================
+
+// Primary Colors — indigo-600
+$color-primary: hsl(239 84% 67%);
+$color-primary-foreground: hsl(0 0% 100%);
+
+// Secondary Colors — indigo-50 tint
+$color-secondary: hsl(237 100% 97%);
+$color-secondary-foreground: hsl(239 84% 40%);
+
+// Background & Surface
+$color-background: hsl(240 10% 98%);
+$color-foreground: hsl(240 10% 10%);
+$color-card: hsl(0 0% 100%);
+$color-card-foreground: hsl(240 10% 10%);
+
+// Popover
+$color-popover: hsl(0 0% 100%);
+$color-popover-foreground: hsl(240 10% 10%);
+
+// Muted & Disabled
+$color-muted: hsl(240 6% 95%);
+$color-muted-foreground: hsl(240 5% 50%);
+
+// Accent — violet
+$color-accent: hsl(258 90% 96%);
+$color-accent-foreground: hsl(258 70% 40%);
+
+// Destructive/Error
+$color-destructive: hsl(0 84.2% 60.2%);
+$color-destructive-foreground: hsl(0 0% 100%);
+
+// Border & Input
+$color-border: hsl(240 6% 90%);
+$color-input: hsl(240 6% 90%);
+
+// Focus Ring
+$color-ring: hsl(239 84% 67%);
+
+// Sidebar Colors
+$color-sidebar-background: hsl(0 0% 98%);
+$color-sidebar-foreground: hsl(240 5.3% 26.1%);
+$color-sidebar-primary: hsl(240 5.9% 10%);
+$color-sidebar-primary-foreground: hsl(0 0% 98%);
+$color-sidebar-accent: hsl(240 4.8% 95.9%);
+$color-sidebar-accent-foreground: hsl(240 5.9% 10%);
+$color-sidebar-border: hsl(220 13% 91%);
+$color-sidebar-ring: hsl(217.2 91.2% 59.8%);
+
+// Dark Mode Colors
+$color-dark-background: hsl(222.2 84% 4.9%);
+$color-dark-foreground: hsl(210 40% 98%);
+$color-dark-card: hsl(222.2 84% 4.9%);
+$color-dark-card-foreground: hsl(210 40% 98%);
+$color-dark-primary: hsl(210 40% 98%);
+$color-dark-primary-foreground: hsl(222.2 47.4% 11.2%);
+$color-dark-secondary: hsl(217.2 32.6% 17.5%);
+$color-dark-secondary-foreground: hsl(210 40% 98%);
+$color-dark-muted: hsl(217.2 32.6% 17.5%);
+$color-dark-muted-foreground: hsl(215 20.2% 65.1%);
+$color-dark-accent: hsl(217.2 32.6% 17.5%);
+$color-dark-accent-foreground: hsl(210 40% 98%);
+$color-dark-destructive: hsl(0 62.8% 30.6%);
+$color-dark-destructive-foreground: hsl(210 40% 98%);
+$color-dark-border: hsl(217.2 32.6% 17.5%);
+$color-dark-input: hsl(217.2 32.6% 17.5%);
+
+// ============================================================================
+// Spacing Scale
+// ============================================================================
+// Based on 4px base unit (rem: 0.25rem = 4px)
+
+$spacing-xs: 0.25rem;   // 4px
+$spacing-sm: 0.5rem;    // 8px
+$spacing-md: 1rem;      // 16px
+$spacing-lg: 1.5rem;    // 24px
+$spacing-xl: 2rem;      // 32px
+$spacing-2xl: 2.5rem;   // 40px
+$spacing-3xl: 3rem;     // 48px
+$spacing-4xl: 4rem;     // 64px
+
+$spacing: (
+  xs: $spacing-xs,
+  sm: $spacing-sm,
+  md: $spacing-md,
+  lg: $spacing-lg,
+  xl: $spacing-xl,
+  2xl: $spacing-2xl,
+  3xl: $spacing-3xl,
+  4xl: $spacing-4xl,
+);
+
+// ============================================================================
+// Typography Scale
+// ============================================================================
+
+// Font Families
+$font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
+  'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
+  sans-serif;
+$font-family-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', monospace;
+
+// Font Sizes
+$font-size-xs: 0.75rem;     // 12px
+$font-size-sm: 0.875rem;    // 14px
+$font-size-base: 1rem;      // 16px
+$font-size-lg: 1.125rem;    // 18px
+$font-size-xl: 1.25rem;     // 20px
+$font-size-2xl: 1.5rem;     // 24px
+$font-size-3xl: 1.875rem;   // 30px
+$font-size-4xl: 2.25rem;    // 36px
+$font-size-5xl: 3rem;       // 48px
+$font-size-6xl: 3.75rem;    // 60px
+$font-size-7xl: 4.5rem;     // 72px
+
+// Font Weights
+$font-weight-light: 300;
+$font-weight-normal: 400;
+$font-weight-medium: 500;
+$font-weight-semibold: 600;
+$font-weight-bold: 700;
+
+// Line Heights
+$line-height-tight: 1;
+$line-height-snug: 1.25;
+$line-height-normal: 1.5;
+$line-height-relaxed: 1.625;
+$line-height-loose: 2;
+
+// Letter Spacing
+$letter-spacing-tight: -0.02em;
+$letter-spacing-normal: 0;
+$letter-spacing-wide: 0.02em;
+
+// Typography Map for Mixins
+$typography: (
+  xs: (
+    size: $font-size-xs,
+    weight: $font-weight-medium,
+    line-height: $line-height-tight,
+  ),
+  sm: (
+    size: $font-size-sm,
+    weight: $font-weight-normal,
+    line-height: $line-height-snug,
+  ),
+  base: (
+    size: $font-size-base,
+    weight: $font-weight-normal,
+    line-height: $line-height-normal,
+  ),
+  lg: (
+    size: $font-size-lg,
+    weight: $font-weight-medium,
+    line-height: $line-height-normal,
+  ),
+  xl: (
+    size: $font-size-xl,
+    weight: $font-weight-semibold,
+    line-height: $line-height-snug,
+  ),
+  2xl: (
+    size: $font-size-2xl,
+    weight: $font-weight-semibold,
+    line-height: $line-height-tight,
+  ),
+  3xl: (
+    size: $font-size-3xl,
+    weight: $font-weight-bold,
+    line-height: $line-height-tight,
+  ),
+);
+
+// ============================================================================
+// Border Radius
+// ============================================================================
+
+$radius-sm: calc(0.5rem - 4px);  // 4px
+$radius-md: 0.5rem;              // 8px
+$radius-lg: 0.75rem;             // 12px
+$radius-xl: 1rem;                // 16px
+$radius-full: 9999px;            // Fully rounded
+
+$radius: (
+  sm: $radius-sm,
+  md: $radius-md,
+  lg: $radius-lg,
+  xl: $radius-xl,
+  full: $radius-full,
+);
+
+// ============================================================================
+// Shadows
+// ============================================================================
+
+$shadow-none: none;
+$shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
+  0 2px 4px -2px rgba(0, 0, 0, 0.1);
+$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
+  0 4px 6px -4px rgba(0, 0, 0, 0.1);
+$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
+  0 8px 10px -6px rgba(0, 0, 0, 0.1);
+$shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+
+$shadow: (
+  none: $shadow-none,
+  xs: $shadow-xs,
+  sm: $shadow-sm,
+  md: $shadow-md,
+  lg: $shadow-lg,
+  xl: $shadow-xl,
+  2xl: $shadow-2xl,
+);
+
+// ============================================================================
+// Transitions & Animations
+// ============================================================================
+
+// Transition Durations
+$transition-fast: 150ms;
+$transition-normal: 300ms;
+$transition-slow: 500ms;
+
+// Transition Timing Functions
+$easing-linear: linear;
+$easing-ease: ease;
+$easing-ease-in: ease-in;
+$easing-ease-out: ease-out;
+$easing-ease-in-out: ease-in-out;
+$easing-cubic-bezier: cubic-bezier(0.4, 0, 0.2, 1);
+
+// ============================================================================
+// Breakpoints
+// ============================================================================
+
+$breakpoint-xs: 0;
+$breakpoint-sm: 640px;
+$breakpoint-md: 768px;
+$breakpoint-lg: 1024px;
+$breakpoint-xl: 1280px;
+$breakpoint-2xl: 1536px;
+
+$breakpoints: (
+  xs: $breakpoint-xs,
+  sm: $breakpoint-sm,
+  md: $breakpoint-md,
+  lg: $breakpoint-lg,
+  xl: $breakpoint-xl,
+  2xl: $breakpoint-2xl,
+);

@@ -13,3 +13,41 @@
 .ring-offset-background {
   --tw-ring-offset-color: hsl(var(--background));
 }
+
+.signin-linear-progress {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 3px;
+  overflow: hidden;
+  z-index: 1;
+  pointer-events: none;
+  background: rgb(226 232 240 / 0.6);
+}
+
+.signin-linear-progress::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  width: 42%;
+  background: linear-gradient(
+    90deg,
+    transparent,
+    hsl(221 83% 53% / 0.15),
+    hsl(239 84% 60%),
+    hsl(221 83% 53% / 0.15),
+    transparent
+  );
+  animation: signin-progress-slide 1.15s ease-in-out infinite;
+}
+
+@keyframes signin-progress-slide {
+  0% {
+    transform: translateX(-100%);
+  }
+
+  100% {
+    transform: translateX(320%);
+  }
+}

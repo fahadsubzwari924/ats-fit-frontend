@@ -1,0 +1,406 @@
+// ============================================================================
+// Button Component Styles
+// ============================================================================
+// Global button styles with support for multiple variants and sizes
+// Following Material Design principles with accessibility focus
+
+@use 'sass:math';
+@use 'design-tokens' as *;
+@use 'mixins' as *;
+
+// ============================================================================
+// Button Base Styles
+// ============================================================================
+
+.btn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: $spacing-sm;
+  white-space: nowrap;
+  @include rounded(md);
+  @include transition(all, normal);
+  @include body-text;
+  font-weight: $font-weight-medium;
+
+  border: 1px solid transparent;
+  cursor: pointer;
+
+  // Default padding
+  @include padding($spacing-md, $spacing-lg);
+
+  // Disabled state
+  @include disabled {
+    cursor: not-allowed;
+    opacity: 0.5;
+  }
+
+  // Focus ring
+  @include focus-ring($offset: 2px, $width: 2px);
+
+  // SVG icons styling
+  svg {
+    width: 1em;
+    height: 1em;
+    flex-shrink: 0;
+    pointer-events: none;
+  }
+}
+
+// ============================================================================
+// Button Variants
+// ============================================================================
+
+// Default variant (filled with primary color)
+.btn--default {
+  background-color: $color-primary;
+  color: $color-primary-foreground;
+  border-color: $color-primary;
+
+  @include hover {
+    background-color: color-mix(in srgb, $color-primary 90%, black);
+  }
+
+  &:active:not(:disabled) {
+    background-color: color-mix(in srgb, $color-primary 85%, black);
+  }
+
+  @include dark-mode {
+    background-color: $color-dark-primary;
+    color: $color-dark-primary-foreground;
+    border-color: $color-dark-primary;
+
+    @include hover {
+      background-color: color-mix(in srgb, $color-dark-primary 90%, white);
+    }
+
+    &:active:not(:disabled) {
+      background-color: color-mix(in srgb, $color-dark-primary 85%, white);
+    }
+  }
+}
+
+// Primary variant (same as default in this design system)
+.btn--primary {
+  @extend .btn--default;
+}
+
+// Destructive variant (for dangerous actions)
+.btn--destructive {
+  background-color: $color-destructive;
+  color: $color-destructive-foreground;
+  border-color: $color-destructive;
+
+  @include hover {
+    background-color: color-mix(in srgb, $color-destructive 90%, black);
+  }
+
+  &:active:not(:disabled) {
+    background-color: color-mix(in srgb, $color-destructive 85%, black);
+  }
+
+  @include dark-mode {
+    background-color: $color-dark-destructive;
+    color: $color-dark-destructive-foreground;
+    border-color: $color-dark-destructive;
+
+    @include hover {
+      background-color: color-mix(in srgb, $color-dark-destructive 90%, black);
+    }
+  }
+}
+
+// Secondary variant
+.btn--secondary {
+  background-color: $color-secondary;
+  color: $color-secondary-foreground;
+  border-color: $color-secondary;
+
+  @include hover {
+    background-color: color-mix(in srgb, $color-secondary 80%, black);
+  }
+
+  &:active:not(:disabled) {
+    background-color: color-mix(in srgb, $color-secondary 75%, black);
+  }
+
+  @include dark-mode {
+    background-color: $color-dark-secondary;
+    color: $color-dark-secondary-foreground;
+    border-color: $color-dark-secondary;
+
+    @include hover {
+      background-color: color-mix(in srgb, $color-dark-secondary 80%, white);
+    }
+  }
+}
+
+// Outline variant (bordered button with transparent background)
+.btn--outline {
+  background-color: $color-background;
+  color: $color-foreground;
+  border-color: $color-input;
+
+  @include hover {
+    background-color: $color-accent;
+    color: $color-accent-foreground;
+  }
+
+  &:active:not(:disabled) {
+    background-color: color-mix(in srgb, $color-accent 90%, black);
+  }
+
+  @include dark-mode {
+    background-color: $color-dark-background;
+    color: $color-dark-foreground;
+    border-color: $color-dark-input;
+
+    @include hover {
+      background-color: $color-dark-accent;
+      color: $color-dark-accent-foreground;
+    }
+  }
+}
+
+// Ghost variant (no border, transparent background)
+.btn--ghost {
+  background-color: transparent;
+  color: $color-foreground;
+  border-color: transparent;
+
+  @include hover {
+    background-color: $color-accent;
+    color: $color-accent-foreground;
+  }
+
+  &:active:not(:disabled) {
+    background-color: color-mix(in srgb, $color-accent 90%, black);
+  }
+
+  @include dark-mode {
+    color: $color-dark-foreground;
+
+    @include hover {
+      background-color: $color-dark-accent;
+      color: $color-dark-accent-foreground;
+    }
+  }
+}
+
+// Link variant (text-only, underlined)
+.btn--link {
+  background-color: transparent;
+  color: $color-primary;
+  border-color: transparent;
+  text-decoration: underline;
+  text-decoration-offset: $spacing-sm;
+
+  @include hover {
+    text-decoration: underline;
+  }
+
+  &:active:not(:disabled) {
+    opacity: 0.8;
+  }
+
+  @include dark-mode {
+    color: $color-dark-primary;
+  }
+}
+
+// Amber/Orange gradient variant (for "Answer Questions", "I'm Done" buttons)
+.btn--amber {
+  background: linear-gradient(to right, #f59e0b, #f97316);
+  color: #ffffff;
+  border-color: transparent;
+
+  @include hover {
+    background: linear-gradient(to right, #d97706, #ea580c);
+  }
+
+  &:active:not(:disabled) {
+    background: linear-gradient(to right, #b45309, #c2410c);
+  }
+
+  @include disabled {
+    background: linear-gradient(to right, #94a3b8, #94a3b8);
+  }
+}
+
+// Yellow variant (for "Upgrade" button)
+.btn--yellow {
+  background-color: #eab308;
+  color: #ffffff;
+  border-color: #eab308;
+
+  @include hover {
+    background-color: #ca8a04;
+    border-color: #ca8a04;
+  }
+
+  &:active:not(:disabled) {
+    background-color: #a16207;
+  }
+
+  @include disabled {
+    background-color: #94a3b8;
+    border-color: #94a3b8;
+  }
+}
+
+// Blue solid variant (for "Answer Now", "Sign Up Free" buttons)
+.btn--blue {
+  background-color: #2563eb;
+  color: #ffffff;
+  border-color: #2563eb;
+
+  @include hover {
+    background-color: #1d4ed8;
+    border-color: #1d4ed8;
+  }
+
+  &:active:not(:disabled) {
+    background-color: #1e40af;
+  }
+
+  @include disabled {
+    background-color: #94a3b8;
+    border-color: #94a3b8;
+  }
+}
+
+// ============================================================================
+// Button Sizes
+// ============================================================================
+
+.btn--sm {
+  @include padding($spacing-sm, $spacing-md);
+  height: 2.25rem; // 36px
+  @include typography(sm);
+
+  svg {
+    width: 0.875em;
+    height: 0.875em;
+  }
+}
+
+.btn--md {
+  @include padding($spacing-md, $spacing-lg);
+  height: 2.5rem; // 40px
+  @include typography(base);
+}
+
+.btn--lg {
+  @include padding($spacing-md, $spacing-xl);
+  height: 2.75rem; // 44px
+  @include typography(lg);
+  font-weight: $font-weight-semibold;
+
+  svg {
+    width: 1.125em;
+    height: 1.125em;
+  }
+}
+
+.btn--icon {
+  width: 2.5rem; // 40px
+  height: 2.5rem; // 40px
+  @include padding(0);
+
+  svg {
+    width: 1.25em;
+    height: 1.25em;
+  }
+}
+
+// ============================================================================
+// Button State Combinations
+// ============================================================================
+
+.btn--block {
+  width: 100%;
+}
+
+.btn--loading {
+  position: relative;
+  color: transparent;
+
+  &::after {
+    content: '';
+    position: absolute;
+    width: 1em;
+    height: 1em;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid currentColor;
+    border-right-color: transparent;
+    border-radius: 50%;
+    animation: spin 0.6s linear infinite;
+  }
+}
+
+// ============================================================================
+// Button Group
+// ============================================================================
+
+.btn-group {
+  @include flex(row, flex-start, stretch);
+
+  .btn {
+    border-radius: 0;
+
+    &:first-child {
+      @include rounded(md);
+      border-top-right-radius: 0;
+      border-bottom-right-radius: 0;
+    }
+
+    &:last-child {
+      @include rounded(md);
+      border-top-left-radius: 0;
+      border-bottom-left-radius: 0;
+    }
+
+    &:not(:last-child) {
+      border-right: none;
+    }
+  }
+}
+
+// ============================================================================
+// Animations
+// ============================================================================
+
+@keyframes spin {
+  to {
+    transform: translate(-50%, -50%) rotate(360deg);
+  }
+}
+
+@keyframes shimmer {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(100%);
+  }
+}
+
+.animate-shimmer {
+  animation: shimmer 2s infinite;
+}
+
+@keyframes bounce-once {
+  0%, 100% {
+    transform: translateY(0);
+  }
+  50% {
+    transform: translateY(-10px);
+  }
+}
+
+.animate-bounce-once {
+  animation: bounce-once 0.6s ease-in-out;
+}
