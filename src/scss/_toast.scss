@@ -1,0 +1,51 @@
+// ============================================================================
+// Material Snackbar shell — hosts app-toast card (transparent surface)
+// ============================================================================
+
+@use 'design-tokens' as *;
+
+.mat-mdc-snack-bar-container.app-toast-panel {
+  margin: $spacing-md $spacing-md 0 0 !important;
+  max-width: min(28rem, calc(100vw - #{$spacing-md} * 2)) !important;
+  min-width: 0 !important;
+
+  .mdc-snackbar__surface {
+    padding: 0 !important;
+    min-width: 0 !important;
+    background: transparent !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+  }
+
+  .mat-mdc-snack-bar-label {
+    padding: 0 !important;
+    flex: 1 1 auto;
+    min-width: 0;
+  }
+
+  .mdc-snackbar__label {
+    padding: 0 !important;
+  }
+}
+
+// Slight entrance polish (respects reduced motion via Material defaults where possible)
+.mat-mdc-snack-bar-container.app-toast-panel .mdc-snackbar__surface {
+  animation: app-toast-enter 0.28s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes app-toast-enter {
+  from {
+    opacity: 0;
+    transform: translateY(-0.75rem) scale(0.96);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .mat-mdc-snack-bar-container.app-toast-panel .mdc-snackbar__surface {
+    animation: none;
+  }
+}

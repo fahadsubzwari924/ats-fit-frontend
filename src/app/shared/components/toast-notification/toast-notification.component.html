@@ -1,0 +1,37 @@
+<div
+  class="app-toast"
+  [class.app-toast--success]="data.variant === 'success'"
+  [class.app-toast--error]="data.variant === 'error'"
+  [class.app-toast--warning]="data.variant === 'warning'"
+  [class.app-toast--info]="data.variant === 'info'"
+  role="alert"
+  [attr.aria-live]="data.variant === 'error' ? 'assertive' : 'polite'"
+>
+  <span class="app-toast__rail" aria-hidden="true"></span>
+
+  <div class="app-toast__inner">
+    <mat-icon class="app-toast__glyph" aria-hidden="true">{{ iconName() }}</mat-icon>
+
+    <p class="app-toast__message">{{ data.message }}</p>
+
+    <div class="app-toast__actions">
+      @if (data.actionLabel) {
+        <button
+          type="button"
+          class="app-toast__action"
+          (click)="onAction()"
+        >
+          {{ data.actionLabel }}
+        </button>
+      }
+      <button
+        type="button"
+        class="app-toast__dismiss"
+        (click)="snackBarRef.dismiss()"
+        aria-label="Dismiss notification"
+      >
+        Dismiss
+      </button>
+    </div>
+  </div>
+</div>

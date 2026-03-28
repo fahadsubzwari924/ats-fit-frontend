@@ -1,100 +1,107 @@
 import { Injectable, inject } from '@angular/core';
-import { MatSnackBar, MatSnackBarConfig, MatSnackBarRef, SimpleSnackBar } from '@angular/material/snack-bar';
+import {
+  MatSnackBar,
+  MatSnackBarConfig,
+  MatSnackBarRef,
+} from '@angular/material/snack-bar';
 import { SnackbarConfig } from '@shared/interfaces/snakbar-config.interface';
-
+import { ToastNotificationComponent } from '../components/toast-notification/toast-notification.component';
+import type { ToastVariant } from '../components/toast-notification/toast-notification.types';
 
 @Injectable({
-  providedIn: 'root'
+  providedIn: 'root',
 })
 export class SnackbarService {
+  private readonly snackBar = inject(MatSnackBar);
 
-  private snackBar = inject(MatSnackBar);
-
-  private defaultConfig: MatSnackBarConfig = {
+  private readonly defaultConfig: MatSnackBarConfig = {
     duration: 4000,
     horizontalPosition: 'right',
     verticalPosition: 'top',
   };
 
+  private normalizePanelClass(panelClass?: string | string[]): string[] {
+    if (!panelClass) {
+      return [];
+    }
+    return Array.isArray(panelClass) ? panelClass : [panelClass];
+  }
+
   /**
-   * Show a success snackbar
-   * @param message - The message to display
-   * @param config - Optional configuration
+   * Custom toast UI: icon, soft surface, dismiss control.
+   * Text "Close" from legacy callers is omitted in favor of the dismiss icon.
    */
-  public showSuccess(message: string, config?: SnackbarConfig): MatSnackBarRef<SimpleSnackBar> {
-    const snackbarConfig: MatSnackBarConfig = {
-      ...this.defaultConfig,
+  private openStyledToast(
+    message: string,
+    variant: ToastVariant,
+    config?: SnackbarConfig,
+    fallbackDuration?: number,
+  ): MatSnackBarRef<ToastNotificationComponent> {
+    const duration =
+      config?.duration ?? fallbackDuration ?? this.defaultConfig.duration;
+    const actionLabel =
+      config?.action && config.action !== 'Close' ? config.action : undefined;
+
+    return this.snackBar.openFromComponent(ToastNotificationComponent, {
+      horizontalPosition:
+        config?.horizontalPosition ?? this.defaultConfig.horizontalPosition,
+      verticalPosition:
+        config?.verticalPosition ?? this.defaultConfig.verticalPosition,
+      duration,
+      data: { message, variant, actionLabel },
+      panelClass: [
+        'app-toast-panel',
+        `${variant}-toast-panel`,
+        ...this.normalizePanelClass(config?.panelClass),
+      ],
+    });
+  }
+
+  public showSuccess(
+    message: string,
+    config?: SnackbarConfig,
+  ): MatSnackBarRef<ToastNotificationComponent> {
+    return this.openStyledToast(message, 'success', config, 4000);
+  }
+
+  public showError(
+    message: string,
+    config?: SnackbarConfig,
+  ): MatSnackBarRef<ToastNotificationComponent> {
+    return this.openStyledToast(message, 'error', config, 6000);
+  }
+
+  public showWarning(
+    message: string,
+    config?: SnackbarConfig,
+  ): MatSnackBarRef<ToastNotificationComponent> {
+    return this.openStyledToast(message, 'warning', config, 5000);
+  }
+
+  public showInfo(
+    message: string,
+    config?: SnackbarConfig,
+  ): MatSnackBarRef<ToastNotificationComponent> {
+    return this.openStyledToast(message, 'info', config, 4000);
+  }
+
+  /**
+   * Generic toast using the neutral "info" style (legacy / ad-hoc).
+   */
+  public show(
+    message: string,
+    action?: string,
+    config?: SnackbarConfig,
+  ): MatSnackBarRef<ToastNotificationComponent> {
+    const textAction =
+      (action && action !== 'Close' ? action : undefined) ||
+      (config?.action && config.action !== 'Close' ? config.action : undefined);
+    return this.openStyledToast(message, 'info', {
       ...config,
-      panelClass: ['success-snackbar', ...(config?.panelClass || [])]
-    };
-
-    return this.snackBar.open(message, config?.action || 'Close', snackbarConfig);
+      action: textAction,
+    });
   }
 
-  /**
-   * Show an error snackbar
-   * @param message - The message to display
-   * @param config - Optional configuration
-   */
-  public showError(message: string, config?: SnackbarConfig): MatSnackBarRef<SimpleSnackBar> {
-    const snackbarConfig: MatSnackBarConfig = {
-      ...this.defaultConfig,
-      duration: config?.duration || 6000, // Error messages should stay longer
-      ...config,
-      panelClass: ['error-snackbar', ...(config?.panelClass || [])]
-    };
-
-    return this.snackBar.open(message, config?.action || 'Close', snackbarConfig);
-  }
-
-  /**
-   * Show a warning snackbar
-   * @param message - The message to display
-   * @param config - Optional configuration
-   */
-  public showWarning(message: string, config?: SnackbarConfig): MatSnackBarRef<SimpleSnackBar> {
-    const snackbarConfig: MatSnackBarConfig = {
-      ...this.defaultConfig,
-      ...config,
-      panelClass: ['warning-snackbar', ...(config?.panelClass || [])]
-    };
-
-    return this.snackBar.open(message, config?.action || 'Close', snackbarConfig);
-  }
-
-  /**
-   * Show an info snackbar
-   * @param message - The message to display
-   * @param config - Optional configuration
-   */
-  public showInfo(message: string, config?: SnackbarConfig): MatSnackBarRef<SimpleSnackBar> {
-    const snackbarConfig: MatSnackBarConfig = {
-      ...this.defaultConfig,
-      ...config,
-      panelClass: ['info-snackbar', ...(config?.panelClass || [])]
-    };
-
-    return this.snackBar.open(message, config?.action || 'Close', snackbarConfig);
-  }
-
-  /**
-   * Show a custom snackbar
-   * @param message - The message to display
-   * @param action - Optional action button text
-   * @param config - Optional configuration
-   */
-  public show(message: string, action?: string, config?: SnackbarConfig): MatSnackBarRef<SimpleSnackBar> {
-    const snackbarConfig: MatSnackBarConfig = {
-      ...this.defaultConfig,
-      ...config
-    };
-
-    return this.snackBar.open(message, action || 'Close', snackbarConfig);
-  }
-
-  /**
-   * Dismiss all active snackbars
-   */
   public dismiss(): void {
     this.snackBar.dismiss();
   }

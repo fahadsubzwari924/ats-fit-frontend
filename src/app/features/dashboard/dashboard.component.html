@@ -12,15 +12,13 @@
         </div>
         <div class="flex items-center gap-2">
           <span
-            class="text-xs font-semibold px-3 py-1 rounded-full"
-            [ngClass]="user?.plan === SubscriptionType.PREMIUM
-              ? 'bg-amber-400/20 text-amber-300 border border-amber-400/30'
-              : 'bg-white/10 text-slate-300 border border-white/10'"
+            class="plan-chip"
+            [ngClass]="user?.plan === SubscriptionType.PREMIUM ? 'plan-chip--premium' : 'plan-chip--freemium'"
           >
             {{ user?.plan }} Plan
           </span>
           @if (user?.plan === SubscriptionType.FREEMIUM) {
-            <app-button customClass="btn btn--yellow btn--sm" text="Upgrade" icon="crown"></app-button>
+            <app-button variant="upgrade" size="sm" text="Upgrade"></app-button>
           }
         </div>
       </div>
