@@ -1,0 +1,12 @@
+<div
+  class="bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden"
+  style="box-shadow: 0 1px 4px rgba(0,0,0,0.04)">
+  <div class="px-5 py-4 border-b border-[#F1F5F9]">
+    <h2 class="font-semibold text-[14px] text-[#0F172A]">Job Applications</h2>
+  </div>
+  <div class="p-5 space-y-3">
+    @for (job of applications(); track job.id) {
+      <app-job-history-card [jobHistory]="job" (jobStatusChange)="jobStatusChange.emit($event)"></app-job-history-card>
+    }
+  </div>
+</div>

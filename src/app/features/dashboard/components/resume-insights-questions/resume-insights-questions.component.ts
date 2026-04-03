@@ -1,4 +1,6 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, DestroyRef, effect, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { interval, Subscription, switchMap } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { ProfileQuestionsService } from '@features/dashboard/services/profile-questions.service';
 import { ResumeProfileState } from '@core/states/resume-profile.state';
@@ -6,6 +8,9 @@ import { EmployerQuestionGroup } from '@features/dashboard/models/profile-questi
 import { EmployerQuestionGroupComponent } from './employer-question-group/employer-question-group.component';
 import { ModalService } from '@shared/services/modal.service';
 import { TailorApplyModalComponent } from '@features/tailor-apply/tailor-apply-modal.component';
+
+const ENRICHMENT_POLL_INTERVAL_MS = 4000;
+const ENRICHMENT_POLL_MAX_ATTEMPTS = 15;
 
 @Component({
   selector: 'app-resume-insights-questions',
@@ -18,6 +23,9 @@ export class ResumeInsightsQuestionsComponent {
   private readonly profileQuestionsService = inject(ProfileQuestionsService);
   private readonly profileState = inject(ResumeProfileState);
   private readonly modalService = inject(ModalService);
+  private readonly destroyRef = inject(DestroyRef);
+
+  private enrichmentPollSub: Subscription | null = null;
 
   /** When true, show the card (e.g. when there are questions to answer) */
   visible = input<boolean>(true);
@@ -29,6 +37,7 @@ export class ResumeInsightsQuestionsComponent {
   editingQuestionId = signal<string | null>(null);
   saveError = signal<string | null>(null);
   completing = signal(false);
+  expandedIndex = signal<number | null>(0);
 
   totalQuestions = computed(() =>
     this.groups().reduce((acc, g) => acc + g.questions.length, 0)
@@ -62,6 +71,21 @@ export class ResumeInsightsQuestionsComponent {
 
   constructor() {
     this.loadQuestions();
+
+    effect(() => {
+      const editId = this.editingQuestionId();
+      if (!editId) return;
+      const index = this.groups().findIndex((g) =>
+        g.questions.some((q) => q.id === editId)
+      );
+      if (index !== -1) {
+        this.expandedIndex.set(index);
+      }
+    });
+  }
+
+  onGroupToggled(index: number): void {
+    this.expandedIndex.update((current) => (current === index ? null : index));
   }
 
   loadQuestions(): void {
@@ -96,28 +120,33 @@ export class ResumeInsightsQuestionsComponent {
       }))
     );
     this.profileState.updateQuestionAnswered(newAnswered, newAnswered / total);
-    this.profileQuestionsService.saveAnswer(payload).subscribe({
-      next: (res) => {
-        this.profileState.updateQuestionAnswered(newAnswered, res.profileCompleteness);
-        if (res.enrichedProfileId) {
-          this.profileState.setEnrichedProfileId(res.enrichedProfileId);
-        }
-      },
-      error: () => {
-        this.saveError.set('Failed to save, please try again.');
-        this.groups.update((list) =>
-          list.map((g) => ({
-            ...g,
-            questions: g.questions.map((q) =>
-              q.id === payload.questionId
-                ? { ...q, userResponse: null, isAnswered: false }
-                : q
-            ),
-          }))
-        );
-        this.profileState.updateQuestionAnswered(prevAnswered, prevAnswered / total);
-      },
-    });
+    this.profileQuestionsService
+      .saveAnswer(payload)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.profileState.updateQuestionAnswered(newAnswered, res.profileCompleteness);
+          if (res.enrichedProfileId) {
+            this.profileState.setEnrichedProfileId(res.enrichedProfileId);
+          } else if (newAnswered === total) {
+            this.startEnrichmentPolling();
+          }
+        },
+        error: () => {
+          this.saveError.set('Failed to save, please try again.');
+          this.groups.update((list) =>
+            list.map((g) => ({
+              ...g,
+              questions: g.questions.map((q) =>
+                q.id === payload.questionId
+                  ? { ...q, userResponse: null, isAnswered: false }
+                  : q
+              ),
+            }))
+          );
+          this.profileState.updateQuestionAnswered(prevAnswered, prevAnswered / total);
+        },
+      });
   }
 
   onSkipQuestion(questionId: string): void {
@@ -140,31 +169,33 @@ export class ResumeInsightsQuestionsComponent {
     );
     const newAnswered = this.answeredCount();
     this.profileState.updateQuestionAnswered(newAnswered, newAnswered / total);
-    this.profileQuestionsService.skipQuestion(questionId).subscribe({
-      next: (res) => {
-        this.profileState.updateQuestionAnswered(
-          newAnswered,
-          res.profileCompleteness
-        );
-        if (res.enrichedProfileId) {
-          this.profileState.setEnrichedProfileId(res.enrichedProfileId);
-        }
-      },
-      error: () => {
-        this.saveError.set('Failed to skip, please try again.');
-        if (previousQuestion) {
-          this.groups.update((list) =>
-            list.map((g) => ({
-              ...g,
-              questions: g.questions.map((q) =>
-                q.id === questionId ? { ...previousQuestion } : q
-              ),
-            }))
-          );
-        }
-        this.profileState.updateQuestionAnswered(prevAnswered, prevAnswered / total);
-      },
-    });
+    this.profileQuestionsService
+      .skipQuestion(questionId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.profileState.updateQuestionAnswered(newAnswered, res.profileCompleteness);
+          if (res.enrichedProfileId) {
+            this.profileState.setEnrichedProfileId(res.enrichedProfileId);
+          } else if (newAnswered === total) {
+            this.startEnrichmentPolling();
+          }
+        },
+        error: () => {
+          this.saveError.set('Failed to skip, please try again.');
+          if (previousQuestion) {
+            this.groups.update((list) =>
+              list.map((g) => ({
+                ...g,
+                questions: g.questions.map((q) =>
+                  q.id === questionId ? { ...previousQuestion } : q
+                ),
+              }))
+            );
+          }
+          this.profileState.updateQuestionAnswered(prevAnswered, prevAnswered / total);
+        },
+      });
   }
 
   onStartEdit(questionId: string): void {
@@ -177,17 +208,57 @@ export class ResumeInsightsQuestionsComponent {
 
   onComplete(): void {
     this.completing.set(true);
-    this.profileQuestionsService.markComplete().subscribe({
-      next: (res) => {
-        this.profileState.setEnrichedProfileId(res.enrichedProfileId);
-        this.completing.set(false);
-        this.loadQuestions();
-      },
-      error: () => this.completing.set(false),
-    });
+    this.profileQuestionsService
+      .markComplete()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (res) => {
+          this.completing.set(false);
+          if (res.enrichedProfileId) {
+            this.profileState.setEnrichedProfileId(res.enrichedProfileId);
+            this.loadQuestions();
+          } else {
+            this.startEnrichmentPolling();
+          }
+        },
+        error: () => this.completing.set(false),
+      });
   }
 
   openTailorModal(): void {
     this.modalService.openModal(TailorApplyModalComponent).afterClosed().subscribe();
+  }
+
+  private startEnrichmentPolling(): void {
+    this.stopEnrichmentPolling();
+
+    let attempts = 0;
+    this.enrichmentPollSub = interval(ENRICHMENT_POLL_INTERVAL_MS)
+      .pipe(
+        switchMap(() => this.profileQuestionsService.getProfileStatus()),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe({
+        next: (status) => {
+          attempts++;
+          this.profileState.setProfileStatus(status);
+
+          if (status.enrichedProfileId) {
+            this.profileState.setEnrichedProfileId(status.enrichedProfileId);
+            this.stopEnrichmentPolling();
+            return;
+          }
+
+          if (attempts >= ENRICHMENT_POLL_MAX_ATTEMPTS) {
+            this.stopEnrichmentPolling();
+          }
+        },
+        error: () => this.stopEnrichmentPolling(),
+      });
+  }
+
+  private stopEnrichmentPolling(): void {
+    this.enrichmentPollSub?.unsubscribe();
+    this.enrichmentPollSub = null;
   }
 }

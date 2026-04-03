@@ -1,6 +1,5 @@
 import { Platform } from '@angular/cdk/platform';
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { SubscriptionType } from '@core/enums/subscription-type.enum';
 import { UploadedResume } from '@core/models/user/uploaded-resumes.model';
 import { User } from '@core/models/user/user.model';
 import { StorageService } from '@shared/services/storage.service';
@@ -24,7 +23,10 @@ export class UserState {
   public readonly isLoggedIn = this._isLoggedIn.asReadonly();
   public readonly uploadedResumes = computed(() => this._currentUser()?.uploadedResumes || []);
   public readonly featureUsage = computed(() => this._currentUser()?.featureUsage);
-  public readonly isPremiumUser = computed(() => this._currentUser()?.plan === SubscriptionType.PREMIUM)
+  public readonly isPremiumUser = computed(() => this._currentUser()?.isPremium ?? false);
+  public readonly onboardingCompleted = computed(
+    () => this._currentUser()?.onboardingCompleted ?? true
+  );
 
   constructor() {
     this.loadFromStorage();
@@ -51,8 +53,24 @@ export class UserState {
     return user;
   }
 
+  public markOnboardingComplete(): void {
+    const current = this._currentUser();
+    if (!current) return;
+
+    const updated = new User({
+      ...current,
+      onboardingCompleted: true
+    });
+
+    this._currentUser.set(updated);
+    this.saveToStorage();
+  }
+
   public updateUserResume(resume: UploadedResume): void {
-    this._currentUser()?.uploadedResumes.push(resume);
+    this._currentUser.update(user => {
+      if (!user) return user;
+      return new User({ ...user, uploadedResumes: [...(user.uploadedResumes ?? []), resume] });
+    });
     this.saveToStorage();
   }
 
@@ -68,7 +86,11 @@ export class UserState {
 
   // Storage methods
   private saveToStorage(): void {
-    this.platform.isBrowser && this.storageService.setUser(this._currentUser() as User);
+    if (!this.platform.isBrowser) {
+      return;
+    }
+    const current = this._currentUser();
+    this.storageService.setUser(current);
   }
 
   private loadFromStorage(): void {

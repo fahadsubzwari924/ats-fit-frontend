@@ -1,17 +1,86 @@
-<div class="text-center mb-8">
-  <h2 class="text-3xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent mb-4">
-    Billing History</h2>
-  <p class="text-slate-600 text-lg">View and download your past invoices and payments</p>
-</div>
-<div class="rounded-lg text-card-foreground border-0 shadow-xl bg-white">
-  <div class="p-0">
-    <div class="space-y-0">
-      @for (item of subscriptionHistory(); track item.id) {
-        <app-billing-history-card
-          [item]="item"
-          (downloadInvoice)="onDownloadInvoice($event)">
-        </app-billing-history-card>
-      }
+<div class="billing-grid">
+  <div class="billing-stack billing-stack--sm">
+    <div class="billing-invoice-stats">
+      <div class="billing-invoice-stat">
+        <p class="billing-invoice-stat__label">Total Invoices</p>
+        <p class="billing-invoice-stat__value">{{ (subscriptionHistory() || []).length }}</p>
+        <p class="billing-invoice-stat__sub">all time</p>
+      </div>
+      <div class="billing-invoice-stat">
+        <p class="billing-invoice-stat__label">Total Paid</p>
+        <p class="billing-invoice-stat__value">${{ totalPaidNum().toFixed(0) }}</p>
+        <p class="billing-invoice-stat__sub">all time</p>
+      </div>
+      <div class="billing-invoice-stat">
+        <p class="billing-invoice-stat__label">Last Payment</p>
+        <p class="billing-invoice-stat__value">{{ lastPaymentAmount() }}</p>
+        <p class="billing-invoice-stat__sub">{{ lastPaymentDate() }}</p>
+      </div>
+    </div>
+
+    <div class="billing-card">
+      <div class="billing-card__head">
+        <h2 class="billing-card__title">Invoice History</h2>
+        <button type="button" class="billing-link-btn" style="display:inline-flex;align-items:center;gap:0.375rem">
+          <svg class="billing-svg-icon billing-svg-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+            <polyline points="7 10 12 15 17 10" />
+            <line x1="12" x2="12" y1="15" y2="3" />
+          </svg>
+          Export All
+        </button>
+      </div>
+      <div class="billing-table-head">
+        <span>Description</span>
+        <span>Date</span>
+        <span>Amount</span>
+        <span class="billing-table-head__action">Action</span>
+      </div>
+      <div>
+        @for (item of subscriptionHistory() || []; track item.id) {
+          <div class="billing-table-row">
+            <div class="billing-table-row__desc-wrap">
+              <div class="billing-table-row__icon">
+                <svg class="billing-svg-icon billing-svg-icon--sm billing-svg-icon--green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z" />
+                  <path d="M14 2v4a2 2 0 0 0 2 2h4" />
+                  <path d="M10 9H8" />
+                  <path d="M16 13H8" />
+                  <path d="M16 17H8" />
+                </svg>
+              </div>
+              <div>
+                <p class="billing-table-row__title">{{ invoiceDescription(item) }}</p>
+                <p class="billing-table-row__id">{{ invoiceRef(item) }}</p>
+              </div>
+            </div>
+            <p class="billing-table-row__date">{{ item.createdAt | date: 'MMM d, y' }}</p>
+            <p class="billing-table-row__amount">{{ item.amount }}</p>
+            <div class="billing-table-row__actions">
+              @if (isPaidStatus(item)) {
+                <span class="billing-pill billing-pill--paid">{{ statusPill(item) }}</span>
+              } @else {
+                <span class="billing-pill billing-pill--default">{{ statusPill(item) }}</span>
+              }
+              <button type="button" class="billing-download-btn" (click)="onDownloadInvoice(item)" [disabled]="!hasInvoiceUrl(item)">
+                <svg class="billing-svg-icon billing-svg-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4" />
+                  <polyline points="7 10 12 15 17 10" />
+                  <line x1="12" x2="12" y1="15" y2="3" />
+                </svg>
+              </button>
+            </div>
+          </div>
+        }
+      </div>
     </div>
   </div>
+
+  <app-billing-history-sidebar
+    [cardLast4]="'4242'"
+    [cardExpiry]="'12/25'"
+    [planLabel]="planNameLabel()"
+    [amountLabel]="planAmountLabel()"
+    [nextCharge]="renewalDateLabel()"
+    [renewalDateLabel]="renewalDateLabel()" />
 </div>

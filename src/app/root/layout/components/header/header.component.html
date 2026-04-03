@@ -1,130 +1,205 @@
-<header
-  class="fixed top-0 w-full bg-white/95 backdrop-blur-sm border-b border-slate-200 z-50"
->
-  <div class="max-w-7xl mx-auto px-4">
-    <div class="flex justify-between items-center h-16">
-      <a class="flex items-center space-x-2 cursor-pointer" href="/">
-        <div
-          class="w-8 h-8 bg-gradient-to-br from-blue-600 to-indigo-600 rounded-lg flex items-center justify-center"
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="24"
-            height="24"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
+<header class="app-header">
+  <div class="app-header__inner">
+    <div class="app-header__left">
+      <a routerLink="/" class="app-header__brand" aria-label="ATS Fit home">
+        <svg class="app-header__logo" width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+          <rect width="32" height="32" rx="8" fill="#2563EB" />
+          <path
+            d="M8 22L12 10L16 18L20 10L24 22"
+            stroke="white"
+            stroke-width="2.2"
             stroke-linecap="round"
             stroke-linejoin="round"
-            class="lucide lucide-file-text h-5 w-5 text-white"
-          >
-            <path
-              d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7Z"
-            ></path>
-            <path d="M14 2v4a2 2 0 0 0 2 2h4"></path>
-            <path d="M10 9H8"></path>
-            <path d="M16 13H8"></path>
-            <path d="M16 17H8"></path>
-          </svg>
-        </div>
-        <span class="text-xl font-bold bg-gradient-to-r from-blue-600 to-indigo-600 bg-clip-text text-transparent">
-          ATS Fit
-        </span>
+          />
+          <circle cx="16" cy="18" r="1.5" fill="white" />
+        </svg>
+        <span class="app-header__title">ATS Fit</span>
       </a>
-      <nav class="hidden md:flex items-center space-x-8">
-        <a
-          href="/"
-          class="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
-          >Features</a
-        >
-        <a
-          href="/"
-          class="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
-          >Pricing</a
-        >
-        <a
-          href="/"
-          class="text-slate-600 hover:text-slate-900 transition-colors cursor-pointer"
-          >About</a
-        >
-      </nav>
 
       @if (isAuthenticated()) {
-        <div class="hidden md:flex items-center space-x-4">
-          <div class="flex items-center space-x-4">
-            <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 text-foreground text-xs">
-              Free
-            </div>
-            <a routerLink="/dashboard">
-              <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 cursor-pointer">
-                Dashboard
-              </button>
-            </a>
-            <a routerLink="/billing">
-              <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 cursor-pointer">
-                Billing
-              </button>
-            </a>
-
-            <button (click)="logout()"
-              class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 cursor-pointer"
-            >
-              Logout
-            </button>
-          </div>
-        </div>
+        <nav class="app-header__nav app-header__nav--primary" aria-label="Main">
+          <a
+            routerLink="/dashboard"
+            routerLinkActive="app-header__nav-link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="app-header__nav-link"
+          >
+            Dashboard
+          </a>
+        </nav>
       } @else {
-        <div class="hidden md:flex items-center space-x-4">
-          <div class="flex items-center space-x-3">
-            <a [routerLink]="'/signin'">
-              <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 hover:bg-accent hover:text-accent-foreground h-9 rounded-md px-3 cursor-pointer">
-                Sign In
-              </button>
-            </a>
-            <a [routerLink]="'/signup'">
-              <button class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 [&amp;_svg]:pointer-events-none [&amp;_svg]:size-4 [&amp;_svg]:shrink-0 text-primary-foreground h-9 rounded-md px-3 bg-blue-600 hover:bg-blue-700 cursor-pointer">
-                <svg
-                  xmlns="http://www.w3.org/2000/svg"
-                  width="24"
-                  height="24"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  stroke-width="2"
-                  stroke-linecap="round"
-                  stroke-linejoin="round"
-                  class="lucide lucide-zap h-4 w-4 mr-1"
-                >
-                  <path
-                    d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"
-                  ></path>
-                </svg>
-                Get Started
-              </button>
-            </a>
-          </div>
-        </div>
+        <nav class="app-header__nav app-header__nav--public" aria-label="Marketing">
+          <a href="/" class="app-header__nav-link">Features</a>
+          <a href="/" class="app-header__nav-link">Pricing</a>
+          <a href="/" class="app-header__nav-link">About</a>
+        </nav>
       }
-
-      <button class="md:hidden p-2 cursor-pointer">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="24"
-          height="24"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          stroke-linecap="round"
-          stroke-linejoin="round"
-          class="lucide lucide-menu h-6 w-6 text-slate-600"
-        >
-          <line x1="4" x2="20" y1="12" y2="12"></line>
-          <line x1="4" x2="20" y1="6" y2="6"></line>
-          <line x1="4" x2="20" y1="18" y2="18"></line>
-        </svg>
-      </button>
     </div>
+
+    @if (isAuthenticated()) {
+      <div class="app-header__right">
+        @if (showPremiumChip()) {
+          <div class="plan-chip--premium-light" aria-label="Premium">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6L12 2z"
+                fill="#F59E0B"
+                stroke="#F59E0B"
+                stroke-width="1"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span>Premium</span>
+          </div>
+        } @else if (showNonPremiumChip()) {
+          <div class="app-header__plan-chip--muted">{{ nonPremiumChipLabel() }}</div>
+        }
+
+        <button type="button" class="app-header__notify" aria-label="Notifications">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+            <path d="M6 8a6 6 0 0 1 12 0c0 7 3 9 3 9H3s3-2 3-9" />
+            <path d="M10.3 21a1.94 1.94 0 0 0 3.4 0" />
+          </svg>
+          <span class="app-header__notify-dot" aria-hidden="true"></span>
+        </button>
+
+        <div #userMenuRoot class="app-header__user">
+          <button
+            type="button"
+            class="app-header__user-trigger"
+            (click)="toggleUserMenu($event)"
+            [attr.aria-expanded]="userMenuOpen()"
+            aria-haspopup="true"
+            aria-label="Account menu"
+          >
+            <span class="app-header__avatar">{{ initials(currentUser()?.fullName) }}</span>
+            <div class="app-header__user-text">
+              <span class="app-header__user-name">{{ shortDisplayName(currentUser()?.fullName) }}</span>
+              <span class="app-header__user-plan">{{ planSubtitle(currentUser() ?? null) }}</span>
+            </div>
+            <svg class="app-header__chevron" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="m6 9 6 6 6-6" />
+            </svg>
+          </button>
+
+          @if (userMenuOpen()) {
+            <div class="app-header__dropdown" role="menu">
+              <div class="app-header__dropdown-header">
+                <p class="app-header__dropdown-name">{{ currentUser()?.fullName }}</p>
+                <p class="app-header__dropdown-email">{{ currentUser()?.email }}</p>
+              </div>
+              <button type="button" class="app-header__dropdown-item" role="menuitem" (click)="goToDashboardSection('profile')">
+                <svg class="app-header__dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2" />
+                  <circle cx="12" cy="7" r="4" />
+                </svg>
+                Profile
+              </button>
+              <button type="button" class="app-header__dropdown-item" role="menuitem" (click)="goToDashboardSection('usage')">
+                <svg class="app-header__dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M18 20V10M12 20V4M6 20v-6" />
+                </svg>
+                Usage &amp; Limits
+              </button>
+              <a routerLink="/billing" class="app-header__dropdown-item" role="menuitem" (click)="closeUserMenu()">
+                <svg class="app-header__dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <rect width="20" height="14" x="2" y="5" rx="2" />
+                  <path d="M2 10h20" />
+                </svg>
+                Billing
+              </a>
+              <button type="button" class="app-header__dropdown-item" role="menuitem" (click)="goToDashboardSection('settings')">
+                <svg class="app-header__dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                  <path d="M12.22 2h-.44a2 2 0 0 0-2 2v.18a2 2 0 0 1-1 1.73l-.43.25a2 2 0 0 1-2 0l-.15-.08a2 2 0 0 0-2.73.73l-.22.38a2 2 0 0 0 .73 2.73l.15.1a2 2 0 0 1 1 1.72v.51a2 2 0 0 1-1 1.74l-.15.09a2 2 0 0 0-.73 2.73l.22.38a2 2 0 0 0 2.73.73l.15-.08a2 2 0 0 1 2 0l.43.25a2 2 0 0 1 1 1.73V20a2 2 0 0 0 2 2h.44a2 2 0 0 0 2-2v-.18a2 2 0 0 1 1-1.73l.43-.25a2 2 0 0 1 2 0l.15.08a2 2 0 0 0 2.73-.73l.22-.39a2 2 0 0 0-.73-2.73l-.15-.08a2 2 0 0 1-1-1.74v-.5a2 2 0 0 1 1-1.74l.15-.09a2 2 0 0 0 .73-2.73l-.22-.38a2 2 0 0 0-2.73-.73l-.15.08a2 2 0 0 1-2 0l-.43-.25a2 2 0 0 1-1-1.73V4a2 2 0 0 0-2-2z" />
+                  <circle cx="12" cy="12" r="3" />
+                </svg>
+                Settings
+              </button>
+              <div class="app-header__dropdown-sep">
+                <button type="button" class="app-header__dropdown-item app-header__dropdown-item--danger" role="menuitem" (click)="logout()">
+                  <svg class="app-header__dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                    <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4" />
+                    <polyline points="16 17 21 12 16 7" />
+                    <line x1="21" x2="9" y1="12" y2="12" />
+                  </svg>
+                  Sign Out
+                </button>
+              </div>
+            </div>
+          }
+        </div>
+      </div>
+    } @else {
+      <div class="app-header__public-actions">
+        <a [routerLink]="'/signin'" class="app-header__btn">Sign In</a>
+        <a [routerLink]="'/signup'" class="app-header__btn app-header__btn--primary">
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
+          </svg>
+          Get Started
+        </a>
+      </div>
+    }
+
+    <button
+      type="button"
+      class="app-header__mobile-toggle"
+      (click)="toggleMobile($event)"
+      [attr.aria-expanded]="mobileOpen()"
+      aria-label="Open menu"
+    >
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        @if (mobileOpen()) {
+          <path d="M18 6 6 18M6 6l12 12" />
+        } @else {
+          <line x1="4" x2="20" y1="12" y2="12" />
+          <line x1="4" x2="20" y1="6" y2="6" />
+          <line x1="4" x2="20" y1="18" y2="18" />
+        }
+      </svg>
+    </button>
   </div>
+
+  @if (mobileOpen()) {
+    <div class="app-header__mobile-panel">
+      @if (isAuthenticated()) {
+        <a
+          routerLink="/dashboard"
+          routerLinkActive="app-header__nav-link--active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="app-header__nav-link"
+          (click)="closeMobile()"
+        >
+          Dashboard
+        </a>
+        @if (showPremiumChip()) {
+          <div class="plan-chip--premium-light">
+            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+              <path
+                d="M12 2l2.4 7.4h7.6l-6 4.6 2.3 7-6.3-4.6-6.3 4.6 2.3-7-6-4.6h7.6L12 2z"
+                fill="#F59E0B"
+                stroke="#F59E0B"
+                stroke-width="1"
+                stroke-linejoin="round"
+              />
+            </svg>
+            <span>Premium</span>
+          </div>
+        } @else if (showNonPremiumChip()) {
+          <div class="app-header__plan-chip--muted">{{ nonPremiumChipLabel() }}</div>
+        }
+        <button type="button" class="app-header__dropdown-item" (click)="goToDashboardSection('profile')">Profile</button>
+        <button type="button" class="app-header__dropdown-item" (click)="goToDashboardSection('usage')">Usage &amp; Limits</button>
+        <a routerLink="/billing" class="app-header__dropdown-item" (click)="closeMobile()">Billing</a>
+        <button type="button" class="app-header__dropdown-item" (click)="goToDashboardSection('settings')">Settings</button>
+        <button type="button" class="app-header__dropdown-item app-header__dropdown-item--danger" (click)="logout()">Sign Out</button>
+      } @else {
+        <a href="/" class="app-header__nav-link" (click)="closeMobile()">Features</a>
+        <a href="/" class="app-header__nav-link" (click)="closeMobile()">Pricing</a>
+        <a href="/" class="app-header__nav-link" (click)="closeMobile()">About</a>
+        <a [routerLink]="'/signin'" class="app-header__btn" (click)="closeMobile()">Sign In</a>
+        <a [routerLink]="'/signup'" class="app-header__btn app-header__btn--primary" (click)="closeMobile()">Get Started</a>
+      }
+    </div>
+  }
 </header>

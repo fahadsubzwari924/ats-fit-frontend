@@ -1,0 +1,105 @@
+<div class="choice-panel">
+  <!-- Eyebrow badge -->
+  <div class="choice-panel__badge anim-fade">
+    <span class="choice-panel__badge-dot"></span>
+    <span class="choice-panel__badge-text">Quick setup · 30 seconds</span>
+  </div>
+
+  <!-- Heading -->
+  <div class="choice-panel__heading anim-float">
+    <h1 class="choice-panel__title">
+      What do you want<br />to do first?
+    </h1>
+    <p class="choice-panel__subtitle">
+      Choose how you'd like to get started. You can always change your mind.
+    </p>
+  </div>
+
+  <!-- Option A -->
+  <button
+    class="choice-panel__option anim-float2"
+    [class.choice-panel__option--selected]="selected() === 'a'"
+    (click)="select('a')"
+    type="button"
+  >
+    <span class="choice-panel__recommended-badge">&#10024; Recommended</span>
+
+    <div class="choice-panel__option-inner">
+      <span
+        class="choice-panel__option-icon"
+        [class.choice-panel__option-icon--active]="selected() === 'a'"
+      >
+        &#127919;
+      </span>
+
+      <div class="choice-panel__option-body">
+        <div class="choice-panel__option-header">
+          <span class="choice-panel__option-label">Upload resume first</span>
+          <span class="choice-panel__option-tag">Best results</span>
+        </div>
+        <p class="choice-panel__option-desc">
+          Get the highest quality results — ATS Fit analyzes your resume and uses it to power
+          every tailoring session.
+        </p>
+        <ul class="choice-panel__pros">
+          <li class="choice-panel__pro">3&times; better ATS keyword alignment</li>
+          <li class="choice-panel__pro">Precision tailoring for every job</li>
+          <li class="choice-panel__pro">Smart quantified impact suggestions</li>
+        </ul>
+      </div>
+
+      <span
+        class="choice-panel__radio"
+        [class.choice-panel__radio--checked]="selected() === 'a'"
+      ></span>
+    </div>
+  </button>
+
+  <!-- Option B -->
+  <button
+    class="choice-panel__option choice-panel__option--b anim-float3"
+    [class.choice-panel__option--selected-b]="selected() === 'b'"
+    (click)="select('b')"
+    type="button"
+  >
+    <div class="choice-panel__option-inner">
+      <span class="choice-panel__option-icon choice-panel__option-icon--neutral">&#9889;</span>
+
+      <div class="choice-panel__option-body">
+        <p class="choice-panel__option-label choice-panel__option-label--muted">
+          Start tailoring right away
+        </p>
+        <p class="choice-panel__option-desc choice-panel__option-desc--muted">
+          Dive straight in. Resume tailoring works without an upload — just with less precision.
+        </p>
+        <ul class="choice-panel__cons">
+          <li class="choice-panel__con choice-panel__con--ok">No upload needed right now</li>
+          <li class="choice-panel__con choice-panel__con--bad">Generic tailoring — less accurate</li>
+          <li class="choice-panel__con choice-panel__con--ok">Upload from dashboard anytime</li>
+        </ul>
+      </div>
+
+      <span
+        class="choice-panel__radio choice-panel__radio--neutral"
+        [class.choice-panel__radio--checked-neutral]="selected() === 'b'"
+      ></span>
+    </div>
+  </button>
+
+  <!-- CTA -->
+  <button
+    class="choice-panel__cta"
+    [class.choice-panel__cta--skip]="selected() === 'b'"
+    (click)="onContinue()"
+    type="button"
+  >
+    <span>{{ selected() === 'a' ? 'Upload my resume — get the best results' : 'Skip for now — go to dashboard' }}</span>
+    <span class="choice-panel__cta-arrow">&#8594;</span>
+  </button>
+
+  @if (selected() === 'a') {
+    <button class="choice-panel__skip-link" (click)="onSkip()" type="button">
+      Don't have it handy? Skip and upload later &rarr;
+    </button>
+  }
+</div>

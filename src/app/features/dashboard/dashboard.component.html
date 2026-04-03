@@ -1,249 +1,58 @@
-<div class="min-h-screen bg-slate-50">
+<div class="min-h-screen bg-[#F8FAFC]">
+  <app-dashboard-hero
+    [userName]="user?.fullName"
+    [resumeCount]="resumeHistory().length"
+    [atsCreditsRemaining]="atsCreditsRemaining()"
+    (tailorClicked)="openTailorModal()"
+    (quickTailorClicked)="openBatchTailoringModal()"
+    (resumeHistoryClicked)="openResumeHistoryModal()">
+  </app-dashboard-hero>
 
-  <!-- ── Dark Hero Header ────────────────────────────────────────── -->
-  <div class="bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900 pt-20 pb-16 px-4">
-    <div class="max-w-4xl mx-auto">
-      <div class="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
-        <div>
-          <h1 class="text-2xl font-bold text-white">
-            Welcome back, {{ user?.fullName?.split(' ')?.[0] }}!
-          </h1>
-          <p class="text-sm text-indigo-300/80 mt-0.5">Let's land your next role.</p>
+  <app-questions-banner [visible]="showQuestionsBanner" (answerClicked)="onScrollToQuestions()">
+  </app-questions-banner>
+
+  <div class="max-w-[1280px] mx-auto px-6 py-7">
+    <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
+      <div class="space-y-5">
+        <div id="dashboard-profile" class="app-dashboard-anchor">
+          <app-resume-profile-card
+            (uploadRequested)="onProfileUploadRequested($event)"
+            (scrollToQuestions)="onScrollToQuestions()"
+            (retryRequested)="onRetryProcessing()">
+          </app-resume-profile-card>
         </div>
-        <div class="flex items-center gap-2">
-          <span
-            class="plan-chip"
-            [ngClass]="user?.plan === SubscriptionType.PREMIUM ? 'plan-chip--premium' : 'plan-chip--freemium'"
-          >
-            {{ user?.plan }} Plan
-          </span>
-          @if (user?.plan === SubscriptionType.FREEMIUM) {
-            <app-button variant="upgrade" size="sm" text="Upgrade"></app-button>
-          }
-        </div>
-      </div>
 
-      <!-- Quick Action cards inside the hero -->
-      <div class="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-8">
+        <app-resume-history-card
+          [items]="resumeHistory()"
+          [loading]="resumeHistoryLoading()"
+          [downloadingId]="downloadingId()"
+          (viewAllClicked)="openResumeHistoryModal()"
+          (createFirstClicked)="openTailorModal()"
+          (downloadItem)="downloadHistoryItem($event)">
+        </app-resume-history-card>
 
-        <!-- Tailor Resume -->
-        <button (click)="openTailorModal()"
-          class="group text-left rounded-2xl bg-gradient-to-br from-indigo-600 to-violet-600 shadow-lg shadow-indigo-900/30 hover:shadow-indigo-500/40 hover:scale-[1.02] transition-all duration-200 p-5 focus:outline-none focus:ring-2 focus:ring-indigo-400 focus:ring-offset-2 focus:ring-offset-slate-900">
-          <div class="flex items-start gap-3">
-            <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" class="text-white">
-                <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path>
-              </svg>
-            </div>
-            <div class="flex-1 min-w-0">
-              <h3 class="font-semibold text-white text-sm">Tailor Resume</h3>
-              <p class="text-xs text-indigo-200/80 mt-0.5 leading-snug">Single job, AI-powered</p>
-            </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" class="text-white/40 group-hover:text-white/70 group-hover:translate-x-0.5 transition-all shrink-0 mt-0.5">
-              <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
-            </svg>
-          </div>
-        </button>
+        @if (user?.isPremium) {
+          <app-tailore-resume-upload></app-tailore-resume-upload>
+        }
 
-        <!-- Quick Tailor (Batch) -->
-        <button (click)="openBatchTailoringModal()"
-          class="group text-left rounded-2xl bg-gradient-to-br from-amber-500/80 to-orange-500/80 shadow-lg shadow-amber-900/20 hover:shadow-amber-500/30 hover:scale-[1.02] transition-all duration-200 p-5 focus:outline-none focus:ring-2 focus:ring-amber-400 focus:ring-offset-2 focus:ring-offset-slate-900">
-          <div class="flex items-start gap-3">
-            <div class="w-10 h-10 rounded-xl bg-white/20 backdrop-blur-sm flex items-center justify-center shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" class="text-white">
-                <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-              </svg>
-            </div>
-            <div class="flex-1 min-w-0">
-              <div class="flex items-center gap-1.5">
-                <h3 class="font-semibold text-white text-sm">Quick Tailor</h3>
-                <span class="text-[9px] font-bold px-1.5 py-0.5 bg-white/20 text-white/90 rounded-full">PRO</span>
-              </div>
-              <p class="text-xs text-amber-100/80 mt-0.5 leading-snug">Multiple jobs at once</p>
-            </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" class="text-white/40 group-hover:text-white/70 group-hover:translate-x-0.5 transition-all shrink-0 mt-0.5">
-              <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
-            </svg>
-          </div>
-        </button>
-
-        <!-- My Resumes -->
-        <button (click)="openResumeHistoryModal()"
-          class="group text-left rounded-2xl bg-white/10 backdrop-blur-sm border border-white/10 hover:bg-white/15 hover:border-white/20 hover:scale-[1.02] transition-all duration-200 p-5 focus:outline-none focus:ring-2 focus:ring-white/30 focus:ring-offset-2 focus:ring-offset-slate-900">
-          <div class="flex items-start gap-3">
-            <div class="w-10 h-10 rounded-xl bg-violet-500/30 flex items-center justify-center shrink-0">
-              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" class="text-violet-300">
-                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-              </svg>
-            </div>
-            <div class="flex-1 min-w-0">
-              <h3 class="font-semibold text-white text-sm">My Resumes</h3>
-              <p class="text-xs text-slate-400 mt-0.5 leading-snug">
-                @if (resumeHistory().length) {
-                  {{ resumeHistory().length }} version{{ resumeHistory().length !== 1 ? 's' : '' }}
-                } @else {
-                  View history
-                }
-              </p>
-            </div>
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" class="text-white/30 group-hover:text-white/60 group-hover:translate-x-0.5 transition-all shrink-0 mt-0.5">
-              <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
-            </svg>
-          </div>
-        </button>
-
-      </div>
-    </div>
-  </div>
-
-  <!-- ── Main Content — overlaps the dark hero ────────────────── -->
-  <div class="max-w-4xl mx-auto px-4 -mt-6 pb-10 space-y-8">
-
-    <!-- ── Premium Banner ────────────────────────────────────────── -->
-    @if (user?.plan === SubscriptionType.FREEMIUM) {
-      <app-premium-banner></app-premium-banner>
-    }
-
-    <!-- ── Profile Zone ──────────────────────────────────────────── -->
-    <div class="space-y-3">
-      <app-profile-alert-bar (scrollToQuestions)="onScrollToQuestions()"></app-profile-alert-bar>
-      <app-resume-profile-card
-        (uploadRequested)="onProfileUploadRequested($event)"
-        (scrollToQuestions)="onScrollToQuestions()">
-      </app-resume-profile-card>
-      <div [id]="insightsQuestionsSectionId">
-        <app-resume-insights-questions></app-resume-insights-questions>
-      </div>
-    </div>
-
-    <!-- ── Resume Version History ──────────────────────────────── -->
-    <section id="resume-history-section">
-      <div class="flex items-center justify-between mb-3">
-        <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest">Recent Tailored Resumes</h2>
-        @if (resumeHistory().length > 0) {
-          <button (click)="openResumeHistoryModal()"
-            class="text-xs font-semibold text-indigo-600 hover:text-indigo-700 flex items-center gap-1 transition-colors">
-            View All
-            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2.5">
-              <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
-            </svg>
-          </button>
+        @if (user?.isPremium && jobHistory()?.applications?.length) {
+          <app-job-applications-card
+            [applications]="jobHistory()!.applications!"
+            (jobStatusChange)="onJobStatusChange($event)">
+          </app-job-applications-card>
         }
       </div>
 
-      <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm overflow-hidden">
-        @if (resumeHistoryLoading()) {
-          <div class="flex items-center justify-center py-10 gap-2 text-slate-400">
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" class="animate-spin">
-              <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
-            </svg>
-            <span class="text-sm">Loading...</span>
-          </div>
-        } @else if (resumeHistory().length === 0) {
-          <div class="flex flex-col items-center justify-center py-12 gap-3">
-            <div class="w-14 h-14 rounded-2xl bg-slate-100 flex items-center justify-center">
-              <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="1.5" class="text-slate-300">
-                <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                <polyline points="14 2 14 8 20 8"></polyline>
-              </svg>
-            </div>
-            <div class="text-center">
-              <p class="text-sm font-medium text-slate-500">No tailored resumes yet</p>
-              <button (click)="openTailorModal()"
-                class="mt-1 text-xs font-semibold text-indigo-600 hover:text-indigo-700 underline underline-offset-2">
-                Create your first one →
-              </button>
-            </div>
-          </div>
-        } @else {
-          <div class="divide-y divide-slate-100 max-h-80 overflow-y-auto">
-            @for (item of resumeHistory(); track item.id) {
-              <div class="flex items-center gap-3 px-5 py-3.5 hover:bg-indigo-50/40 transition-colors">
-                <div class="w-9 h-9 rounded-lg bg-gradient-to-br from-indigo-500 to-violet-500 flex items-center justify-center shrink-0 shadow-sm">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                    stroke="currentColor" stroke-width="2" class="text-white">
-                    <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-                    <polyline points="14 2 14 8 20 8"></polyline>
-                  </svg>
-                </div>
-                <div class="flex-1 min-w-0">
-                  <p class="text-sm font-semibold text-slate-800 truncate">
-                    {{ item.jobPosition || 'Unknown Position' }} &#64; {{ item.companyName || '—' }}
-                  </p>
-                  <p class="text-xs text-slate-400">{{ item.createdAt | date:'MMM d, y' }}</p>
-                </div>
-                @if (item.optimizationConfidence) {
-                  <span class="text-xs font-bold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full shrink-0">
-                    {{ item.optimizationConfidence }}%
-                  </span>
-                }
-                <button
-                  (click)="downloadHistoryItem(item)"
-                  [disabled]="downloadingId() === item.id"
-                  class="w-8 h-8 rounded-lg border border-slate-200 flex items-center justify-center text-slate-400 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 transition-all duration-150 disabled:opacity-50 shrink-0">
-                  @if (downloadingId() === item.id) {
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" stroke-width="2" class="animate-spin">
-                      <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
-                    </svg>
-                  } @else {
-                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                      stroke="currentColor" stroke-width="2">
-                      <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                      <polyline points="7 10 12 15 17 10"></polyline>
-                      <line x1="12" x2="12" y1="15" y2="3"></line>
-                    </svg>
-                  }
-                </button>
-              </div>
-            }
-          </div>
-        }
+      <div class="space-y-5">
+        <div id="dashboard-usage" class="app-dashboard-anchor">
+          <app-dashboard-usage-card [featureUsages]="featureUsage()"></app-dashboard-usage-card>
+        </div>
+        <div id="dashboard-settings" class="app-dashboard-anchor">
+          <app-dashboard-tips-card></app-dashboard-tips-card>
+        </div>
       </div>
-    </section>
-
-    <!-- ── Resume Management (Premium) ──────────────────────────── -->
-    @if (user?.plan === SubscriptionType.PREMIUM) {
-      <section>
-        <app-tailore-resume-upload></app-tailore-resume-upload>
-      </section>
-    }
-
-    <!-- ── Usage Stats ────────────────────────────────────────────── -->
-    @if (featureUsage().length) {
-      <section>
-        <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Usage</h2>
-        <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-5">
-          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-            @for (feature of featureUsage(); track $index) {
-              <app-stat-widget [featureUsage]="feature"></app-stat-widget>
-            }
-          </div>
-        </div>
-      </section>
-    }
-
-    <!-- ── Job Applications (Premium) ──────────────────────────── -->
-    @if (user?.plan === SubscriptionType.PREMIUM && jobHistory()?.applications?.length) {
-      <section>
-        <h2 class="text-xs font-semibold text-slate-400 uppercase tracking-widest mb-3">Job Applications</h2>
-        <div class="bg-white rounded-2xl border border-slate-200/60 shadow-sm p-5 space-y-3">
-          @for (job of jobHistory()?.applications; track $index) {
-            <app-job-history-card [jobHistory]="job" (jobStatusChange)="onJobStatusChange($event)"></app-job-history-card>
-          }
-        </div>
-      </section>
-    }
-
+    </div>
   </div>
 </div>
+
+<app-questions-drawer [open]="drawerOpen()" (closed)="onDrawerClosed()"></app-questions-drawer>

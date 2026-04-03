@@ -1,0 +1,16 @@
+<div class="rounded-2xl border border-[#BFDBFE] p-5"
+     style="background: linear-gradient(135deg, #F8FAFC 0%, #EFF6FF 100%); box-shadow: 0 1px 4px rgba(37,99,235,0.06)">
+
+  <h3 class="font-semibold text-[13.5px] text-[#1E3A8A] mb-3">Tips to improve your score</h3>
+
+  <ul class="space-y-2.5">
+    @for (tip of tips; track $index) {
+      <li class="flex items-start gap-2.5">
+        <span class="w-5 h-5 rounded-full bg-[#2563EB] text-white text-[10px] font-bold flex items-center justify-center flex-shrink-0 mt-0.5">
+          {{ $index + 1 }}
+        </span>
+        <p class="text-[12.5px] text-[#374151] leading-relaxed">{{ tip }}</p>
+      </li>
+    }
+  </ul>
+</div>

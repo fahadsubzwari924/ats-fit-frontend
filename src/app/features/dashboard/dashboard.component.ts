@@ -1,42 +1,35 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { DatePipe, NgClass } from '@angular/common';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { catchError, forkJoin, interval, of, switchMap, takeWhile } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-// Components
-import { JobHistoryCardComponent } from '@features/dashboard/components/ui/job-history-card/job-history-card.component';
-import { PremiumBannerComponent } from '@features/dashboard/components/ui/premium-banner/premium-banner.component';
-import { StatWidgetComponent } from '@features/dashboard/components/ui/stat-widget/stat-widget.component';
+import { DashboardUsageCardComponent } from '@features/dashboard/components/ui/dashboard-usage-card/dashboard-usage-card.component';
+import { DashboardTipsCardComponent } from '@features/dashboard/components/ui/dashboard-tips-card/dashboard-tips-card.component';
 import { TailoreResumeUploadComponent } from '@features/dashboard/components/features/tailore-resume-upload/tailore-resume-upload.component';
 import { ResumeProfileCardComponent } from '@features/dashboard/components/resume-profile-card/resume-profile-card.component';
-import { ProfileAlertBarComponent } from '@features/dashboard/components/profile-alert-bar/profile-alert-bar.component';
-import { ResumeInsightsQuestionsComponent } from '@features/dashboard/components/resume-insights-questions/resume-insights-questions.component';
+import { QuestionsDrawerComponent } from '@features/dashboard/components/questions-drawer/questions-drawer.component';
 import { TailorApplyModalComponent } from '@features/tailor-apply/tailor-apply-modal.component';
 import { BatchTailoringModalComponent } from '@features/tailor-apply/batch-tailoring-modal.component';
 import { ResumeHistoryModalComponent } from '@features/dashboard/components/resume-history/resume-history-modal.component';
-import { ButtonComponent } from '@shared/components/ui/button/button.component';
-// Services
 import { JobService } from '@features/apply-new-job/services/job.service';
 import { ResumeService } from '@shared/services/resume.service';
 import { ModalService } from '@shared/services/modal.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { ProfileQuestionsService } from '@features/dashboard/services/profile-questions.service';
-// States
 import { UserState } from '@core/states/user.state';
 import { ResumeProfileState } from '@core/states/resume-profile.state';
-// Models
 import { AppliedJob } from '@features/apply-new-job/models/applied-job.model';
 import { JobApplication } from '@features/apply-new-job/models/job-application.model';
 import { FeatureUsage } from '@core/models/user/feature-usage.model';
 import { ResumeProfileStatus } from '@features/dashboard/models/resume-profile.model';
 import { ResumeHistoryItem } from '@features/dashboard/models/resume-history.model';
 import { TailoringModalCloseResult } from '@features/tailor-apply/models/tailoring-modal-close-result.model';
-// Enums
-import { SubscriptionType } from '@core/enums/subscription-type.enum';
 import { Messages } from '@core/enums/messages.enum';
 import { ApiResponse } from '@core/models/response/api-response.model';
 import { ResponseStatus } from '@core/enums/response-status.enum';
-// Others
 import { saveAs } from 'file-saver';
+import { DashboardHeroComponent } from '@shared/components/dashboard-hero/dashboard-hero.component';
+import { QuestionsBannerComponent } from '@shared/components/questions-banner/questions-banner.component';
+import { ResumeHistoryCardComponent } from '@shared/components/resume-history-card/resume-history-card.component';
+import { JobApplicationsCardComponent } from '@shared/components/job-applications-card/job-applications-card.component';
 
 const POLL_INTERVAL_MS = 5000;
 const POLL_MAX_ATTEMPTS = 24;
@@ -45,16 +38,15 @@ const POLL_MAX_ATTEMPTS = 24;
   selector: 'app-dashboard',
   standalone: true,
   imports: [
-    DatePipe,
-    NgClass,
-    StatWidgetComponent,
-    PremiumBannerComponent,
-    JobHistoryCardComponent,
     TailoreResumeUploadComponent,
-    ButtonComponent,
     ResumeProfileCardComponent,
-    ProfileAlertBarComponent,
-    ResumeInsightsQuestionsComponent,
+    QuestionsDrawerComponent,
+    DashboardUsageCardComponent,
+    DashboardTipsCardComponent,
+    DashboardHeroComponent,
+    QuestionsBannerComponent,
+    ResumeHistoryCardComponent,
+    JobApplicationsCardComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
@@ -69,8 +61,6 @@ export class DashboardComponent implements OnInit {
   private snackbarService = inject(SnackbarService);
   private profileQuestionsService = inject(ProfileQuestionsService);
 
-  public SubscriptionType = SubscriptionType;
-
   public featureUsage = signal<FeatureUsage[]>([]);
   public jobHistory = signal<AppliedJob | null>(null);
   public resumeHistory = signal<ResumeHistoryItem[]>([]);
@@ -78,10 +68,21 @@ export class DashboardComponent implements OnInit {
   public downloadingId = signal<string | null>(null);
 
   public user = this.userState.currentUser();
-  public uploadedResume = this.userState.uploadedResumes();
 
-  insightsQuestionsSectionId = 'resume-insights-questions-section';
+  drawerOpen = signal<boolean>(false);
   private enrichmentAutoTriggered = signal(false);
+  private hasAutoOpenedDrawer = signal(false);
+
+  readonly atsCreditsRemaining = computed(() => {
+    const atsCredits = this.featureUsage().find((f) => f.feature === 'ats_score');
+    return atsCredits ? atsCredits.remaining ?? (atsCredits.allowed - atsCredits.used) : 0;
+  });
+
+  get showQuestionsBanner(): boolean {
+    const status = this.profileStateService.profileStatus();
+    if (!status) return false;
+    return status.questionsTotal > 0 && status.questionsAnswered < status.questionsTotal;
+  }
 
   ngOnInit(): void {
     this.initializeContent();
@@ -123,16 +124,53 @@ export class DashboardComponent implements OnInit {
 
   private startProfileStatusPolling(): void {
     let attempts = 0;
-    interval(POLL_INTERVAL_MS).pipe(
-      switchMap(() => this.profileQuestionsService.getProfileStatus()),
-      takeUntilDestroyed(this.destroyRef),
-      takeWhile((status) => {
-        attempts++;
-        this.profileStateService.setProfileStatus(status);
-        const done = status.processingStatus === 'completed' || status.processingStatus === 'failed' || attempts >= POLL_MAX_ATTEMPTS;
-        return !done;
-      }, true)
-    ).subscribe();
+    let prevProcessingStatus: string | null = null;
+
+    this.profileStateService.setPollingTimedOut(false);
+
+    interval(POLL_INTERVAL_MS)
+      .pipe(
+        switchMap(() => this.profileQuestionsService.getProfileStatus()),
+        takeUntilDestroyed(this.destroyRef),
+        takeWhile((status) => {
+          attempts++;
+
+          const justCompleted =
+            prevProcessingStatus === 'processing' &&
+            status.processingStatus === 'completed' &&
+            status.questionsTotal > 0 &&
+            !this.hasAutoOpenedDrawer();
+
+          if (justCompleted) {
+            this.hasAutoOpenedDrawer.set(true);
+            setTimeout(() => this.drawerOpen.set(true), 1000);
+          }
+
+          prevProcessingStatus = status.processingStatus;
+          this.profileStateService.setProfileStatus(status);
+
+          const timedOut =
+            attempts >= POLL_MAX_ATTEMPTS &&
+            status.processingStatus !== 'completed' &&
+            status.processingStatus !== 'failed';
+
+          if (timedOut) {
+            this.profileStateService.setPollingTimedOut(true);
+          }
+
+          const done =
+            status.processingStatus === 'completed' ||
+            status.processingStatus === 'failed' ||
+            attempts >= POLL_MAX_ATTEMPTS;
+          return !done;
+        }, true)
+      )
+      .subscribe();
+  }
+
+  onRetryProcessing(): void {
+    this.profileStateService.setPollingTimedOut(false);
+    this.startProfileStatusPolling();
   }
 
   onProfileUploadRequested(file: File): void {
@@ -161,18 +199,17 @@ export class DashboardComponent implements OnInit {
   }
 
   onScrollToQuestions(): void {
-    document.getElementById(this.insightsQuestionsSectionId)?.scrollIntoView({ behavior: 'smooth' });
+    this.drawerOpen.set(true);
   }
 
-  scrollToResumeHistory(): void {
-    document.getElementById('resume-history-section')?.scrollIntoView({ behavior: 'smooth' });
+  onDrawerClosed(): void {
+    this.drawerOpen.set(false);
   }
 
   private initializeContent(): void {
     this.refreshDashboardData();
   }
 
-  /** Loads feature usage, job applications, and recent resume history (single round-trip each). */
   private refreshDashboardData(): void {
     forkJoin([
       this.resumeService.getFeatureUsage().pipe(catchError(() => of([]))),
@@ -181,7 +218,7 @@ export class DashboardComponent implements OnInit {
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe(([feature, jobs]) => {
         this.jobHistory.set(jobs as AppliedJob | null);
-        this.featureUsage.set((feature as FeatureUsage[])?.length ? feature as FeatureUsage[] : []);
+        this.featureUsage.set((feature as FeatureUsage[])?.length ? (feature as FeatureUsage[]) : []);
       });
 
     this.loadResumeHistory();
@@ -192,7 +229,7 @@ export class DashboardComponent implements OnInit {
 
     if (typeof result === 'string') {
       if (result === 'scrollToQuestions') {
-        this.onScrollToQuestions();
+        this.drawerOpen.set(true);
       }
       return;
     }
@@ -200,7 +237,7 @@ export class DashboardComponent implements OnInit {
     if (typeof result === 'object') {
       const r = result as TailoringModalCloseResult;
       if (r.scrollToQuestions) {
-        this.onScrollToQuestions();
+        this.drawerOpen.set(true);
       }
       if (r.refreshDashboard) {
         this.refreshDashboardData();
@@ -210,13 +247,13 @@ export class DashboardComponent implements OnInit {
 
   private loadResumeHistory(): void {
     this.resumeHistoryLoading.set(true);
-    this.resumeService.getResumeHistory(5).pipe(
-      catchError(() => of([])),
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe((history) => {
-      this.resumeHistory.set(history);
-      this.resumeHistoryLoading.set(false);
-    });
+    this.resumeService
+      .getResumeHistory(5)
+      .pipe(catchError(() => of([])), takeUntilDestroyed(this.destroyRef))
+      .subscribe((history) => {
+        this.resumeHistory.set(history);
+        this.resumeHistoryLoading.set(false);
+      });
   }
 
   public openTailorModal(): void {
@@ -242,22 +279,18 @@ export class DashboardComponent implements OnInit {
   }
 
   public openResumeHistoryModal(): void {
-    this.modalService
-      .openModal(ResumeHistoryModalComponent, undefined, {
-        width: '680px',
-        maxWidth: '95vw',
-        panelClass: 'tailor-modal-panel',
-      });
+    this.modalService.openModal(ResumeHistoryModalComponent, undefined, {
+      width: '680px',
+      maxWidth: '95vw',
+      panelClass: 'tailor-modal-panel',
+    });
   }
 
   public downloadHistoryItem(item: ResumeHistoryItem): void {
     this.downloadingId.set(item.id);
-    this.resumeService.downloadResumeById(item.id).pipe(
-      takeUntilDestroyed(this.destroyRef)
-    ).subscribe({
+    this.resumeService.downloadResumeById(item.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (blob) => {
-        const filename = `${item.jobPosition ?? 'resume'}-${item.companyName ?? ''}.pdf`
-          .replace(/\s+/g, '-').toLowerCase();
+        const filename = `${item.jobPosition ?? 'resume'}-${item.companyName ?? ''}.pdf`.replace(/\s+/g, '-').toLowerCase();
         saveAs(blob, filename);
         this.downloadingId.set(null);
       },

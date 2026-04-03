@@ -4,6 +4,7 @@ import { map, Observable } from 'rxjs';
 import { API_ROUTES } from '@core/constants/api.constant';
 import { ApiResponse } from '@core/models/response/api-response.model';
 import {
+  EnhancedResumeDiff,
   ResumeDiff,
   ResumeDiffResponse,
 } from '@features/resume-tailoring/models/resume-diff.model';
@@ -14,7 +15,7 @@ import {
 export class ResumeDiffService {
   private readonly _http = inject(HttpClient);
 
-  getDiff(generationId: string): Observable<ResumeDiff | null> {
+  getDiff(generationId: string): Observable<ResumeDiff | EnhancedResumeDiff | null> {
     return this._http
       .get<ApiResponse<ResumeDiffResponse>>(
         API_ROUTES.createAPIRoute(

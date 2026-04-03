@@ -1,0 +1,583 @@
+// ============================================================================
+// Resume diff / changes summary — global UI (BEM: rd-*)
+// ============================================================================
+// Used by tailor-apply resume comparison and any future diff surfaces.
+
+@use 'design-tokens' as *;
+
+// ── Keyword highlight (innerHTML from sanitizer) ────────────────────────────
+
+.rd-kw-highlight {
+  display: inline;
+  background-color: #d1fae5;
+  color: #065f46;
+  border-radius: 3px;
+  padding: 0 2px;
+  font-style: normal;
+  font-weight: 500;
+}
+
+// ── Root layout ─────────────────────────────────────────────────────────────
+
+.rd-root {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+// ── Hero ────────────────────────────────────────────────────────────────────
+
+.rd-hero {
+  text-align: center;
+  padding: 0.25rem 0 0.5rem;
+}
+
+.rd-hero__eyebrow {
+  font-size: 0.625rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: $color-primary;
+  margin: 0 0 0.35rem;
+}
+
+.rd-hero__title {
+  font-size: 1.125rem;
+  font-weight: 700;
+  color: $color-foreground;
+  margin: 0;
+  line-height: 1.25;
+}
+
+.rd-hero__lead {
+  font-size: 0.75rem;
+  color: $color-muted-foreground;
+  margin: 0.35rem 0 0;
+  line-height: 1.45;
+  max-width: 22rem;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+// ── Sticky step navigation ──────────────────────────────────────────────────
+
+.rd-nav {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.375rem;
+  justify-content: center;
+  position: sticky;
+  top: 0;
+  z-index: 3;
+  margin: 0 -0.25rem;
+  padding: 0.5rem 0.25rem 0.625rem;
+  background: linear-gradient(
+    180deg,
+    hsl(210 40% 98%) 0%,
+    hsl(210 40% 98%) 55%,
+    hsl(210 40% 98% / 0) 100%
+  );
+}
+
+.rd-nav__btn {
+  appearance: none;
+  border: 1px solid $color-border;
+  background: $color-card;
+  color: $color-muted-foreground;
+  font-family: $font-family-base;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  padding: 0.35rem 0.65rem;
+  border-radius: 9999px;
+  cursor: pointer;
+  transition: border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+
+  &:hover {
+    border-color: $color-ring;
+    color: $color-foreground;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-ring;
+    outline-offset: 2px;
+  }
+}
+
+.rd-nav__btn--active {
+  border-color: $color-primary;
+  color: $color-primary;
+  background: hsl(221 83% 53% / 0.06);
+  box-shadow: 0 0 0 1px hsl(221 83% 53% / 0.12);
+}
+
+.rd-nav__num {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.125rem;
+  height: 1.125rem;
+  padding: 0 0.2rem;
+  font-size: 0.5625rem;
+  font-weight: 800;
+  border-radius: 9999px;
+  background: hsl(221 83% 53% / 0.12);
+  color: $color-primary;
+  margin-right: 0.3rem;
+  vertical-align: middle;
+}
+
+.rd-nav__btn--active .rd-nav__num {
+  background: $color-primary;
+  color: $color-primary-foreground;
+}
+
+// ── Scroll region ───────────────────────────────────────────────────────────
+
+.rd-scroll {
+  max-height: min(52vh, 440px);
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding-right: 4px;
+  scroll-behavior: smooth;
+
+  // Firefox
+  scrollbar-width: thin;
+  scrollbar-color: #cbd5e1 transparent;
+}
+
+.rd-timeline {
+  display: flex;
+  flex-direction: column;
+  gap: 1.125rem;
+}
+
+// ── Timeline step (marker + card) ───────────────────────────────────────────
+
+.rd-step {
+  display: grid;
+  grid-template-columns: 2.5rem minmax(0, 1fr);
+  gap: 0.75rem;
+  align-items: start;
+}
+
+.rd-step__marker {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding-top: 0.125rem;
+
+  &::after {
+    content: '';
+    position: absolute;
+    top: 2.125rem;
+    bottom: -1.125rem;
+    left: 50%;
+    width: 2px;
+    margin-left: -1px;
+    background: $color-border;
+    border-radius: 1px;
+  }
+}
+
+// Last timeline step only (footnote or other siblings may follow the last step host).
+.rd-timeline > app-diff-step-shell:last-of-type .rd-step__marker::after {
+  display: none;
+}
+
+.rd-step__number {
+  position: relative;
+  z-index: 1;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9999px;
+  background: linear-gradient(145deg, $color-primary 0%, hsl(221 83% 45%) 100%);
+  color: $color-primary-foreground;
+  font-size: 0.75rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  box-shadow: 0 2px 10px hsl(221 83% 53% / 0.28);
+}
+
+.rd-step__card {
+  background: $color-card;
+  border: 1px solid $color-border;
+  border-radius: $radius-lg;
+  padding: 0.875rem 1rem;
+  box-shadow: $shadow-xs;
+  min-width: 0;
+}
+
+.rd-step__header {
+  margin-bottom: 0.625rem;
+}
+
+.rd-step__title {
+  font-size: 0.8125rem;
+  font-weight: 700;
+  color: $color-foreground;
+  margin: 0;
+  line-height: 1.3;
+}
+
+.rd-step__subtitle {
+  font-size: 0.6875rem;
+  color: $color-muted-foreground;
+  margin: 0.2rem 0 0;
+  line-height: 1.4;
+}
+
+.rd-step__body {
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: $color-foreground;
+}
+
+// ── Metric tiles (overview) ─────────────────────────────────────────────────
+
+.rd-metric-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 0.5rem;
+  margin-bottom: 0.75rem;
+}
+
+.rd-metric {
+  text-align: center;
+  padding: 0.625rem 0.35rem;
+  border-radius: $radius-md;
+  background: hsl(214 32% 96%);
+  border: 1px solid $color-border;
+}
+
+.rd-metric__value {
+  display: block;
+  font-size: 1.375rem;
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.02em;
+}
+
+.rd-metric__label {
+  display: block;
+  font-size: 0.5625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $color-muted-foreground;
+  margin-top: 0.25rem;
+}
+
+.rd-metric--blue .rd-metric__value   { color: hsl(221 83% 53%); }
+.rd-metric--emerald .rd-metric__value { color: #059669; }
+.rd-metric--indigo .rd-metric__value  { color: #4f46e5; }
+
+// ── Coverage bars ───────────────────────────────────────────────────────────
+
+.rd-coverage-row {
+  margin-bottom: 0.75rem;
+
+  &:last-of-type {
+    margin-bottom: 0;
+  }
+}
+
+.rd-coverage-label {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  margin-bottom: 0.25rem;
+}
+
+.rd-coverage-label__text {
+  font-size: 0.625rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $color-muted-foreground;
+}
+
+.rd-coverage-label__pct {
+  font-size: 0.6875rem;
+  font-weight: 700;
+  color: $color-foreground;
+}
+
+.rd-coverage-track {
+  position: relative;
+  height: 6px;
+  border-radius: 9999px;
+  background: hsl(214 32% 96%);
+  overflow: hidden;
+}
+
+.rd-coverage-fill {
+  position: absolute;
+  inset: 0 auto 0 0;
+  height: 100%;
+  border-radius: 9999px;
+  transition: width 0.75s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.rd-coverage-fill--before {
+  background: #94a3b8;
+}
+
+.rd-coverage-fill--after {
+  background: #10b981;
+}
+
+.rd-tag-group__label {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  margin: 0.5rem 0 0.35rem;
+
+  &--added {
+    color: #059669;
+  }
+
+  &--missing {
+    color: #b45309;
+  }
+}
+
+.rd-tag-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem;
+}
+
+.rd-tag--amber {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.125rem 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  background: #fffbeb;
+  border: 1px solid #fde68a;
+  color: #b45309;
+}
+
+// ── Change badges (global modifiers) ────────────────────────────────────────
+
+.rd-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.0625rem 0.5rem;
+  font-size: 0.625rem;
+  font-weight: 700;
+  line-height: 1.5;
+  white-space: nowrap;
+}
+
+.rd-badge--modified  { background: #d1fae5; color: #065f46; }
+.rd-badge--added     { background: #dbeafe; color: #1d4ed8; }
+.rd-badge--removed   { background: #fee2e2; color: #b91c1c; }
+.rd-badge--unchanged { background: #f1f5f9; color: #64748b; }
+
+// ── Content blocks ──────────────────────────────────────────────────────────
+
+.rd-block-label {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #059669;
+  margin: 0 0 0.35rem;
+}
+
+.rd-prose {
+  font-size: 0.75rem;
+  line-height: 1.55;
+  color: $color-foreground;
+  margin: 0;
+  white-space: pre-line;
+}
+
+.rd-toggle-original {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+  margin-top: 0.5rem;
+  padding: 0;
+  border: none;
+  background: none;
+  font-family: $font-family-base;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  color: $color-muted-foreground;
+  cursor: pointer;
+  transition: color 0.15s ease;
+
+  &:hover {
+    color: $color-foreground;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-ring;
+    outline-offset: 2px;
+    border-radius: 4px;
+  }
+
+  svg {
+    flex-shrink: 0;
+    transition: transform 0.2s ease;
+  }
+
+  &--open svg {
+    transform: rotate(180deg);
+  }
+}
+
+.rd-original {
+  margin-top: 0.5rem;
+  padding: 0.625rem 0.75rem;
+  border-radius: $radius-md;
+  background: hsl(210 40% 98%);
+  border: 1px solid $color-border;
+}
+
+.rd-original__label {
+  font-size: 0.5625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: $color-muted-foreground;
+  margin: 0 0 0.35rem;
+}
+
+.rd-original__text {
+  font-size: 0.6875rem;
+  line-height: 1.55;
+  color: $color-muted-foreground;
+  margin: 0;
+  white-space: pre-line;
+}
+
+// ── Experience bullets ───────────────────────────────────────────────────────
+
+.rd-bullet {
+  padding: 0.5rem 0 0.5rem 0.625rem;
+  border-left: 2px solid transparent;
+  margin-bottom: 0.75rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.rd-bullet--modified { border-left-color: #10b981; }
+.rd-bullet--added    { border-left-color: #3b82f6; }
+.rd-bullet--removed  { border-left-color: #ef4444; }
+
+.rd-bullet__meta {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.35rem;
+  margin-bottom: 0.35rem;
+}
+
+.rd-bullet__hint {
+  font-size: 0.625rem;
+  color: $color-muted-foreground;
+}
+
+// ── Skills category ─────────────────────────────────────────────────────────
+
+.rd-skill-cat {
+  margin-bottom: 0.625rem;
+
+  &:last-child {
+    margin-bottom: 0;
+  }
+}
+
+.rd-skill-cat__name {
+  font-size: 0.625rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  color: $color-muted-foreground;
+  margin: 0 0 0.35rem;
+  text-transform: capitalize;
+}
+
+// ── Footnote / notice ───────────────────────────────────────────────────────
+
+.rd-footnote {
+  display: flex;
+  gap: 0.5rem;
+  align-items: flex-start;
+  padding: 0.625rem 0.75rem;
+  border-radius: $radius-md;
+  background: hsl(214 32% 96%);
+  border: 1px solid $color-border;
+  font-size: 0.6875rem;
+  color: $color-muted-foreground;
+  line-height: 1.45;
+
+  strong {
+    color: $color-foreground;
+    font-weight: 600;
+  }
+}
+
+// ── States: loading / error ─────────────────────────────────────────────────
+
+.rd-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  padding: 2.5rem 1rem;
+  gap: 0.75rem;
+}
+
+.rd-state__text {
+  font-size: 0.8125rem;
+  color: $color-muted-foreground;
+  margin: 0;
+}
+
+// ── Footer actions ──────────────────────────────────────────────────────────
+
+.rd-footer {
+  padding-top: 0.25rem;
+}
+
+.rd-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.375rem;
+  width: 100%;
+  justify-content: center;
+  font-family: $font-family-base;
+  font-size: 0.8125rem;
+  font-weight: 600;
+  color: $color-foreground;
+  padding: 0.625rem 1rem;
+  border-radius: $radius-md;
+  border: 1px solid $color-border;
+  background: $color-card;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease;
+
+  &:hover {
+    background: hsl(214 32% 96%);
+    border-color: #cbd5e1;
+  }
+
+  &:focus-visible {
+    outline: 2px solid $color-ring;
+    outline-offset: 2px;
+  }
+}

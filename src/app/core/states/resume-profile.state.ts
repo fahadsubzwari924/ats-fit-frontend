@@ -9,8 +9,10 @@ import {
 })
 export class ResumeProfileState {
   private _profileStatus = signal<ResumeProfileStatus | null>(null);
+  private _pollingTimedOut = signal<boolean>(false);
 
   readonly profileStatus = this._profileStatus.asReadonly();
+  readonly pollingTimedOut = this._pollingTimedOut.asReadonly();
 
   readonly profileState = computed<ProfileState>(() => {
     const s = this._profileStatus();
@@ -51,6 +53,10 @@ export class ResumeProfileState {
     this._profileStatus.set(status);
   }
 
+  setPollingTimedOut(timedOut: boolean): void {
+    this._pollingTimedOut.set(timedOut);
+  }
+
   /** Update local state after answering/skipping a question (optimistic or after API) */
   updateQuestionAnswered(answeredCount: number, profileCompleteness: number): void {
     this._profileStatus.update((prev) => {
@@ -73,5 +79,6 @@ export class ResumeProfileState {
 
   reset(): void {
     this._profileStatus.set(null);
+    this._pollingTimedOut.set(false);
   }
 }

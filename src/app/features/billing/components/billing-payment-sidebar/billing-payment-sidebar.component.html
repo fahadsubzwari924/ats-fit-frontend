@@ -1,0 +1,51 @@
+<div class="billing-stack billing-stack--sm">
+  <div class="billing-secure-panel">
+    <div class="billing-secure-panel__head">
+      <div class="billing-secure-panel__icon">
+        <svg class="billing-svg-icon billing-svg-icon--md billing-svg-icon--white-80" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="2" aria-hidden="true">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+        </svg>
+      </div>
+      <h3 class="billing-secure-panel__title">Secure Payments</h3>
+    </div>
+    <ul class="billing-secure-panel__list">
+      <li class="billing-secure-panel__li">
+        <svg class="billing-svg-icon billing-svg-icon--sm billing-svg-icon--check-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <path d="m9 11 3 3L22 4" />
+        </svg>
+        256-bit SSL encryption
+      </li>
+      <li class="billing-secure-panel__li">
+        <svg class="billing-svg-icon billing-svg-icon--sm billing-svg-icon--check-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <path d="m9 11 3 3L22 4" />
+        </svg>
+        PCI DSS compliant processing
+      </li>
+      <li class="billing-secure-panel__li">
+        <svg class="billing-svg-icon billing-svg-icon--sm billing-svg-icon--check-green" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+          <path d="m9 11 3 3L22 4" />
+        </svg>
+        No card details stored on our servers
+      </li>
+    </ul>
+  </div>
+
+  <div class="billing-notice-card">
+    <div class="billing-notice-card__head">
+      <svg class="billing-svg-icon billing-svg-icon--md billing-svg-icon--amber" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" />
+        <line x1="12" x2="12" y1="8" y2="12" />
+        <line x1="12" x2="12.01" y1="16" y2="16" />
+      </svg>
+      <h3 class="billing-notice-card__title">Auto-Renewal</h3>
+    </div>
+    <p class="billing-notice-card__text">
+      Your subscription auto-renews on <strong>{{ renewalDateLabel() }}</strong>. The default card ending in
+      <strong>{{ defaultCardLast4() }}</strong> will be charged <strong>{{ nextChargeAmount() }}</strong>.
+    </p>
+    <button type="button" class="billing-btn--danger-text" (click)="cancelAutoRenewal.emit()">Cancel auto-renewal</button>
+  </div>
+</div>

@@ -1,59 +1,85 @@
 @let g = group();
-<div class="rounded-xl border transition-all duration-200"
-  [ngClass]="isGroupComplete(g) ? 'bg-emerald-50/50 border-emerald-200' : 'bg-white border-slate-200'">
-  <button type="button" (click)="toggle()" class="w-full text-left">
-    <div class="flex items-center justify-between p-3">
-      <div class="flex items-center gap-3">
-        <div class="w-8 h-8 rounded-lg flex items-center justify-center flex-shrink-0"
-          [ngClass]="isGroupComplete(g) ? 'bg-gradient-to-br from-emerald-500 to-teal-500' : 'bg-gradient-to-br from-slate-400 to-slate-500'">
-          @if (isGroupComplete(g)) {
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white">
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-          } @else {
-            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-white">
-              <path d="M3 21h18"></path>
-              <path d="M5 21V7l8-4v18"></path>
-              <path d="M19 21V11l-6-4"></path>
-            </svg>
-          }
-        </div>
-        <div>
-          <p class="text-sm font-medium text-slate-900">{{ g.companyName }}</p>
-          @if (g.jobTitle) {
-            <p class="text-xs text-slate-500">{{ g.jobTitle }}</p>
-          }
-        </div>
-      </div>
+<div
+  class="bg-[#FAFBFC] rounded-2xl border border-[#E2E8F0] overflow-hidden"
+  [attr.data-testid]="'company-card-' + g.companyName">
+
+  <!-- ── Company header (accordion trigger) ───────────────────────────── -->
+  <button
+    type="button"
+    class="w-full px-4 py-3 border-b border-[#F1F5F9] flex items-center gap-3 text-left cursor-pointer hover:bg-[#F1F5F9]/60 transition-colors focus:outline-none focus-visible:ring-2 focus-visible:ring-[#2563EB] focus-visible:ring-inset"
+    (click)="toggleExpanded()"
+    [attr.aria-expanded]="isExpanded()"
+    [attr.aria-controls]="'eqg-panel-' + g.workExperienceIndex">
+    <!-- Color avatar -->
+    <div
+      class="w-8 h-8 rounded-xl flex items-center justify-center flex-shrink-0 text-white text-[12px] font-bold pointer-events-none"
+      [style.background]="companyColor()">
+      {{ g.companyName.charAt(0) }}
+    </div>
+
+    <!-- Company info -->
+    <div class="flex-1 min-w-0 pointer-events-none">
       <div class="flex items-center gap-2">
-        <span class="inline-flex items-center rounded-full border px-2 py-0.5 text-xs font-medium"
-          [ngClass]="isGroupComplete(g) ? 'bg-emerald-100 text-emerald-700' : 'bg-slate-100 text-slate-600'">
-          {{ companyAnswered(g) }}/{{ companyTotal(g) }}
+        <h3 class="font-semibold text-[13px] text-[#0F172A]">{{ g.companyName }}</h3>
+        <!-- Progress pill -->
+        <span
+          class="text-[10px] font-bold px-1.5 py-0.5 rounded-full uppercase"
+          [style.letterSpacing]="'0.05em'"
+          [style.background]="companyColor() + '15'"
+          [style.color]="companyColor()">
+          {{ companyAnsweredCount() }}/{{ companyTotalCount() }}
         </span>
-        @if (expanded()) {
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-slate-400">
-            <polyline points="18 15 12 9 6 15"></polyline>
-          </svg>
-        } @else {
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="text-slate-400">
-            <polyline points="6 9 12 15 18 9"></polyline>
-          </svg>
+      </div>
+      <div class="flex items-center gap-3 mt-0.5">
+        @if (g.jobTitle) {
+          <span class="flex items-center gap-1 text-[11px] text-[#64748B]">
+            <!-- Briefcase icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="20" height="14" x="2" y="7" rx="2"/><path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"/>
+            </svg>
+            {{ g.jobTitle }}
+          </span>
+        }
+        @if (period()) {
+          <span class="flex items-center gap-1 text-[11px] text-[#94A3B8]">
+            <!-- Calendar icon -->
+            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <rect width="18" height="18" x="3" y="4" rx="2" ry="2"/><line x1="16" x2="16" y1="2" y2="6"/><line x1="8" x2="8" y1="2" y2="6"/><line x1="3" x2="21" y1="10" y2="10"/>
+            </svg>
+            {{ period() }}
+          </span>
         }
       </div>
     </div>
+
+    <span class="flex-shrink-0 text-[#94A3B8] eqg-chevron" [class.eqg-chevron--open]="isExpanded()" aria-hidden="true">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="m6 9 6 6 6-6"/>
+      </svg>
+    </span>
   </button>
-  @if (expanded()) {
-    <div class="px-3 pb-3 space-y-3">
-      @for (q of g.questions; track q.id) {
-        <app-profile-question-item
-          [question]="q"
-          [isEditing]="isEditing(q)"
-          (saveAnswer)="onSaveAnswer($event)"
-          (skipQuestion)="onSkipQuestion($event)"
-          (startEdit)="onStartEdit(q.id)"
-          (cancelEdit)="onCancelEdit()">
-        </app-profile-question-item>
-      }
+
+  <!-- ── Questions list (collapsible) ────────────────────────────────── -->
+  <div
+    class="eqg-panel"
+    [class.eqg-panel--open]="isExpanded()"
+    [id]="'eqg-panel-' + g.workExperienceIndex"
+    role="region"
+    [attr.aria-label]="g.companyName + ' questions'">
+    <div class="eqg-panel-inner">
+      <div class="p-3 space-y-2.5">
+        @for (q of g.questions; track q.id) {
+          <app-profile-question-item
+            [question]="q"
+            [isEditing]="isEditing(q)"
+            (saveAnswer)="onSaveAnswer($event)"
+            (skipQuestion)="onSkipQuestion($event)"
+            (startEdit)="onStartEdit(q.id)"
+            (cancelEdit)="onCancelEdit()">
+          </app-profile-question-item>
+        }
+      </div>
     </div>
-  }
+  </div>
+
 </div>

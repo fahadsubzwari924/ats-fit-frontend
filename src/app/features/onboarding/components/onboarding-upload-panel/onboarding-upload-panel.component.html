@@ -1,0 +1,84 @@
+<div class="upload-panel">
+  <!-- Back -->
+  <div class="upload-panel__back anim-fade">
+    <button class="upload-panel__back-btn" (click)="back.emit()" type="button">
+      &larr; Back to options
+    </button>
+  </div>
+
+  <!-- Heading -->
+  <div class="upload-panel__heading anim-float">
+    <h1 class="upload-panel__title">
+      Upload your<br />resume
+    </h1>
+    <p class="upload-panel__subtitle">
+      Analyzed once, used for every future tailoring session. Analysis runs in the background —
+      you go straight to your dashboard.
+    </p>
+  </div>
+
+  <!-- Drop zone -->
+  <div
+    class="upload-panel__dropzone anim-float2"
+    [class.upload-panel__dropzone--active]="isDragging()"
+    (dragover)="onDragOver($event)"
+    (dragleave)="onDragLeave()"
+    (drop)="onDrop($event)"
+    (click)="openFilePicker()"
+    role="button"
+    tabindex="0"
+    (keydown.enter)="openFilePicker()"
+    aria-label="Upload resume file"
+  >
+    <div class="upload-panel__icon-wrap" [class.upload-panel__icon-wrap--active]="isDragging()">
+      <span class="upload-panel__icon">&#8679;</span>
+    </div>
+
+    <p class="upload-panel__drop-title">
+      {{ isDragging() ? 'Release to upload' : 'Drop your resume here' }}
+    </p>
+    <p class="upload-panel__drop-sub">or click to browse from your computer</p>
+
+    <div class="upload-panel__formats">
+      <span>PDF</span>
+      <span class="upload-panel__formats-divider"></span>
+      <span>Word (.docx)</span>
+      <span class="upload-panel__formats-divider"></span>
+      <span>Max 5 MB</span>
+    </div>
+
+    <input
+      #fileInput
+      type="file"
+      accept=".pdf,.docx"
+      class="upload-panel__file-input"
+      (change)="onFileInputChange($event)"
+    />
+  </div>
+
+  <!-- Validation error -->
+  @if (validationError()) {
+    <p class="upload-panel__error">{{ validationError() }}</p>
+  }
+
+  <!-- Trust signals -->
+  <div class="upload-panel__signals anim-float3">
+    <div class="upload-panel__signal">
+      <span class="upload-panel__signal-icon">&#9650;</span>
+      <span>3&times; better match</span>
+    </div>
+    <div class="upload-panel__signal">
+      <span class="upload-panel__signal-icon">&#9201;</span>
+      <span>Background analysis</span>
+    </div>
+    <div class="upload-panel__signal">
+      <span class="upload-panel__signal-icon">&#10003;</span>
+      <span>Go to dashboard instantly</span>
+    </div>
+  </div>
+
+  <!-- Skip -->
+  <button class="upload-panel__skip" (click)="skip.emit()" type="button">
+    Skip — I'll upload from the dashboard later
+  </button>
+</div>

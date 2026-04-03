@@ -1,3 +1,30 @@
 :host {
   display: block;
 }
+
+/* Accordion body: keep rounded card look; animate height without changing outer box */
+.eqg-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.22s ease-out;
+}
+
+.eqg-panel--open {
+  grid-template-rows: 1fr;
+}
+
+.eqg-panel-inner {
+  overflow: hidden;
+  min-height: 0;
+}
+
+.eqg-chevron {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease-out;
+}
+
+.eqg-chevron--open {
+  transform: rotate(180deg);
+}

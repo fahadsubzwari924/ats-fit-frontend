@@ -1,0 +1,89 @@
+<div class="billing-card">
+  <div class="billing-card__head">
+    <h2 class="billing-card__title">Current Plan</h2>
+    <span class="billing-pill billing-pill--active">
+      <svg class="billing-svg-icon billing-svg-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14" />
+        <path d="m9 11 3 3L22 4" />
+      </svg>
+      Active
+    </span>
+  </div>
+  <div class="billing-card__body">
+    <div class="billing-current-plan__row">
+      <div>
+        @if (showPremiumSkin()) {
+          <div class="billing-pill billing-pill--premium">
+            <svg class="billing-svg-icon" style="width:0.75rem;height:0.75rem" viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M11.525 2.295a.53.53 0 0 1 .95 0l2.31 4.679a2.123 2.123 0 0 0 1.595 1.16l5.166.756a.53.53 0 0 1 .294.904l-3.736 3.638a2.123 2.123 0 0 0-.611 1.878l.882 5.14a.53.53 0 0 1-.771.56l-4.618-2.428a2.122 2.122 0 0 0-1.973 0L6.396 21.01a.53.53 0 0 1-.77-.56l.881-5.139a2.122 2.122 0 0 0-.611-1.879L2.16 9.795a.53.53 0 0 1 .294-.906l5.165-.755a2.122 2.122 0 0 0 1.597-1.16z" />
+            </svg>
+            {{ planLabel() }}
+          </div>
+        } @else {
+          <div class="billing-pill billing-pill--plan-name">{{ planLabel() }}</div>
+        }
+        <p class="billing-current-plan__price">{{ priceMain() }}<span>{{ pricePeriod() }}</span></p>
+        <p class="billing-current-plan__renew">{{ renewSummary() }}</p>
+      </div>
+      @if (daysRemainingLabel()) {
+        <div class="billing-current-plan__countdown">
+          <div class="billing-current-plan__countdown-row">
+            <svg class="billing-svg-icon billing-svg-icon--sm billing-svg-icon--muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M8 2v4" />
+              <path d="M16 2v4" />
+              <rect width="18" height="18" x="3" y="4" rx="2" />
+              <path d="M3 10h18" />
+            </svg>
+            <span>{{ daysRemainingLabel() }}</span>
+          </div>
+          <div class="billing-current-plan__progress-track">
+            <div class="billing-current-plan__progress-fill" [style.width.%]="renewalProgressPct()"></div>
+          </div>
+        </div>
+      }
+    </div>
+
+    <div class="billing-feature-grid">
+      @for (f of features(); track f) {
+        <div class="billing-feature-grid__item">
+          <span class="billing-feature-grid__check">
+            <svg class="billing-svg-icon billing-svg-icon--check-green" style="width:0.625rem;height:0.625rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          </span>
+          {{ f }}
+        </div>
+      }
+    </div>
+
+    <div class="billing-current-plan__actions">
+      <button type="button" class="billing-btn billing-btn--primary" (click)="upgradeEnterprise.emit()">
+        <svg class="billing-svg-icon billing-svg-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
+        </svg>
+        Upgrade to Enterprise
+      </button>
+      <button type="button" class="billing-btn billing-btn--secondary" (click)="changePlan.emit()">
+        <svg class="billing-svg-icon billing-svg-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
+          <path d="M21 3v5h-5" />
+          <path d="M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16" />
+          <path d="M8 16H3v5" />
+        </svg>
+        Change Plan
+      </button>
+    </div>
+  </div>
+
+  <div class="billing-card__foot">
+    <div class="billing-foot-note">
+      <svg class="billing-svg-icon billing-svg-icon--sm billing-svg-icon--muted" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="12" cy="12" r="10" />
+        <path d="M12 16v-4" />
+        <path d="M12 8h.01" />
+      </svg>
+      <span>{{ autoRenewNote() }} @if (nextChargeAmount()) { · Next charge <strong>{{ nextChargeAmount() }}</strong> }</span>
+    </div>
+    <button type="button" class="billing-btn--danger-text" (click)="cancelPlan.emit()">Cancel plan</button>
+  </div>
+</div>

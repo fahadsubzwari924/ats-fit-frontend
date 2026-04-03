@@ -1,0 +1,46 @@
+<div
+  class="billing-plan-offer"
+  [class.billing-plan-offer--current]="isCurrent()"
+  [style.--billing-plan-accent]="accentColor()">
+  @if (isCurrent()) {
+    <div class="billing-plan-offer__ribbon">
+      <span class="billing-plan-offer__ribbon-text">Your current plan</span>
+    </div>
+  }
+  <div class="billing-plan-offer__body">
+    <div class="billing-plan-offer__head">
+      <div class="billing-plan-offer__icon-wrap">
+        <svg class="billing-svg-icon billing-svg-icon--sm" viewBox="0 0 24 24" fill="none" stroke="var(--billing-plan-accent)" stroke-width="2" aria-hidden="true">
+          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
+        </svg>
+      </div>
+      <span class="billing-plan-offer__name">{{ plan().planName }}</span>
+    </div>
+    <p class="billing-plan-offer__price">
+      {{ displayPrice() }}<span>{{ periodSuffix() }}</span>
+    </p>
+    <ul class="billing-plan-offer__features">
+      @for (f of plan().features; track f) {
+        <li class="billing-plan-offer__feature">
+          <span class="billing-plan-offer__feature-dot">
+            <svg class="billing-svg-icon" style="width:0.5rem;height:0.5rem" viewBox="0 0 24 24" fill="none" stroke="var(--billing-plan-accent)" stroke-width="3" aria-hidden="true">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+          </span>
+          {{ f }}
+        </li>
+      }
+    </ul>
+    @if (isCurrent()) {
+      <button type="button" class="billing-plan-offer__btn billing-plan-offer__btn--disabled" disabled>Current Plan</button>
+    } @else {
+      <button type="button" class="billing-plan-offer__btn billing-plan-offer__btn--accent" (click)="onClick()">
+        {{ buttonLabel() }}
+        <svg class="billing-svg-icon billing-svg-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M5 12h14" />
+          <path d="m12 5 7 7-7 7" />
+        </svg>
+      </button>
+    }
+  </div>
+</div>
