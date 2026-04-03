@@ -1,0 +1,12 @@
+<nav class="rd-nav" aria-label="Walk through changes">
+  @for (s of steps(); track s.id) {
+    <button
+      type="button"
+      class="rd-nav__btn"
+      [class.rd-nav__btn--active]="activeId() === s.id"
+      (click)="navigate.emit(s.id)">
+      <span class="rd-nav__num" aria-hidden="true">{{ s.stepIndex }}</span>
+      {{ s.label }}
+    </button>
+  }
+</nav>

@@ -76,10 +76,13 @@
         } @else {
           <!-- Employer groups -->
           <div class="space-y-3">
-            @for (g of groups(); track g.workExperienceIndex) {
+            @for (g of groups(); track g.workExperienceIndex; let i = $index) {
               <app-employer-question-group
                 [group]="g"
+                [groupIndex]="i"
+                [expanded]="expandedIndex() === i"
                 [editingQuestionId]="editingQuestionId()"
+                (toggled)="onGroupToggled(i)"
                 (saveAnswer)="onSaveAnswer($event)"
                 (skipQuestion)="onSkipQuestion($event)"
                 (startEdit)="onStartEdit($event)"

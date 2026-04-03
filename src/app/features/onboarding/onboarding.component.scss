@@ -1,0 +1,19 @@
+// The onboarding container must fill the viewport on its own (no LayoutComponent).
+:host {
+  display: block;
+  min-height: 100vh;
+}
+
+.onboarding-layout {
+  display: flex;
+  min-height: 100vh;
+
+  &__right {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    background: #fff;
+    overflow-y: auto;
+    min-height: 100vh;
+  }
+}

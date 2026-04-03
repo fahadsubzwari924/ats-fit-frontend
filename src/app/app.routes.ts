@@ -1,5 +1,6 @@
 import { Routes } from '@angular/router';
 import { authGuard } from '@core/guards/auth.guard';
+import { onboardingGuard } from '@core/guards/onboarding.guard';
 import { publicGuard } from '@core/guards/public.guard';
 import { LayoutComponent } from '@root/layout/layout.component';
 
@@ -20,7 +21,7 @@ export const routes: Routes = [
   {
     path: '',
     component: LayoutComponent,
-    canActivate: [authGuard],
+    canActivate: [authGuard, onboardingGuard],
     children: [
       {
         path: 'dashboard',
@@ -34,6 +35,11 @@ export const routes: Routes = [
         loadComponent: () => import('@features/billing/billing.component').then(m => m.BillingComponent)
       }
     ]
+  },
+  {
+    path: 'onboarding',
+    canActivate: [authGuard],
+    loadComponent: () => import('@features/onboarding/onboarding.component').then(m => m.OnboardingComponent)
   },
   // Auth pages (only accessible when not logged in)
   {

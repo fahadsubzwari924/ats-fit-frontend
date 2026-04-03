@@ -1,0 +1,44 @@
+<div class="billing-stack billing-stack--sm">
+  <div class="billing-card">
+    <div class="billing-card__head">
+      <h2 class="billing-card__title">Payment Method</h2>
+    </div>
+    <div class="billing-card__body">
+      <div class="billing-history-pm__row">
+        <div class="billing-history-pm__visual">
+          <svg class="billing-svg-icon billing-svg-icon--sm billing-svg-icon--white-80" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <rect width="20" height="14" x="2" y="5" rx="2" />
+            <line x1="2" x2="22" y1="10" y2="10" />
+          </svg>
+        </div>
+        <div>
+          <p class="billing-table-row__title">{{ cardBrand() }} •••• {{ cardLast4() }}</p>
+          <p class="billing-pm-row__exp">Expires {{ cardExpiry() }} · Default</p>
+        </div>
+      </div>
+      <a routerLink="/billing" [queryParams]="{ tab: 'payment' }" class="billing-router-link">Manage payment methods →</a>
+    </div>
+  </div>
+
+  <div class="billing-cycle-card">
+    <h3 class="billing-cycle-card__title">Billing cycle</h3>
+    <div class="billing-cycle-card__rows">
+      <div class="billing-cycle-card__row">
+        <span class="billing-cycle-card__k">Plan</span>
+        <span class="billing-cycle-card__v">{{ planLabel() }}</span>
+      </div>
+      <div class="billing-cycle-card__row">
+        <span class="billing-cycle-card__k">Amount</span>
+        <span class="billing-cycle-card__v">{{ amountLabel() }}</span>
+      </div>
+      <div class="billing-cycle-card__row">
+        <span class="billing-cycle-card__k">Next charge</span>
+        <span class="billing-cycle-card__v">{{ nextCharge() || renewalDateLabel() || '—' }}</span>
+      </div>
+      <div class="billing-cycle-card__row">
+        <span class="billing-cycle-card__k">Payment</span>
+        <span class="billing-cycle-card__v">{{ cardBrand() }} •••• {{ cardLast4() }}</span>
+      </div>
+    </div>
+  </div>
+</div>

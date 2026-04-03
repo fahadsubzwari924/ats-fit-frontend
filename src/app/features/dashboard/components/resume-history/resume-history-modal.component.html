@@ -171,6 +171,33 @@
                             · {{ getDetail(item.id)!.changesDiff!.sectionsChanged }} sections
                           </span>
                         </div>
+
+                        <!-- Enhanced diff (version 2): show keyword coverage -->
+                        @if (getDetail(item.id)!.changesDiff!.version === 2 && getDetail(item.id)!.changesDiff!.keywordAnalysis) {
+                          <div class="mb-2 space-y-1">
+                            <div class="flex items-center justify-between text-[10px]">
+                              <span class="text-slate-500">Keyword coverage</span>
+                              <span class="font-semibold text-emerald-600">
+                                {{ getDetail(item.id)!.changesDiff!.keywordAnalysis!.coverageOriginal }}%
+                                → {{ getDetail(item.id)!.changesDiff!.keywordAnalysis!.coverageOptimized }}%
+                              </span>
+                            </div>
+                            <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+                              <div class="h-full bg-emerald-500 rounded-full"
+                                [style.width]="getDetail(item.id)!.changesDiff!.keywordAnalysis!.coverageOptimized + '%'">
+                              </div>
+                            </div>
+                            @if (getDetail(item.id)!.changesDiff!.keywordAnalysis!.newlyAdded.length) {
+                              <div class="flex flex-wrap gap-1 pt-0.5">
+                                @for (kw of getDetail(item.id)!.changesDiff!.keywordAnalysis!.newlyAdded.slice(0, 5); track kw) {
+                                  <span class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[10px] font-medium">+{{ kw }}</span>
+                                }
+                              </div>
+                            }
+                          </div>
+                        }
+
+                        <!-- Section-level changes list (works for both legacy and enhanced) -->
                         <div class="space-y-1.5">
                           @for (change of getDetail(item.id)!.changesDiff!.changes.slice(0, 3); track $index) {
                             @if (change.changeType !== 'unchanged') {
@@ -186,6 +213,12 @@
                             }
                           }
                         </div>
+                      </div>
+                    } @else {
+                      <!-- Computing state for recently generated resumes -->
+                      <div class="bg-slate-50 rounded-xl border border-slate-200/70 p-3 flex items-center gap-2">
+                        <div class="w-3.5 h-3.5 border border-indigo-400 border-t-transparent rounded-full animate-spin shrink-0"></div>
+                        <span class="text-[11px] text-slate-500">Changes analysis computing...</span>
                       </div>
                     }
 

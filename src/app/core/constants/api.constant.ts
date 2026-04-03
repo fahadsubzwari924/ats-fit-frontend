@@ -24,6 +24,7 @@ export const API_ROUTES = {
     DELETE_RESUME: 'users/delete-resume',
     FEATURE_USAGE: 'users/feature-usage',
     RESUME_PROFILE_STATUS: 'users/resume-profile-status',
+    ONBOARDING_COMPLETE: 'users/onboarding/complete',
   },
   PROFILE: {
     QUESTIONS: 'resume-tailoring/profile-questions',

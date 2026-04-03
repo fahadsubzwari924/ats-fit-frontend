@@ -1,0 +1,14 @@
+<div class="rd-step__marker" [attr.id]="anchorId()">
+  <span class="rd-step__number">{{ stepIndex() }}</span>
+</div>
+<div class="rd-step__card">
+  <header class="rd-step__header">
+    <h3 class="rd-step__title">{{ title() }}</h3>
+    @if (subtitle(); as sub) {
+      <p class="rd-step__subtitle">{{ sub }}</p>
+    }
+  </header>
+  <div class="rd-step__body">
+    <ng-content />
+  </div>
+</div>

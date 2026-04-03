@@ -7,50 +7,66 @@
 @use '@angular/material';
 @use './scss/buttons';
 @use './scss/components';
+@use './scss/billing';
+@use './scss/app-header';
 @use './scss/toast';
+@use './scss/resume-diff';
 
 // ============================================================================
-// Tailwind v4 Theme — semantic colors from the React prototype design system
+// Tailwind v4 Theme — aligned with the React prototype (index.css)
 // ============================================================================
 
 @theme {
   /* Surface & text */
-  --color-background: hsl(240 10% 98%);
-  --color-foreground: hsl(240 10% 10%);
+  --color-background: hsl(210 40% 98%);
+  --color-foreground: hsl(222 47% 11%);
   --color-card: hsl(0 0% 100%);
-  --color-card-foreground: hsl(240 10% 10%);
+  --color-card-foreground: hsl(222 47% 11%);
   --color-popover: hsl(0 0% 100%);
-  --color-popover-foreground: hsl(240 10% 10%);
+  --color-popover-foreground: hsl(222 47% 11%);
 
-  /* Primary — indigo-600 */
-  --color-primary: hsl(239 84% 67%);
+  /* Primary — blue-600 (#2563EB) */
+  --color-primary: hsl(221 83% 53%);
   --color-primary-foreground: hsl(0 0% 100%);
 
-  /* Secondary — indigo-50 tint */
-  --color-secondary: hsl(237 100% 97%);
-  --color-secondary-foreground: hsl(239 84% 40%);
+  /* Secondary — slate-100 */
+  --color-secondary: hsl(214 32% 96%);
+  --color-secondary-foreground: hsl(222 47% 11%);
 
   /* Muted */
-  --color-muted: hsl(240 6% 95%);
-  --color-muted-foreground: hsl(240 5% 50%);
+  --color-muted: hsl(214 32% 96%);
+  --color-muted-foreground: hsl(215 20% 55%);
 
-  /* Accent — violet */
-  --color-accent: hsl(258 90% 96%);
-  --color-accent-foreground: hsl(258 70% 40%);
+  /* Accent */
+  --color-accent: hsl(214 32% 96%);
+  --color-accent-foreground: hsl(222 47% 11%);
 
   /* Destructive */
-  --color-destructive: hsl(0 84.2% 60.2%);
+  --color-destructive: hsl(0 84% 60%);
   --color-destructive-foreground: hsl(0 0% 100%);
 
   /* Border & input */
-  --color-border: hsl(240 6% 90%);
-  --color-input: hsl(240 6% 90%);
-  --color-ring: hsl(239 84% 67%);
+  --color-border: hsl(214 32% 91%);
+  --color-input: hsl(214 32% 91%);
+  --color-ring: hsl(221 83% 53%);
+
+  /* Chart colors */
+  --color-chart-1: hsl(221 83% 53%);
+  --color-chart-2: hsl(262 83% 58%);
+  --color-chart-3: hsl(142 76% 36%);
+  --color-chart-4: hsl(38 92% 50%);
+  --color-chart-5: hsl(0 84% 60%);
+
+  /* Fonts */
+  --font-sans: 'Inter', system-ui, sans-serif;
+  --font-serif: Georgia, serif;
+  --font-mono: Menlo, monospace;
 
   /* Radius */
-  --radius-lg: 0.75rem;
-  --radius-md: 0.5rem;
-  --radius-sm: 0.375rem;
+  --radius-sm: 0.25rem;
+  --radius-md: 0.375rem;
+  --radius-lg: 0.5rem;
+  --radius-xl: 0.75rem;
 }
 
 // ============================================================================
@@ -62,7 +78,7 @@
 @tailwind utilities;
 
 // ============================================================================
-// Base layer — matches React prototype's index.css @layer base
+// Base layer
 // ============================================================================
 
 @layer base {
@@ -71,6 +87,9 @@
   }
 
   body {
+    font-family: 'Inter', system-ui, sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     background-color: var(--color-background);
     color: var(--color-foreground);
   }
@@ -87,11 +106,101 @@ body {
   padding: 0;
 }
 
-// Snackbar / toast: see scss/_toast.scss + ToastNotificationComponent
+// ============================================================================
+// CSS Custom Properties — React prototype design system tokens
+// ============================================================================
+
+:root {
+  --ats-background: #F8FAFC;
+  --ats-foreground: #0F172A;
+
+  --ats-primary: #2563EB;
+  --ats-primary-dark: #1D4ED8;
+  --ats-primary-darker: #1E40AF;
+  --ats-primary-darkest: #1E3A8A;
+  --ats-primary-light: #3B82F6;
+  --ats-primary-lighter: #93C5FD;
+  --ats-primary-lightest: #BFDBFE;
+  --ats-primary-bg: #EFF6FF;
+
+  --ats-slate-900: #0F172A;
+  --ats-slate-800: #1E293B;
+  --ats-slate-700: #374151;
+  --ats-slate-500: #64748B;
+  --ats-slate-400: #94A3B8;
+  --ats-slate-300: #CBD5E1;
+  --ats-slate-200: #E2E8F0;
+  --ats-slate-100: #F1F5F9;
+  --ats-slate-50: #F8FAFC;
+
+  --ats-green-700: #15803D;
+  --ats-green-600: #16A34A;
+  --ats-green-500: #10B981;
+  --ats-green-400: #059669;
+  --ats-green-100: #DCFCE7;
+  --ats-green-50: #F0FDF4;
+  --ats-green-border: #BBF7D0;
+
+  --ats-amber-600: #D97706;
+  --ats-amber-500: #F59E0B;
+  --ats-amber-400: #B45309;
+  --ats-amber-bg: #FFFBEB;
+  --ats-amber-border: #FDE68A;
+  --ats-amber-bg-light: #FFF7ED;
+  --ats-amber-border-light: #FED7AA;
+  --ats-amber-dark: #C2410C;
+  --ats-amber-darkest: #78350F;
+
+  --ats-purple: #7C3AED;
+  --ats-teal: #0891B2;
+  --ats-red: #EF4444;
+
+  --ats-shadow-card: 0 1px 4px rgba(0, 0, 0, 0.04);
+  --ats-shadow-header: 0 1px 3px rgba(0, 0, 0, 0.04);
+  --ats-shadow-dropdown: 0 8px 24px rgba(0, 0, 0, 0.08);
+  --ats-shadow-tips: 0 1px 4px rgba(37, 99, 235, 0.06);
+
+  --ats-hero-gradient: linear-gradient(135deg, #1E3A8A 0%, #1D4ED8 50%, #2563EB 100%);
+
+  --ats-radius-card: 1rem;
+  --ats-radius-pill: 9999px;
+  --ats-radius-btn: 0.75rem;
+
+  --ats-max-width: 1280px;
+}
 
 // ============================================================================
-// Animations (from React prototype's index.css)
+// Animations
 // ============================================================================
+
+// ── Onboarding animations ────────────────────────────────────────────────────
+
+@keyframes float-up {
+  from { opacity: 0; transform: translateY(18px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes fade-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+
+@keyframes pulse-soft {
+  0%, 100% { opacity: 0.5; transform: scale(1); }
+  50%       { opacity: 1;   transform: scale(1.06); }
+}
+
+@keyframes blink {
+  0%, 100% { opacity: 1; }
+  50%       { opacity: 0.3; }
+}
+
+.anim-float  { animation: float-up 0.4s ease both; }
+.anim-float2 { animation: float-up 0.4s 0.08s ease both; }
+.anim-float3 { animation: float-up 0.4s 0.16s ease both; }
+.anim-fade   { animation: fade-in 0.35s ease both; }
+
+// ── Existing animations ───────────────────────────────────────────────────────
 
 @keyframes shimmer {
   0% { transform: translateX(-100%); }
@@ -128,8 +237,6 @@ body {
 
 // ── Material Dialog panel overrides ─────────────────────────────────────────
 .tailor-modal-panel {
-  // Remove default Material padding and background so the component
-  // owns all styling (rounded corners, background, etc.)
   &.mat-mdc-dialog-panel {
     padding: 0 !important;
     background: transparent !important;

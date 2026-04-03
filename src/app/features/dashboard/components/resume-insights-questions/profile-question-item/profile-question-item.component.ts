@@ -24,12 +24,14 @@ export class ProfileQuestionItemComponent {
   startEdit = output<void>();
   cancelEdit = output<void>();
 
-  onBlur(): void {
-    const q = this.question();
-    const draft = this.draftResponse().trim();
-    if (!this.isEditing() || !draft) return;
-    this.saveAnswer.emit({ questionId: q.id, response: draft });
-    this.draftResponse.set('');
+  onToggle(): void {
+    if (this.isEditing()) {
+      this.draftResponse.set('');
+      this.cancelEdit.emit();
+    } else {
+      this.draftResponse.set(this.question().userResponse ?? '');
+      this.startEdit.emit();
+    }
   }
 
   onSave(): void {
@@ -54,9 +56,7 @@ export class ProfileQuestionItemComponent {
     this.cancelEdit.emit();
   }
 
-  /** Value shown in textarea: draft when editing, else question response */
   getDraftValue(): string {
-    if (this.isEditing()) return this.draftResponse();
-    return this.question().userResponse ?? '';
+    return this.draftResponse();
   }
 }

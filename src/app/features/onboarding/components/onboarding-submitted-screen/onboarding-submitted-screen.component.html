@@ -1,0 +1,94 @@
+<div class="submitted-screen anim-float">
+
+  <!-- Logo -->
+  <div class="submitted-screen__logo">
+    <span class="submitted-screen__logo-mark">A</span>
+    <span class="submitted-screen__logo-text">ATS Fit</span>
+  </div>
+
+  <!-- Card -->
+  <div class="submitted-screen__card">
+
+    <!-- Card header -->
+    <div class="submitted-screen__card-header">
+      <div class="submitted-screen__success-icon">
+        <span>&#10003;</span>
+      </div>
+      <div>
+        <h2 class="submitted-screen__card-title">Resume received!</h2>
+        <p class="submitted-screen__card-status">Analysis starting in background&hellip;</p>
+      </div>
+    </div>
+
+    <div class="submitted-screen__card-body">
+
+      <!-- File chip -->
+      @if (fileName) {
+        <div class="submitted-screen__file-chip">
+          <span class="submitted-screen__file-icon">&#128196;</span>
+          <div class="submitted-screen__file-info">
+            <p class="submitted-screen__file-name">{{ fileName }}</p>
+            <p class="submitted-screen__file-meta">
+              {{ fileSizeKb !== null ? fileSizeKb + ' KB' : '' }} &middot; Queued for analysis
+            </p>
+          </div>
+          <span class="submitted-screen__file-check">&#10003;</span>
+        </div>
+      }
+
+      <!-- Background tasks -->
+      <p class="submitted-screen__tasks-label">Running in background</p>
+      <div class="submitted-screen__tasks">
+        <div class="submitted-screen__task submitted-screen__task--delay-0">
+          <span class="submitted-screen__task-dot"></span>
+          <span class="submitted-screen__task-text">Extracting resume content</span>
+          <span class="submitted-screen__task-time">~5 sec</span>
+        </div>
+        <div class="submitted-screen__task submitted-screen__task--delay-1">
+          <span class="submitted-screen__task-dot"></span>
+          <span class="submitted-screen__task-text">Analyzing work experiences</span>
+          <span class="submitted-screen__task-time">~20 sec</span>
+        </div>
+        <div class="submitted-screen__task submitted-screen__task--delay-2">
+          <span class="submitted-screen__task-dot"></span>
+          <span class="submitted-screen__task-text">Generating precision questions</span>
+          <span class="submitted-screen__task-time">~25 sec</span>
+        </div>
+      </div>
+
+      <!-- Notification strip -->
+      <div class="submitted-screen__notification">
+        <span class="submitted-screen__bell">&#128276;</span>
+        <p class="submitted-screen__notification-text">
+          <span class="submitted-screen__notification-strong">Dashboard notification</span>
+          the moment analysis is complete (~40–50 sec).
+        </p>
+      </div>
+
+      <!-- CTA -->
+      <button
+        class="submitted-screen__cta"
+        (click)="goToDashboard.emit()"
+        type="button"
+      >
+        Go to Dashboard &rarr;
+      </button>
+
+      <p class="submitted-screen__countdown">
+        Auto-redirecting in <strong>{{ countdown() }}s</strong>
+      </p>
+    </div>
+  </div>
+
+  <!-- Bottom hints -->
+  <div class="submitted-screen__hints">
+    <div class="submitted-screen__hint">
+      <span class="submitted-screen__hint-icon">&#127919;</span>
+      <p>Precision tailoring unlocked after analysis</p>
+    </div>
+    <div class="submitted-screen__hint">
+      <span class="submitted-screen__hint-icon">&#10024;</span>
+      <p>Impact questions ready to boost your score</p>
+    </div>
+  </div>
+</div>

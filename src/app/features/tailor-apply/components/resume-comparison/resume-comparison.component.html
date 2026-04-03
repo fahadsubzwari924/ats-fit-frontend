@@ -1,32 +1,23 @@
-<div class="space-y-4 animate-fade-in-up">
+<div class="rd-root animate-fade-in-up">
 
-  <!-- Header -->
-  <div class="flex items-center gap-2">
-    <div class="w-7 h-7 bg-gradient-to-br from-indigo-500 to-cyan-500 rounded-lg flex items-center justify-center">
-      <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2.5" class="text-white">
-        <path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"></path>
-        <path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"></path>
-      </svg>
-    </div>
-    <div>
-      <p class="text-sm font-semibold text-slate-800">What Changed</p>
-      <p class="text-xs text-slate-500">Before vs. after AI optimization</p>
-    </div>
-  </div>
+  <header class="rd-hero">
+    <p class="rd-hero__eyebrow">Guided review</p>
+    <h2 class="rd-hero__title">What changed in your resume</h2>
+    <p class="rd-hero__lead">
+      Follow the numbered steps in order—each block builds on the last so you can scan impact first, then details.
+    </p>
+  </header>
 
-  <!-- Loading state -->
   @if (loading()) {
-    <div class="flex flex-col items-center gap-3 py-10">
-      <div class="w-8 h-8 border-2 border-indigo-600 border-t-transparent rounded-full animate-spin"></div>
-      <p class="text-sm text-slate-500">Analyzing changes...</p>
+    <div class="rd-state">
+      <div class="w-9 h-9 border-2 border-indigo-500 border-t-transparent rounded-full animate-spin" aria-hidden="true"></div>
+      <p class="rd-state__text">Analyzing changes…</p>
     </div>
   }
 
-  <!-- Error state -->
   @if (error() && !loading()) {
-    <div class="flex flex-col items-center gap-3 py-8 text-center">
-      <div class="w-10 h-10 rounded-full bg-red-50 flex items-center justify-center">
+    <div class="rd-state">
+      <div class="w-11 h-11 rounded-full bg-red-50 flex items-center justify-center" aria-hidden="true">
         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" class="text-red-500">
           <circle cx="12" cy="12" r="10"></circle>
@@ -34,106 +25,296 @@
           <line x1="12" x2="12.01" y1="16" y2="16"></line>
         </svg>
       </div>
-      <p class="text-sm text-slate-600">{{ error() }}</p>
-      <button (click)="retry()"
-        class="text-sm text-indigo-600 hover:text-indigo-700 font-medium underline underline-offset-2">
+      <p class="rd-state__text">{{ error() }}</p>
+      <button type="button" (click)="retry()"
+        class="text-sm font-semibold text-indigo-600 hover:text-indigo-700 underline underline-offset-2">
         Try again
       </button>
     </div>
   }
 
-  <!-- No diff data -->
   @if (!loading() && !error() && !diff()) {
-    <div class="flex flex-col items-center gap-2 py-8 text-center">
-      <p class="text-sm text-slate-500">No comparison data available for this resume.</p>
-      <p class="text-xs text-slate-400">Comparison is available for resumes generated after this feature was released.</p>
+    <div class="rd-state">
+      <div class="w-9 h-9 border-2 border-indigo-300 border-t-indigo-500 rounded-full animate-spin" aria-hidden="true"></div>
+      <p class="rd-state__text">Computing changes…</p>
+      <p class="text-xs text-slate-400 text-center max-w-xs">This usually completes within a few seconds.</p>
+      <button type="button" (click)="retry()"
+        class="text-xs font-medium text-indigo-600 hover:text-indigo-700 underline underline-offset-2">
+        Refresh
+      </button>
     </div>
   }
 
-  <!-- Diff content -->
   @if (!loading() && !error() && diff()) {
-    <div class="space-y-3">
+    <app-diff-nav-rail
+      [steps]="digestSteps()"
+      [activeId]="activeNavId()"
+      (navigate)="scrollToStep($event)">
+    </app-diff-nav-rail>
 
-      <!-- Summary pill -->
-      <div class="flex items-center gap-2 px-3 py-2 bg-emerald-50 rounded-lg border border-emerald-100">
-        <span class="text-xs font-semibold text-emerald-700">
-          {{ diff()!.totalChanges }} changes
-        </span>
-        <span class="text-xs text-slate-400">across</span>
-        <span class="text-xs font-semibold text-emerald-700">
-          {{ diff()!.sectionsChanged }} sections
-        </span>
-      </div>
+    <div class="rd-scroll">
+      <div class="rd-timeline">
 
-      <!-- Scrollable changes list -->
-      <div class="max-h-64 overflow-y-auto space-y-2.5 pr-1">
+        <!-- Step 1: Overview -->
+        <app-diff-step-shell
+          anchorId="rd-overview"
+          [stepIndex]="stepNumberFor('rd-overview')"
+          title="Big picture"
+          subtitle="How much this tailored version moved the needle.">
+          <div class="rd-metric-grid">
+            <app-diff-metric-tile
+              [value]="diff()!.sectionsChanged"
+              label="Sections updated"
+              variant="blue">
+            </app-diff-metric-tile>
+            <app-diff-metric-tile
+              [value]="'+' + totalKeywordsAdded()"
+              label="Keywords woven in"
+              variant="emerald">
+            </app-diff-metric-tile>
+            @if (isEnhanced()) {
+              <app-diff-metric-tile
+                [value]="totalBulletsRewritten()"
+                label="Bullets refined"
+                variant="indigo">
+              </app-diff-metric-tile>
+            } @else {
+              <app-diff-metric-tile
+                [value]="diff()!.totalChanges"
+                label="Total edits"
+                variant="indigo">
+              </app-diff-metric-tile>
+            }
+          </div>
+          @if (isEnhanced() && coverageImprovement() > 0) {
+            <p class="rd-prose mt-2 text-slate-600">
+              Job keyword match improved by <strong class="text-emerald-700">{{ coverageImprovement() }}%</strong>
+              — see the next step for the breakdown.
+            </p>
+          } @else {
+            <p class="rd-prose mt-2 text-slate-600">
+              Use the numbered tabs above to jump, or scroll down in order.
+            </p>
+          }
+        </app-diff-step-shell>
 
-        @for (change of changedSections(); track $index; let i = $index) {
-          <div class="rounded-xl border border-slate-200 overflow-hidden bg-white">
+        <!-- Enhanced: Job match -->
+        @if (isEnhanced() && enhancedDiff()) {
+          <app-diff-step-shell
+            anchorId="rd-match"
+            [stepIndex]="stepNumberFor('rd-match')"
+            title="Job match &amp; keywords"
+            subtitle="Coverage vs. the job description, plus what was added or still missing.">
+            <div class="rd-coverage-row">
+              <div class="rd-coverage-label">
+                <span class="rd-coverage-label__text">Before</span>
+                <span class="rd-coverage-label__pct">{{ enhancedDiff()!.keywordAnalysis.coverageOriginal }}%</span>
+              </div>
+              <div class="rd-coverage-track">
+                <div class="rd-coverage-fill rd-coverage-fill--before" [style.width]="coverageBarWidthOrig()"></div>
+              </div>
+            </div>
+            <div class="rd-coverage-row">
+              <div class="rd-coverage-label">
+                <span class="rd-coverage-label__text">After</span>
+                <span class="rd-coverage-label__pct text-emerald-600">{{ enhancedDiff()!.keywordAnalysis.coverageOptimized }}%</span>
+              </div>
+              <div class="rd-coverage-track">
+                <div class="rd-coverage-fill rd-coverage-fill--after" [style.width]="coverageBarWidthOpt()"></div>
+              </div>
+            </div>
+            @if (enhancedDiff()!.keywordAnalysis.newlyAdded.length) {
+              <p class="rd-tag-group__label rd-tag-group__label--added">Newly reflected in your resume</p>
+              <div class="rd-tag-row">
+                @for (kw of enhancedDiff()!.keywordAnalysis.newlyAdded; track kw) {
+                  <span class="rd-badge rd-badge--modified">+{{ kw }}</span>
+                }
+              </div>
+            }
+            @if (enhancedDiff()!.keywordAnalysis.stillMissing.length) {
+              <p class="rd-tag-group__label rd-tag-group__label--missing">Still not echoed (optional to add)</p>
+              <div class="rd-tag-row">
+                @for (kw of enhancedDiff()!.keywordAnalysis.stillMissing; track kw) {
+                  <span class="rd-tag--amber">{{ kw }}</span>
+                }
+              </div>
+            }
+          </app-diff-step-shell>
 
-            <!-- Section header -->
-            <button
-              type="button"
-              (click)="toggleSection(i)"
-              class="w-full flex items-center justify-between px-3.5 py-2.5 hover:bg-slate-50 transition-colors text-left">
-              <div class="flex items-center gap-2">
-                <span class="text-xs font-semibold text-slate-800">{{ change.section }}</span>
-                <span class="text-[10px] font-medium px-1.5 py-0.5 rounded-full {{ getChangeBadgeClass(change.changeType) }}">
-                  {{ getChangeTypeLabel(change.changeType) }}
-                </span>
+          @if (enhancedDiff()!.summary && enhancedDiff()!.summary!.changeType !== 'unchanged') {
+            <app-diff-step-shell
+              anchorId="rd-summary"
+              [stepIndex]="stepNumberFor('rd-summary')"
+              title="Professional summary"
+              subtitle="Opening pitch—optimized text is shown first; open original only if you need to compare.">
+              <div class="flex flex-wrap items-center gap-2 mb-2">
+                <app-diff-change-badge [changeType]="enhancedDiff()!.summary!.changeType"></app-diff-change-badge>
+                @if (enhancedDiff()!.summary!.addedKeywords.length) {
+                  <span class="text-[11px] font-semibold text-emerald-600">
+                    +{{ enhancedDiff()!.summary!.addedKeywords.length }} keyword{{ enhancedDiff()!.summary!.addedKeywords.length > 1 ? 's' : '' }}
+                  </span>
+                }
+              </div>
+              <p class="rd-block-label">Tailored version</p>
+              <p class="rd-prose"
+                [innerHTML]="highlight(enhancedDiff()!.summary!.optimized, enhancedDiff()!.summary!.addedKeywords)">
+              </p>
+              <button
+                type="button"
+                class="rd-toggle-original"
+                [class.rd-toggle-original--open]="isShowingOriginal('summary')"
+                (click)="toggleShowOriginal('summary')">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+                {{ isShowingOriginal('summary') ? 'Hide original' : 'Show original' }}
+              </button>
+              @if (isShowingOriginal('summary')) {
+                <div class="rd-original">
+                  <p class="rd-original__label">Original</p>
+                  <p class="rd-original__text">{{ enhancedDiff()!.summary!.original || '(none)' }}</p>
+                </div>
+              }
+            </app-diff-step-shell>
+          }
+
+          @if (enhancedDiff()!.skills && enhancedDiff()!.skills!.changeType !== 'unchanged') {
+            <app-diff-step-shell
+              anchorId="rd-skills"
+              [stepIndex]="stepNumberFor('rd-skills')"
+              title="Skills"
+              subtitle="What was added or removed by category.">
+              <div class="flex flex-wrap items-center gap-2 mb-2">
+                <app-diff-change-badge [changeType]="enhancedDiff()!.skills!.changeType"></app-diff-change-badge>
+                @if (enhancedDiff()!.skills!.totalAdded > 0) {
+                  <span class="text-[11px] font-semibold text-emerald-600">+{{ enhancedDiff()!.skills!.totalAdded }} added</span>
+                }
+                @if (enhancedDiff()!.skills!.totalRemoved > 0) {
+                  <span class="text-[11px] font-semibold text-red-600">−{{ enhancedDiff()!.skills!.totalRemoved }} removed</span>
+                }
+              </div>
+              @for (cat of enhancedDiff()!.skills!.byCategory; track cat.category) {
+                @if (cat.added.length || cat.removed.length) {
+                  <div class="rd-skill-cat">
+                    <p class="rd-skill-cat__name">{{ cat.category }}</p>
+                    <div class="rd-tag-row">
+                      @for (s of cat.added; track s) {
+                        <span class="rd-badge rd-badge--modified">+{{ s }}</span>
+                      }
+                      @for (s of cat.removed; track s) {
+                        <span class="rd-badge rd-badge--removed line-through">{{ s }}</span>
+                      }
+                    </div>
+                  </div>
+                }
+              }
+            </app-diff-step-shell>
+          }
+
+          @for (exp of enhancedDiff()!.experience; track exp.company; let i = $index) {
+            @if (exp.changeType !== 'unchanged') {
+              <app-diff-step-shell
+                [anchorId]="'rd-exp-' + i"
+                [stepIndex]="stepNumberFor('rd-exp-' + i)"
+                [title]="exp.company"
+                [subtitle]="exp.position">
+                <div class="flex flex-wrap items-center gap-2 mb-2">
+                  <app-diff-change-badge [changeType]="exp.changeType"></app-diff-change-badge>
+                  @if (changedBulletsCount(exp) > 0) {
+                    <span class="text-[11px] font-semibold text-indigo-600">
+                      {{ changedBulletsCount(exp) }} bullet{{ changedBulletsCount(exp) > 1 ? 's' : '' }} updated
+                    </span>
+                  }
+                </div>
+                @for (bullet of exp.bulletChanges; track $index; let bi = $index) {
+                  @if (bullet.changeType !== 'unchanged') {
+                    <div
+                      class="rd-bullet"
+                      [class.rd-bullet--modified]="bullet.changeType === 'modified'"
+                      [class.rd-bullet--added]="bullet.changeType === 'added'"
+                      [class.rd-bullet--removed]="bullet.changeType === 'removed'">
+                      <div class="rd-bullet__meta">
+                        <app-diff-change-badge [changeType]="bullet.changeType"></app-diff-change-badge>
+                        <span class="rd-bullet__hint">{{ getSimilarityLabel(bullet.similarity) }}</span>
+                        @if (bullet.addedKeywords.length) {
+                          <span class="text-[10px] font-semibold text-emerald-600 ml-auto">
+                            +{{ bullet.addedKeywords.length }} kw
+                          </span>
+                        }
+                      </div>
+                      <p class="rd-prose" [innerHTML]="highlight(bullet.optimized, bullet.addedKeywords)"></p>
+                      <button
+                        type="button"
+                        class="rd-toggle-original"
+                        [class.rd-toggle-original--open]="isShowingOriginal('exp-' + i + '-b-' + bi)"
+                        (click)="toggleShowOriginal('exp-' + i + '-b-' + bi)">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                          <polyline points="6 9 12 15 18 9"></polyline>
+                        </svg>
+                        {{ isShowingOriginal('exp-' + i + '-b-' + bi) ? 'Hide original' : 'Show original' }}
+                      </button>
+                      @if (isShowingOriginal('exp-' + i + '-b-' + bi)) {
+                        <div class="rd-original">
+                          <p class="rd-original__text">{{ bullet.original || '—' }}</p>
+                        </div>
+                      }
+                    </div>
+                  }
+                }
+              </app-diff-step-shell>
+            }
+          }
+        }
+
+        <!-- Legacy flat sections -->
+        @if (!isEnhanced() && diff()) {
+          @for (change of changedSections(); track $index; let i = $index) {
+            <app-diff-step-shell
+              [anchorId]="'rd-legacy-' + i"
+              [stepIndex]="stepNumberFor('rd-legacy-' + i)"
+              [title]="change.section"
+              subtitle="Optimized text first; expand original if you need to compare.">
+              <div class="flex flex-wrap items-center gap-2 mb-2">
+                <app-diff-change-badge [changeType]="change.changeType"></app-diff-change-badge>
                 @if (change.addedKeywords.length) {
-                  <span class="text-[10px] text-emerald-600 font-medium">
+                  <span class="text-[11px] font-semibold text-emerald-600">
                     +{{ change.addedKeywords.length }} keyword{{ change.addedKeywords.length > 1 ? 's' : '' }}
                   </span>
                 }
               </div>
-              <svg
-                xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2"
-                [ngClass]="isSectionExpanded(i) ? 'rotate-180' : ''"
-                class="text-slate-400 transition-transform duration-200 shrink-0">
-                <polyline points="6 9 12 15 18 9"></polyline>
-              </svg>
-            </button>
-
-            <!-- Expanded comparison -->
-            @if (isSectionExpanded(i)) {
-              <div class="border-t border-slate-100">
-                <div class="grid grid-cols-2 divide-x divide-slate-100">
-                  <div class="p-2.5">
-                    <p class="text-[10px] font-semibold text-slate-400 uppercase tracking-wider mb-1.5">Original</p>
-                    <p class="text-[11px] text-slate-500 leading-relaxed whitespace-pre-line">
-                      {{ change.original || '—' }}
-                    </p>
-                  </div>
-                  <div class="p-2.5 bg-emerald-50/40">
-                    <p class="text-[10px] font-semibold text-emerald-600 uppercase tracking-wider mb-1.5">Optimized</p>
-                    <p class="text-[11px] text-slate-700 leading-relaxed whitespace-pre-line">
-                      {{ change.optimized || '—' }}
-                    </p>
-                    @if (change.addedKeywords.length) {
-                      <div class="flex flex-wrap gap-1 mt-2">
-                        @for (kw of change.addedKeywords; track kw) {
-                          <span class="text-[10px] font-medium bg-emerald-100 text-emerald-700 px-1.5 py-0.5 rounded-full">
-                            +{{ kw }}
-                          </span>
-                        }
-                      </div>
-                    }
-                  </div>
+              <p class="rd-block-label">Tailored version</p>
+              <p class="rd-prose" [innerHTML]="highlight(change.optimized, change.addedKeywords)"></p>
+              <button
+                type="button"
+                class="rd-toggle-original"
+                [class.rd-toggle-original--open]="isShowingOriginal('legacy-' + i)"
+                (click)="toggleShowOriginal('legacy-' + i)">
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                  <polyline points="6 9 12 15 18 9"></polyline>
+                </svg>
+                {{ isShowingOriginal('legacy-' + i) ? 'Hide original' : 'Show original' }}
+              </button>
+              @if (isShowingOriginal('legacy-' + i)) {
+                <div class="rd-original">
+                  <p class="rd-original__label">Original</p>
+                  <p class="rd-original__text">{{ change.original || '—' }}</p>
                 </div>
-              </div>
-            }
-          </div>
+              }
+            </app-diff-step-shell>
+          }
         }
 
-        <!-- Unchanged summary -->
-        @if (unchangedSections().length) {
-          <div class="px-3 py-2 bg-slate-50 rounded-lg border border-slate-100">
-            <p class="text-[11px] text-slate-500">
-              <span class="font-medium text-slate-600">{{ unchangedSections().length }}</span>
-              {{ unchangedSections().length > 1 ? 'sections' : 'section' }} unchanged:
-              {{ unchangedSectionNames() }}
+        @if (unchangedSections().length && !isEnhanced()) {
+          <div class="rd-footnote">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" class="text-slate-400 shrink-0 mt-0.5">
+              <circle cx="12" cy="12" r="10"></circle>
+              <line x1="12" x2="12" y1="8" y2="12"></line>
+            </svg>
+            <p>
+              <strong>{{ unchangedSections().length }}</strong>
+              {{ unchangedSections().length > 1 ? 'sections' : 'section' }} left as-is:
+              <span class="text-slate-400">{{ unchangedSectionNames() }}</span>
             </p>
           </div>
         }
@@ -142,10 +323,14 @@
     </div>
   }
 
-  <!-- Back button -->
-  <button (click)="close.emit()"
-    class="w-full text-xs text-slate-400 hover:text-slate-600 transition-colors py-1">
-    ← Back to results
-  </button>
+  <footer class="rd-footer">
+    <button type="button" class="rd-back" (click)="close.emit()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <line x1="19" x2="5" y1="12" y2="12"></line>
+        <polyline points="12 19 5 12 12 5"></polyline>
+      </svg>
+      Back to results
+    </button>
+  </footer>
 
 </div>

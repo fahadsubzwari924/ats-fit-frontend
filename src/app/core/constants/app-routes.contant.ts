@@ -3,4 +3,5 @@ export class AppRoutes {
   static readonly SIGNIN = '/signin';
   static readonly SIGNUP = '/signup';
   static readonly DASHBOARD = '/dashboard';
+  static readonly ONBOARDING = '/onboarding';
 }

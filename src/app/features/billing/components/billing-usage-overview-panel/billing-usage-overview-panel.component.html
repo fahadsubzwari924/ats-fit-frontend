@@ -1,0 +1,44 @@
+<div class="billing-stack billing-stack--sm">
+  <div class="billing-card">
+    <div class="billing-card__head">
+      <h2 class="billing-card__title">Usage This Cycle</h2>
+      @if (resetLabel()) {
+        <span class="billing-card__head-aside">{{ resetLabel() }}</span>
+      }
+    </div>
+    <div class="billing-card__body billing-card__body--tight-y">
+      <div class="billing-usage-list">
+        @for (item of usages(); track item.label) {
+          <div>
+            <div class="billing-usage-row__top">
+              <span class="billing-usage-row__label">{{ item.label }}</span>
+              <span class="billing-usage-row__value">
+                {{ item.used }} <span class="muted">/ {{ item.total }}</span>
+              </span>
+            </div>
+            <div class="billing-usage-row__track">
+              <div
+                class="billing-usage-row__fill"
+                [style.width.%]="pct(item.used, item.total)"
+                [style.background]="item.color"></div>
+            </div>
+            <p class="billing-usage-row__remain">{{ item.total - item.used }} remaining</p>
+          </div>
+        }
+      </div>
+    </div>
+  </div>
+
+  <div class="billing-mini-stats">
+    <div class="billing-mini-stat">
+      <p class="billing-mini-stat__label">Total Spent</p>
+      <p class="billing-mini-stat__value">{{ totalSpent() }}</p>
+      <p class="billing-mini-stat__sub">{{ totalSpentSub() }}</p>
+    </div>
+    <div class="billing-mini-stat">
+      <p class="billing-mini-stat__label">Active Since</p>
+      <p class="billing-mini-stat__value">{{ activeSinceValue() }}</p>
+      <p class="billing-mini-stat__sub">{{ activeSinceSub() }}</p>
+    </div>
+  </div>
+</div>

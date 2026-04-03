@@ -1,83 +1,81 @@
 // ============================================================================
 // Design Tokens
 // ============================================================================
-// This file defines all design tokens including colors, spacing, typography,
-// border radius, shadows, and transitions following a design system approach.
-// All colors are defined in HSL format for better color manipulation.
+// Aligned with the React prototype design system.
+// Colors follow the blue-centric palette from the new dashboard design.
 
 // ============================================================================
-// Color Palette - HSL Format
+// Color Palette
 // ============================================================================
 
-// Primary Colors — indigo-600
-$color-primary: hsl(239 84% 67%);
+// Primary Colors — blue-600 (#2563EB)
+$color-primary: hsl(221 83% 53%);
 $color-primary-foreground: hsl(0 0% 100%);
 
-// Secondary Colors — indigo-50 tint
-$color-secondary: hsl(237 100% 97%);
-$color-secondary-foreground: hsl(239 84% 40%);
+// Secondary Colors — slate-100
+$color-secondary: hsl(214 32% 96%);
+$color-secondary-foreground: hsl(222 47% 11%);
 
 // Background & Surface
-$color-background: hsl(240 10% 98%);
-$color-foreground: hsl(240 10% 10%);
+$color-background: hsl(210 40% 98%);
+$color-foreground: hsl(222 47% 11%);
 $color-card: hsl(0 0% 100%);
-$color-card-foreground: hsl(240 10% 10%);
+$color-card-foreground: hsl(222 47% 11%);
 
 // Popover
 $color-popover: hsl(0 0% 100%);
-$color-popover-foreground: hsl(240 10% 10%);
+$color-popover-foreground: hsl(222 47% 11%);
 
 // Muted & Disabled
-$color-muted: hsl(240 6% 95%);
-$color-muted-foreground: hsl(240 5% 50%);
+$color-muted: hsl(214 32% 96%);
+$color-muted-foreground: hsl(215 20% 55%);
 
-// Accent — violet
-$color-accent: hsl(258 90% 96%);
-$color-accent-foreground: hsl(258 70% 40%);
+// Accent
+$color-accent: hsl(214 32% 96%);
+$color-accent-foreground: hsl(222 47% 11%);
 
 // Destructive/Error
-$color-destructive: hsl(0 84.2% 60.2%);
+$color-destructive: hsl(0 84% 60%);
 $color-destructive-foreground: hsl(0 0% 100%);
 
 // Border & Input
-$color-border: hsl(240 6% 90%);
-$color-input: hsl(240 6% 90%);
+$color-border: hsl(214 32% 91%);
+$color-input: hsl(214 32% 91%);
 
 // Focus Ring
-$color-ring: hsl(239 84% 67%);
+$color-ring: hsl(221 83% 53%);
 
 // Sidebar Colors
-$color-sidebar-background: hsl(0 0% 98%);
-$color-sidebar-foreground: hsl(240 5.3% 26.1%);
-$color-sidebar-primary: hsl(240 5.9% 10%);
-$color-sidebar-primary-foreground: hsl(0 0% 98%);
-$color-sidebar-accent: hsl(240 4.8% 95.9%);
-$color-sidebar-accent-foreground: hsl(240 5.9% 10%);
-$color-sidebar-border: hsl(220 13% 91%);
-$color-sidebar-ring: hsl(217.2 91.2% 59.8%);
+$color-sidebar-background: hsl(0 0% 100%);
+$color-sidebar-foreground: hsl(222 47% 11%);
+$color-sidebar-primary: hsl(221 83% 53%);
+$color-sidebar-primary-foreground: hsl(0 0% 100%);
+$color-sidebar-accent: hsl(214 32% 96%);
+$color-sidebar-accent-foreground: hsl(222 47% 11%);
+$color-sidebar-border: hsl(214 32% 91%);
+$color-sidebar-ring: hsl(221 83% 53%);
 
 // Dark Mode Colors
-$color-dark-background: hsl(222.2 84% 4.9%);
-$color-dark-foreground: hsl(210 40% 98%);
-$color-dark-card: hsl(222.2 84% 4.9%);
-$color-dark-card-foreground: hsl(210 40% 98%);
-$color-dark-primary: hsl(210 40% 98%);
-$color-dark-primary-foreground: hsl(222.2 47.4% 11.2%);
-$color-dark-secondary: hsl(217.2 32.6% 17.5%);
-$color-dark-secondary-foreground: hsl(210 40% 98%);
-$color-dark-muted: hsl(217.2 32.6% 17.5%);
-$color-dark-muted-foreground: hsl(215 20.2% 65.1%);
-$color-dark-accent: hsl(217.2 32.6% 17.5%);
-$color-dark-accent-foreground: hsl(210 40% 98%);
-$color-dark-destructive: hsl(0 62.8% 30.6%);
-$color-dark-destructive-foreground: hsl(210 40% 98%);
-$color-dark-border: hsl(217.2 32.6% 17.5%);
-$color-dark-input: hsl(217.2 32.6% 17.5%);
+$color-dark-background: hsl(222 47% 8%);
+$color-dark-foreground: hsl(213 31% 91%);
+$color-dark-card: hsl(222 47% 11%);
+$color-dark-card-foreground: hsl(213 31% 91%);
+$color-dark-primary: hsl(221 83% 60%);
+$color-dark-primary-foreground: hsl(0 0% 100%);
+$color-dark-secondary: hsl(217 32% 17%);
+$color-dark-secondary-foreground: hsl(213 31% 91%);
+$color-dark-muted: hsl(217 32% 17%);
+$color-dark-muted-foreground: hsl(215 20% 55%);
+$color-dark-accent: hsl(217 32% 17%);
+$color-dark-accent-foreground: hsl(213 31% 91%);
+$color-dark-destructive: hsl(0 72% 51%);
+$color-dark-destructive-foreground: hsl(0 0% 100%);
+$color-dark-border: hsl(217 32% 17%);
+$color-dark-input: hsl(217 32% 17%);
 
 // ============================================================================
 // Spacing Scale
 // ============================================================================
-// Based on 4px base unit (rem: 0.25rem = 4px)
 
 $spacing-xs: 0.25rem;   // 4px
 $spacing-sm: 0.5rem;    // 8px
@@ -103,13 +101,9 @@ $spacing: (
 // Typography Scale
 // ============================================================================
 
-// Font Families
-$font-family-base: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto',
-  'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-  sans-serif;
+$font-family-base: 'Inter', system-ui, sans-serif;
 $font-family-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', monospace;
 
-// Font Sizes
 $font-size-xs: 0.75rem;     // 12px
 $font-size-sm: 0.875rem;    // 14px
 $font-size-base: 1rem;      // 16px
@@ -122,26 +116,22 @@ $font-size-5xl: 3rem;       // 48px
 $font-size-6xl: 3.75rem;    // 60px
 $font-size-7xl: 4.5rem;     // 72px
 
-// Font Weights
 $font-weight-light: 300;
 $font-weight-normal: 400;
 $font-weight-medium: 500;
 $font-weight-semibold: 600;
 $font-weight-bold: 700;
 
-// Line Heights
 $line-height-tight: 1;
 $line-height-snug: 1.25;
 $line-height-normal: 1.5;
 $line-height-relaxed: 1.625;
 $line-height-loose: 2;
 
-// Letter Spacing
 $letter-spacing-tight: -0.02em;
 $letter-spacing-normal: 0;
 $letter-spacing-wide: 0.02em;
 
-// Typography Map for Mixins
 $typography: (
   xs: (
     size: $font-size-xs,
@@ -184,11 +174,11 @@ $typography: (
 // Border Radius
 // ============================================================================
 
-$radius-sm: calc(0.5rem - 4px);  // 4px
-$radius-md: 0.5rem;              // 8px
-$radius-lg: 0.75rem;             // 12px
-$radius-xl: 1rem;                // 16px
-$radius-full: 9999px;            // Fully rounded
+$radius-sm: 0.25rem;            // 4px
+$radius-md: 0.5rem;             // 8px
+$radius-lg: 0.75rem;            // 12px
+$radius-xl: 1rem;               // 16px
+$radius-full: 9999px;
 
 $radius: (
   sm: $radius-sm,
@@ -199,22 +189,21 @@ $radius: (
 );
 
 // ============================================================================
-// Shadows
+// Shadows (aligned with React prototype)
 // ============================================================================
 
 $shadow-none: none;
-$shadow-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-$shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1),
-  0 2px 4px -2px rgba(0, 0, 0, 0.1);
-$shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1),
-  0 4px 6px -4px rgba(0, 0, 0, 0.1);
-$shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1),
-  0 8px 10px -6px rgba(0, 0, 0, 0.1);
-$shadow-2xl: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+$shadow-2xs: 0px 1px 2px rgba(0, 0, 0, 0.04);
+$shadow-xs: 0px 1px 3px rgba(0, 0, 0, 0.05);
+$shadow-sm: 0px 1px 4px rgba(0, 0, 0, 0.06), 0px 1px 2px rgba(0, 0, 0, 0.04);
+$shadow-md: 0px 4px 12px rgba(0, 0, 0, 0.08), 0px 2px 4px rgba(0, 0, 0, 0.04);
+$shadow-lg: 0px 8px 24px rgba(0, 0, 0, 0.09), 0px 4px 8px rgba(0, 0, 0, 0.04);
+$shadow-xl: 0px 16px 40px rgba(0, 0, 0, 0.10), 0px 8px 16px rgba(0, 0, 0, 0.04);
+$shadow-2xl: 0px 24px 64px rgba(0, 0, 0, 0.12);
 
 $shadow: (
   none: $shadow-none,
+  2xs: $shadow-2xs,
   xs: $shadow-xs,
   sm: $shadow-sm,
   md: $shadow-md,
@@ -227,12 +216,10 @@ $shadow: (
 // Transitions & Animations
 // ============================================================================
 
-// Transition Durations
 $transition-fast: 150ms;
 $transition-normal: 300ms;
 $transition-slow: 500ms;
 
-// Transition Timing Functions
 $easing-linear: linear;
 $easing-ease: ease;
 $easing-ease-in: ease-in;

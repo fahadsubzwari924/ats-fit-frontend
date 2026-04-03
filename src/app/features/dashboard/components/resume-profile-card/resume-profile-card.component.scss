@@ -1,3 +1,17 @@
 :host {
   display: block;
 }
+
+.profile-card {
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04);
+
+  &.card-glow {
+    animation: glowPulse 2s ease-in-out;
+  }
+}
+
+@keyframes glowPulse {
+  0%, 100% { box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04); }
+  25% { box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.25), 0 0 12px rgba(37, 99, 235, 0.15); }
+  75% { box-shadow: 0 0 0 3px rgba(245, 158, 11, 0.2), 0 0 12px rgba(245, 158, 11, 0.1); }
+}

@@ -1,39 +1,63 @@
-import { Component, computed, effect, input, output, signal } from '@angular/core';
-import { CommonModule, NgClass } from '@angular/common';
+import { Component, computed, effect, ElementRef, inject, input, output } from '@angular/core';
+import { CommonModule } from '@angular/common';
 import { EmployerQuestionGroup, ProfileQuestion } from '@features/dashboard/models/profile-question.model';
 import { ProfileQuestionItemComponent } from '../profile-question-item/profile-question-item.component';
+import { DRAWER_COMPANY_COLORS } from '../../questions-drawer/questions-drawer.component';
 
 @Component({
   selector: 'app-employer-question-group',
   standalone: true,
-  imports: [CommonModule, NgClass, ProfileQuestionItemComponent],
+  imports: [CommonModule, ProfileQuestionItemComponent],
   templateUrl: './employer-question-group.component.html',
   styleUrl: './employer-question-group.component.scss',
 })
 export class EmployerQuestionGroupComponent {
-  group = input.required<EmployerQuestionGroup>();
+  private readonly el = inject(ElementRef);
 
-  /** Which question id is currently in edit mode (single edit at a time across groups) */
+  group = input.required<EmployerQuestionGroup>();
+  groupIndex = input<number>(0);
+  expanded = input(false);
   editingQuestionId = input<string | null>(null);
 
+  toggled = output<void>();
   saveAnswer = output<{ questionId: string; response: string }>();
   skipQuestion = output<string>();
   startEdit = output<string>();
   cancelEdit = output<void>();
 
-  expanded = signal<boolean>(true);
-
-  private readonly groupComplete = computed(() => this.isGroupComplete(this.group()));
+  readonly isExpanded = computed(() => this.expanded());
 
   constructor() {
-    // Auto-collapse when all questions in this group become answered.
-    // Users can still manually re-open any collapsed group.
     effect(() => {
-      if (this.groupComplete()) {
-        this.expanded.set(false);
+      if (this.expanded()) {
+        setTimeout(() => {
+          this.el.nativeElement.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        });
       }
     });
   }
+
+  readonly companyColor = computed(
+    () => DRAWER_COMPANY_COLORS[this.groupIndex() % DRAWER_COMPANY_COLORS.length]
+  );
+
+  readonly companyAnsweredCount = computed(() =>
+    this.group().questions.filter((q) => q.isAnswered).length
+  );
+
+  readonly companyTotalCount = computed(() => this.group().questions.length);
+
+  readonly isGroupComplete = computed(() => {
+    const total = this.companyTotalCount();
+    return total > 0 && this.companyAnsweredCount() === total;
+  });
+
+  readonly period = computed(() => {
+    const g = this.group();
+    if (g.startDate && g.endDate) return `${g.startDate} – ${g.endDate}`;
+    if (g.startDate) return `${g.startDate} – Present`;
+    return null;
+  });
 
   companyAnswered(group: EmployerQuestionGroup): number {
     return group.questions.filter((q) => q.isAnswered).length;
@@ -41,15 +65,6 @@ export class EmployerQuestionGroupComponent {
 
   companyTotal(group: EmployerQuestionGroup): number {
     return group.questions.length;
-  }
-
-  isGroupComplete(group: EmployerQuestionGroup): boolean {
-    const total = this.companyTotal(group);
-    return total > 0 && this.companyAnswered(group) === total;
-  }
-
-  toggle(): void {
-    this.expanded.update((v) => !v);
   }
 
   onSaveAnswer(payload: { questionId: string; response: string }): void {
@@ -70,5 +85,9 @@ export class EmployerQuestionGroupComponent {
 
   isEditing(q: ProfileQuestion): boolean {
     return this.editingQuestionId() === q.id;
+  }
+
+  toggleExpanded(): void {
+    this.toggled.emit();
   }
 }

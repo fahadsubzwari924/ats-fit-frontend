@@ -29,18 +29,35 @@ export class StorageService {
     }
   }
 
-  public setUser(user: User): void {
-    if (this.platform.isBrowser) {
-      localStorage.setItem(StorageKeys.USER, JSON.stringify(user));
+  public setUser(user: User | null): void {
+    if (!this.platform.isBrowser) {
+      return;
     }
+    if (user == null) {
+      localStorage.removeItem(StorageKeys.USER);
+      return;
+    }
+    localStorage.setItem(StorageKeys.USER, JSON.stringify(user));
   }
 
   public getUser(): User | null {
-    if (this.platform.isBrowser) {
-      const user = localStorage.getItem(StorageKeys.USER);
-      return user ? new User(JSON.parse(user)) : null;
+    if (!this.platform.isBrowser) {
+      return null;
     }
-    return null;
+    const raw = localStorage.getItem(StorageKeys.USER);
+    if (raw == null || raw === '') {
+      return null;
+    }
+    try {
+      const parsed = JSON.parse(raw) as unknown;
+      if (parsed == null || typeof parsed !== 'object') {
+        return null;
+      }
+      return new User(parsed);
+    } catch {
+      localStorage.removeItem(StorageKeys.USER);
+      return null;
+    }
   }
 
   public clear(): void {

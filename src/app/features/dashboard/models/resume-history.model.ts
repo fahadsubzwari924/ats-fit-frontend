@@ -22,6 +22,7 @@ export interface PaginatedHistoryResponse {
 }
 
 export interface ResumeDiffSummary {
+  version?: number;
   totalChanges: number;
   sectionsChanged: number;
   changes: Array<{
@@ -31,4 +32,12 @@ export interface ResumeDiffSummary {
     optimized: string;
     addedKeywords: string[];
   }>;
+  /** Present only when version === 2 (programmatic diff). */
+  keywordAnalysis?: {
+    coverageOriginal: number;
+    coverageOptimized: number;
+    newlyAdded: string[];
+    stillMissing: string[];
+    targetKeywords: string[];
+  };
 }
