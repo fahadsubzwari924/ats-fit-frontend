@@ -6,6 +6,7 @@ import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { UserState } from '@core/states/user.state';
 import { JobService } from '@features/apply-new-job/services/job.service';
+import { JobApplicationCreatePayload } from '@features/apply-new-job/models/job-application-create-payload.model';
 import { TailoredResume } from '@features/resume-tailoring/models/tailored-resume.model';
 import { TailorApplyStep } from './models/tailor-apply-form.model';
 import { TailoringModalCloseResult } from './models/tailoring-modal-close-result.model';
@@ -14,6 +15,7 @@ import { StepResumeSourceComponent } from './components/step-resume-source/step-
 import { StepTemplateSelectComponent } from './components/step-template-select/step-template-select.component';
 import { StepResultsComponent } from './components/step-results/step-results.component';
 import { Messages } from '@core/enums/messages.enum';
+import { trackedApplicationAppliedAtIso } from '@features/applications/lib/date-input-helpers';
 
 @Component({
   selector: 'app-tailor-apply-modal',
@@ -142,21 +144,35 @@ export class TailorApplyModalComponent implements OnInit {
     }
     const resume = this.tailoredResume();
     const v = this.form.value;
-    const payload = {
-      companyName: v.companyName,
-      jobTitle: v.jobPosition,
-      resumeGenerationId: resume?.resumeGenerationId,
-      source: 'tailor-apply',
+    const payload: JobApplicationCreatePayload = {
+      application_source: 'tailored_resume',
+      company_name: v.companyName,
+      job_position: v.jobPosition,
+      job_description: v.jobDescription,
+      applied_at: trackedApplicationAppliedAtIso(),
+      resume_generation_id: resume?.resumeGenerationId,
     };
     this.jobService.applyNewJobs(payload).subscribe({
       next: () => {
         this.snackbar.showSuccess('Application tracked!');
         this.dialogRef.close(afterTailorClose);
       },
-      error: () => {
+      error: (err) => {
+        this.snackbar.showError(this.trackApplicationErrorMessage(err));
         this.dialogRef.close(afterTailorClose);
       },
     });
+  }
+
+  private trackApplicationErrorMessage(err: unknown): string {
+    const message = (err as { error?: { message?: string | string[] } })?.error?.message;
+    if (Array.isArray(message)) {
+      return message.filter(Boolean).join(', ');
+    }
+    if (typeof message === 'string' && message.trim()) {
+      return message;
+    }
+    return 'Could not save application to tracker.';
   }
 
   closeModal(): void {

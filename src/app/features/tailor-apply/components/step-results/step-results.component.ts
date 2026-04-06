@@ -1,4 +1,4 @@
-import { Component, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output, signal } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 import {
   animate,
@@ -65,9 +65,14 @@ export class StepResultsComponent {
   answerQuestionsFirst = output<void>();
   trackApplication = output<boolean>();
 
-  readonly isPremiumUser = this.userState.isPremiumUser;
+  /** Any signed-in account (freemium or premium) may save to job tracker. */
+  readonly canTrackJobApplication = computed(() => {
+    const id = this.userState.currentUser()?.id;
+    return typeof id === 'string' && id.trim().length > 0;
+  });
 
-  trackChecked = false;
+  /** Default on: save to Job Applications unless the user opts out. */
+  readonly trackChecked = signal(true);
   activePanel = signal<ActivePanel>('none');
   isGeneratingCoverLetter = signal(false);
   coverLetterResult = signal<CoverLetterResult | null>(null);
@@ -83,7 +88,7 @@ export class StepResultsComponent {
   }
 
   onDone(): void {
-    this.trackApplication.emit(this.trackChecked);
+    this.trackApplication.emit(this.trackChecked());
   }
 
   openComparison(): void {

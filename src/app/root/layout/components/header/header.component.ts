@@ -29,6 +29,9 @@ export class HeaderComponent {
   private readonly resumeState = inject(ResumeState);
   readonly userState = inject(UserState);
 
+  /** Route constants for templates (nav links, fragments). */
+  readonly appRoutes = AppRoutes;
+
   private readonly userMenuRoot = viewChild<ElementRef<HTMLElement>>('userMenuRoot');
 
   readonly userMenuOpen = signal(false);

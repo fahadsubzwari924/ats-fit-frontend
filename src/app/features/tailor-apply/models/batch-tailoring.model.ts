@@ -7,6 +7,8 @@ export interface BatchJobInput {
 export interface BatchJobResult {
   jobPosition: string;
   companyName: string;
+  /** Filled client-side from batch input when the API omits it (required for job tracker POST). */
+  jobDescription?: string;
   status: 'success' | 'failed';
   resumeGenerationId?: string;
   pdfContent?: string;

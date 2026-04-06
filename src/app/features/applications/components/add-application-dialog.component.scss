@@ -1,0 +1,8 @@
+:host {
+  display: block;
+}
+
+.add-app-dialog {
+  min-width: min(100vw - 2rem, 420px);
+  max-width: 520px;
+}

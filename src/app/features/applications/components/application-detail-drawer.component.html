@@ -1,0 +1,190 @@
+<div class="app-detail-drawer__overlay" (click)="onBackdropClick()" role="presentation">
+  <aside
+    class="app-detail-drawer__panel"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="application-detail-title"
+    cdkTrapFocus
+    cdkTrapFocusAutoCapture
+    (click)="onPanelClick($event)"
+  >
+    <div class="app-detail-drawer">
+      <header class="app-detail-drawer__header">
+        <div class="app-detail-drawer__header-text">
+          <p class="app-detail-drawer__eyebrow">Job application</p>
+          <h2 id="application-detail-title" class="app-detail-drawer__title">Details</h2>
+        </div>
+        <button
+          type="button"
+          class="app-detail-drawer__icon-btn"
+          aria-label="Close drawer"
+          (click)="closed.emit()"
+        >
+          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </button>
+      </header>
+
+      @if (loading()) {
+        <div class="app-detail-drawer__loading" aria-busy="true">
+          <div class="app-detail-drawer__skeleton app-detail-drawer__skeleton--hero"></div>
+          <div class="app-detail-drawer__skeleton"></div>
+          <div class="app-detail-drawer__skeleton app-detail-drawer__skeleton--short"></div>
+        </div>
+      } @else {
+        @let current = job();
+        @if (current) {
+        <form class="app-detail-drawer__form" (ngSubmit)="save()">
+          <div class="app-detail-drawer__scroll">
+            <div class="app-detail-drawer__hero">
+              <div class="app-detail-drawer__hero-main">
+                <h3 class="app-detail-drawer__company">{{ current.companyName || 'Company' }}</h3>
+                <p class="app-detail-drawer__position">{{ current.jobPosition || 'Role' }}</p>
+              </div>
+              <div class="app-detail-drawer__chips">
+                <span [ngClass]="statusPillNgClass(current.status)">{{ statusLabel(current.status || '') }}</span>
+                @if (current.atsScore != null) {
+                  <span class="app-detail-drawer__chip app-detail-drawer__chip--ats">ATS {{ current.atsScore }}%</span>
+                }
+                @if (current.applicationSource) {
+                  <span class="app-detail-drawer__chip">{{ formatSource(current.applicationSource) }}</span>
+                }
+              </div>
+            </div>
+
+            <div class="app-detail-drawer__meta-grid">
+              <div class="app-detail-drawer__meta-cell">
+                <span class="app-detail-drawer__meta-label">Listing URL</span>
+                @if (current.jobUrl) {
+                  <a class="app-detail-drawer__link" [href]="current.jobUrl" target="_blank" rel="noopener noreferrer">Open link</a>
+                } @else {
+                  <span class="app-detail-drawer__meta-empty">—</span>
+                }
+              </div>
+              <div class="app-detail-drawer__meta-cell">
+                <span class="app-detail-drawer__meta-label">Location</span>
+                <span class="app-detail-drawer__meta-value">{{ current.jobLocation || '—' }}</span>
+              </div>
+              <div class="app-detail-drawer__meta-cell">
+                <span class="app-detail-drawer__meta-label">Applied</span>
+                <span class="app-detail-drawer__meta-value">
+                  @if (isDateValid(current.appliedAt)) {
+                    {{ current.appliedAt | date: 'mediumDate' }}
+                  } @else {
+                    —
+                  }
+                </span>
+              </div>
+            </div>
+
+            <details class="app-detail-drawer__details">
+              <summary class="app-detail-drawer__details-summary">Job description</summary>
+              <div class="app-detail-drawer__jd">
+                <p class="app-detail-drawer__jd-text">{{ jdPreview() }}</p>
+                @if (canToggleJdMore()) {
+                  <button type="button" class="app-detail-drawer__text-btn" (click)="toggleJd(); $event.stopPropagation()">
+                    {{ jdExpanded() ? 'Show less' : 'Show more' }}
+                  </button>
+                }
+              </div>
+            </details>
+
+            <section class="app-detail-drawer__section" aria-labelledby="edit-pipeline-heading">
+              <h4 id="edit-pipeline-heading" class="app-detail-drawer__section-title">Pipeline</h4>
+              <div class="app-detail-drawer__fields">
+                <label class="app-detail-drawer__field">
+                  <span class="app-detail-drawer__label">Status</span>
+                  <select
+                    name="status"
+                    [(ngModel)]="editStatus"
+                    class="app-detail-drawer__input app-detail-drawer__select"
+                  >
+                    @for (s of statusOptions; track s) {
+                      <option [value]="s">{{ statusLabel(s) }}</option>
+                    }
+                  </select>
+                </label>
+                <label class="app-detail-drawer__field">
+                  <span class="app-detail-drawer__label">Applied date</span>
+                  <input
+                    name="applied_at"
+                    type="date"
+                    [(ngModel)]="editAppliedAt"
+                    class="app-detail-drawer__input"
+                  />
+                </label>
+              </div>
+            </section>
+
+            <section class="app-detail-drawer__section" aria-labelledby="edit-interview-heading">
+              <h4 id="edit-interview-heading" class="app-detail-drawer__section-title">Interview</h4>
+              <div class="app-detail-drawer__fields">
+                <label class="app-detail-drawer__field">
+                  <span class="app-detail-drawer__label">Scheduled</span>
+                  <input
+                    name="interview_scheduled_at"
+                    type="date"
+                    [(ngModel)]="editInterviewAt"
+                    class="app-detail-drawer__input"
+                  />
+                </label>
+                <label class="app-detail-drawer__field app-detail-drawer__field--full">
+                  <span class="app-detail-drawer__label">Interview notes</span>
+                  <textarea
+                    name="interview_notes"
+                    [(ngModel)]="editInterviewNotes"
+                    rows="3"
+                    class="app-detail-drawer__input app-detail-drawer__textarea"
+                  ></textarea>
+                </label>
+              </div>
+            </section>
+
+            <section class="app-detail-drawer__section" aria-labelledby="edit-notes-heading">
+              <h4 id="edit-notes-heading" class="app-detail-drawer__section-title">Follow-up & notes</h4>
+              <div class="app-detail-drawer__fields">
+                <label class="app-detail-drawer__field">
+                  <span class="app-detail-drawer__label">Follow-up date</span>
+                  <input name="follow_up_date" type="date" [(ngModel)]="editFollowUp" class="app-detail-drawer__input" />
+                </label>
+                <label class="app-detail-drawer__field app-detail-drawer__field--full">
+                  <span class="app-detail-drawer__label">Notes</span>
+                  <textarea name="notes" [(ngModel)]="editNotes" rows="3" class="app-detail-drawer__input app-detail-drawer__textarea"></textarea>
+                </label>
+                <label class="app-detail-drawer__field app-detail-drawer__field--full">
+                  <span class="app-detail-drawer__label">Rejection reason</span>
+                  <textarea
+                    name="rejection_reason"
+                    [(ngModel)]="editRejection"
+                    rows="2"
+                    class="app-detail-drawer__input app-detail-drawer__textarea"
+                  ></textarea>
+                </label>
+                <label class="app-detail-drawer__field">
+                  <span class="app-detail-drawer__label">Contact phone</span>
+                  <input
+                    name="contact_phone"
+                    type="text"
+                    [(ngModel)]="editContactPhone"
+                    maxlength="20"
+                    class="app-detail-drawer__input"
+                    autocomplete="tel"
+                  />
+                </label>
+              </div>
+            </section>
+          </div>
+
+          <footer class="app-detail-drawer__footer">
+            <button type="submit" class="app-detail-drawer__save" [disabled]="saving()">
+              {{ saving() ? 'Saving…' : 'Save changes' }}
+            </button>
+          </footer>
+        </form>
+        }
+      }
+    </div>
+  </aside>
+</div>

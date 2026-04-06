@@ -1,0 +1,24 @@
+@if (stats(); as s) {
+  <div
+    class="flex flex-col gap-3 rounded-2xl border border-[#E2E8F0] bg-white px-5 py-4 shadow-sm sm:flex-row sm:flex-wrap sm:items-center sm:gap-3"
+    style="box-shadow: 0 1px 4px rgba(0, 0, 0, 0.04)"
+    role="region"
+    aria-label="Application statistics summary"
+  >
+    <div class="flex items-baseline gap-2 border-b border-[#F1F5F9] pb-3 sm:border-0 sm:pb-0">
+      <span class="text-2xl font-semibold tabular-nums text-slate-900">{{ s.totalApplications }}</span>
+      <span class="text-sm font-medium text-slate-600">applications</span>
+    </div>
+    <span class="hidden text-slate-300 sm:inline" aria-hidden="true">|</span>
+    <div class="flex flex-wrap gap-2">
+      @for (key of statusKeys; track key) {
+        <span
+          class="inline-flex items-center gap-1.5 rounded-full border border-[#E2E8F0] bg-[#F8FAFC] px-3 py-1.5 text-xs font-medium text-slate-700"
+        >
+          <span class="text-slate-500">{{ statusTitle(key) }}</span>
+          <span class="tabular-nums text-slate-900">{{ s.applicationsByStatus?.[key] ?? 0 }}</span>
+        </span>
+      }
+    </div>
+  </div>
+}

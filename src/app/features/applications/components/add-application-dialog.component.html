@@ -1,0 +1,69 @@
+<div class="add-app-dialog rounded-2xl bg-white p-6 shadow-xl">
+  <h2 class="mb-1 text-lg font-semibold text-slate-900" id="add-application-title">Add application</h2>
+  <p class="mb-4 text-sm text-slate-600">Track a role you applied to outside the tailored flow.</p>
+
+  <form class="space-y-3" (ngSubmit)="submit()" aria-labelledby="add-application-title">
+    <label class="block text-xs font-medium text-slate-600">
+      Company name <span class="text-red-600">*</span>
+      <input
+        name="company_name"
+        type="text"
+        required
+        [(ngModel)]="companyName"
+        class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+        autocomplete="organization"
+      />
+    </label>
+
+    <label class="block text-xs font-medium text-slate-600">
+      Job title <span class="text-red-600">*</span>
+      <input
+        name="job_position"
+        type="text"
+        required
+        [(ngModel)]="jobTitle"
+        class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+      />
+    </label>
+
+    <label class="block text-xs font-medium text-slate-600">
+      Job URL (optional)
+      <input
+        name="job_url"
+        type="url"
+        [(ngModel)]="jobUrl"
+        placeholder="https://"
+        class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+      />
+    </label>
+
+    <label class="block text-xs font-medium text-slate-600">
+      Job description <span class="text-red-600">*</span>
+      <textarea
+        name="job_description"
+        required
+        rows="5"
+        [(ngModel)]="jobDescription"
+        class="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm text-slate-900 focus:outline-none focus:ring-2 focus:ring-slate-400"
+      ></textarea>
+    </label>
+
+    <div class="flex justify-end gap-2 pt-2">
+      <button
+        type="button"
+        class="rounded-xl border border-slate-200 px-4 py-2 text-sm font-medium text-slate-700 hover:bg-slate-50 focus:outline-none focus:ring-2 focus:ring-slate-400"
+        (click)="cancel()"
+        [disabled]="submitting()"
+      >
+        Cancel
+      </button>
+      <button
+        type="submit"
+        class="rounded-xl bg-[var(--ats-primary)] px-4 py-2 text-sm font-semibold text-white shadow-sm hover:bg-[var(--ats-primary-dark)] disabled:cursor-not-allowed disabled:opacity-50 focus:outline-none focus:ring-2 focus:ring-[var(--ats-primary)] focus:ring-offset-2"
+        [disabled]="submitting()"
+      >
+        {{ submitting() ? 'Adding…' : 'Add application' }}
+      </button>
+    </div>
+  </form>
+</div>
