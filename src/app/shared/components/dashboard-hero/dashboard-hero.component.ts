@@ -14,7 +14,6 @@ export interface DashboardHeroStat {
 export class DashboardHeroComponent {
   userName = input<string | null | undefined>(undefined);
   resumeCount = input<number>(0);
-  atsCreditsRemaining = input<number>(0);
 
   tailorClicked = output<void>();
   quickTailorClicked = output<void>();
@@ -23,7 +22,6 @@ export class DashboardHeroComponent {
   readonly heroStats = computed<DashboardHeroStat[]>(() => [
     { value: String(this.resumeCount() || '0'), label: 'Resumes' },
     { value: '—', label: 'Avg. Score' },
-    { value: String(this.atsCreditsRemaining()), label: 'ATS Credits' },
   ]);
 
   readonly displayName = computed(() => this.userName() || 'User');

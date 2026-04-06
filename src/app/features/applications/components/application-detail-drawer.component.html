@@ -45,9 +45,6 @@
               </div>
               <div class="app-detail-drawer__chips">
                 <span [ngClass]="statusPillNgClass(current.status)">{{ statusLabel(current.status || '') }}</span>
-                @if (current.atsScore != null) {
-                  <span class="app-detail-drawer__chip app-detail-drawer__chip--ats">ATS {{ current.atsScore }}%</span>
-                }
                 @if (current.applicationSource) {
                   <span class="app-detail-drawer__chip">{{ formatSource(current.applicationSource) }}</span>
                 }

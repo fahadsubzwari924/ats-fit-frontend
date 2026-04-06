@@ -1,4 +1,4 @@
-import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { catchError, forkJoin, interval, of, switchMap, takeWhile } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DashboardUsageCardComponent } from '@features/dashboard/components/ui/dashboard-usage-card/dashboard-usage-card.component';
@@ -72,11 +72,6 @@ export class DashboardComponent implements OnInit {
   drawerOpen = signal<boolean>(false);
   private enrichmentAutoTriggered = signal(false);
   private hasAutoOpenedDrawer = signal(false);
-
-  readonly atsCreditsRemaining = computed(() => {
-    const atsCredits = this.featureUsage().find((f) => f.feature === 'ats_score');
-    return atsCredits ? atsCredits.remaining ?? (atsCredits.allowed - atsCredits.used) : 0;
-  });
 
   get showQuestionsBanner(): boolean {
     const status = this.profileStateService.profileStatus();

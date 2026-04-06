@@ -20,12 +20,10 @@ export class DashboardUsageCardComponent {
   featureUsages = input<FeatureUsage[]>([]);
 
   private readonly colorMap: Record<string, string> = {
-    ats_score: '#2563EB',
     resume_generation: '#7C3AED',
   };
 
   private readonly labelMap: Record<string, string> = {
-    ats_score: 'ATS Score Credits',
     resume_generation: 'Resume Generations',
   };
 

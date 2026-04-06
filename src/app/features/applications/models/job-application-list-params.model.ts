@@ -7,8 +7,7 @@ export type JobApplicationListSortField =
   | 'status'
   | 'applied_at'
   | 'application_deadline'
-  | 'follow_up_date'
-  | 'ats_score';
+  | 'follow_up_date';
 
 export interface JobApplicationListParams {
   q?: string;

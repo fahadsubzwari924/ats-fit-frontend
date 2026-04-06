@@ -16,7 +16,6 @@ describe('ApplicationsPageComponent', () => {
   const emptyStats = new JobApplicationStats({
     total_applications: 0,
     applications_by_status: {},
-    average_ats_score: 0,
     response_rate: 0,
     interview_rate: 0,
     success_rate: 0,

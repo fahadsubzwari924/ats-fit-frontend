@@ -35,11 +35,9 @@ export class LandingComponent implements OnInit, OnDestroy {
   // Signals for component state management
   mobileMenuOpen = signal(false);
   showWizard = signal(false);
-  showATSWizard = signal(false);
 
   // Properties for data binding
   canGenerateResume = signal(false);
-  canCheckATSScore = signal(false);
   isAuthenticated = signal(false);
 
   public features = signal<IFeature[]>([]);
@@ -116,10 +114,6 @@ export class LandingComponent implements OnInit, OnDestroy {
     this.modalService.openModal(TailorApplyModalComponent, undefined, { width: '620px', maxWidth: '95vw', panelClass: 'tailor-modal-panel' });
   }
 
-  public openAtsModal(): void {
-    this.modalService.openModal(TailorApplyModalComponent, undefined, { width: '620px', maxWidth: '95vw', panelClass: 'tailor-modal-panel' });
-  }
-
   handleGetStarted(): void {
     if (this.canGenerateResume()) {
       this.showWizard.set(true);
@@ -128,21 +122,8 @@ export class LandingComponent implements OnInit, OnDestroy {
     }
   }
 
-  handleCheckATS(): void {
-    if (this.canCheckATSScore()) {
-      this.showATSWizard.set(true);
-    } else {
-      // Redirect to pricing or show upgrade modal
-      this.router.navigate(['/pricing']);
-    }
-  }
-
   closeWizard(): void {
     this.showWizard.set(false);
-  }
-
-  closeATSWizard(): void {
-    this.showATSWizard.set(false);
   }
 
   toggleMobileMenu(): void {

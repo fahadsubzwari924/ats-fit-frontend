@@ -46,7 +46,6 @@ export class ResumeService {
           const tailoringHeader = response.headers.get('x-tailoring-mode');
           const tailoringMode = (tailoringHeader ?? 'standard') as import('@features/dashboard/models/resume-profile.model').TailoringMode;
           const data = {
-            atsScore: response.headers.get('x-ats-score') ?? undefined,
             filename: response.headers.get('x-filename') ?? undefined,
             resumeGenerationId: response.headers.get('x-resume-generation-id') ?? undefined,
             blob: response.body as Blob,

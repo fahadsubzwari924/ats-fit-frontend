@@ -19,8 +19,6 @@ export class JobApplication {
   applicationSource: string;
   applicationDeadline: Date;
   appliedAt: Date;
-  atsScore: number;
-  atsAnalysis: string;
   coverLetter: string;
   notes: string;
   contactPhone: string;
@@ -48,8 +46,6 @@ export class JobApplication {
     this.applicationSource = data?.application_source;
     this.applicationDeadline = parseOptionalDate(data?.application_deadline);
     this.appliedAt = parseOptionalDate(data?.applied_at);
-    this.atsScore = data?.ats_score;
-    this.atsAnalysis = data?.ats_analysis;
     this.coverLetter = data?.cover_letter;
     this.notes = data?.notes;
     this.contactPhone = data?.contact_phone;
