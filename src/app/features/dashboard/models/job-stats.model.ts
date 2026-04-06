@@ -1,7 +1,8 @@
 // Model class that converts snake_case to camelCase
 export class JobApplicationStats {
   public totalApplications: number;
-  public applicationsByStatus: ApplicationsByStatus;
+  /** May be absent or partial depending on API payload. */
+  public applicationsByStatus?: ApplicationsByStatus;
   public averageAtsScore: number;
   public responseRate: number;
   public interviewRate: number;
@@ -10,7 +11,7 @@ export class JobApplicationStats {
   public monthlyTrend: MonthlyTrend[];
 
   constructor(dto: any) {
-    this.totalApplications = dto?.total_applications;
+    this.totalApplications = dto?.total_applications ?? 0;
     this.applicationsByStatus = dto?.applications_by_status;
     this.averageAtsScore = dto?.average_ats_score;
     this.responseRate = dto?.response_rate;
@@ -23,8 +24,8 @@ export class JobApplicationStats {
       applicationCount: company.application_count
     }));
 
-    // Convert monthly_trend array to camelCase
-    this.monthlyTrend = dto.monthly_trend.map((trend: { month: string; count: number }) => ({
+    // Convert monthly_trend array to camelCase (optional from API)
+    this.monthlyTrend = (dto?.monthly_trend ?? []).map((trend: { month: string; count: number }) => ({
       month: trend.month,
       count: trend.count
     }));

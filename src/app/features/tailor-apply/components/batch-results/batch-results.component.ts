@@ -1,17 +1,20 @@
 import { Component, inject, input, output, signal } from '@angular/core';
+import { FormsModule } from '@angular/forms';
 import { saveAs } from 'file-saver';
 import JSZip from 'jszip';
-import { forkJoin, from, of } from 'rxjs';
-import { catchError } from 'rxjs/operators';
+import { forkJoin, of } from 'rxjs';
+import { catchError, map } from 'rxjs/operators';
 import { BatchGenerateResponse, BatchJobResult } from '@features/tailor-apply/models/batch-tailoring.model';
 import { BatchTailoringService } from '@features/tailor-apply/services/batch-tailoring.service';
+import { JobApplicationCreatePayload } from '@features/apply-new-job/models/job-application-create-payload.model';
 import { JobService } from '@features/apply-new-job/services/job.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
+import { trackedApplicationAppliedAtIso } from '@features/applications/lib/date-input-helpers';
 
 @Component({
   selector: 'app-batch-results',
   standalone: true,
-  imports: [],
+  imports: [FormsModule],
   templateUrl: './batch-results.component.html',
 })
 export class BatchResultsComponent {
@@ -21,6 +24,11 @@ export class BatchResultsComponent {
 
   batchResponse = input.required<BatchGenerateResponse>();
   tailorAnother = output<void>();
+  /** Emitted when the user finishes without saving to the job tracker (checkbox off). */
+  finishWithoutTracking = output<void>();
+
+  /** Default on: user can uncheck to skip tracking when using the primary action. */
+  readonly trackApplicationsChecked = signal(true);
 
   downloadingIndex = signal<number | null>(null);
   isZipping = signal(false);
@@ -72,28 +80,56 @@ export class BatchResultsComponent {
     }
   }
 
+  onFinishWithoutTracking(): void {
+    this.finishWithoutTracking.emit();
+  }
+
   trackAllApplications(): void {
     if (this.tracked() || this.isTracking()) return;
-    const items = this.succeeded;
-    if (!items.length) return;
+    const items = this.succeeded.filter(
+      (r) =>
+        !!r.resumeGenerationId?.trim() &&
+        (r.jobDescription?.trim().length ?? 0) >= 20,
+    );
+    if (!items.length) {
+      this.snackbar.showWarning(
+        'Cannot track: each completed job needs a job description (re-run batch with full descriptions).',
+      );
+      return;
+    }
 
     this.isTracking.set(true);
-    const requests = items
-      .filter((r) => r.resumeGenerationId)
-      .map((r) =>
-        this.jobService.applyNewJobs({
-          companyName: r.companyName,
-          jobTitle: r.jobPosition,
-          resumeGenerationId: r.resumeGenerationId,
-          source: 'quick-tailor',
-        }).pipe(catchError(() => of(null)))
+    const appliedAt = trackedApplicationAppliedAtIso();
+    const requests = items.map((r) => {
+      const payload: JobApplicationCreatePayload = {
+        application_source: 'tailored_resume',
+        company_name: r.companyName,
+        job_position: r.jobPosition,
+        job_description: r.jobDescription!.trim(),
+        applied_at: appliedAt,
+        resume_generation_id: r.resumeGenerationId,
+      };
+      return this.jobService.applyNewJobs(payload).pipe(
+        map(() => true as const),
+        catchError(() => of(false as const)),
       );
+    });
 
-    forkJoin(requests.length ? requests : [of(null)]).subscribe({
-      next: () => {
+    forkJoin(requests).subscribe({
+      next: (outcomes) => {
         this.isTracking.set(false);
-        this.tracked.set(true);
-        this.snackbar.showSuccess(`${items.length} application${items.length > 1 ? 's' : ''} tracked!`);
+        const ok = outcomes.filter(Boolean).length;
+        const bad = outcomes.length - ok;
+        if (ok > 0) {
+          this.tracked.set(true);
+          const suffix = bad > 0 ? ` (${bad} failed)` : '';
+          this.snackbar.showSuccess(
+            `${ok} application${ok > 1 ? 's' : ''} tracked!${suffix}`,
+          );
+        }
+        if (ok === 0) {
+          this.snackbar.showError('Could not track applications. Please try again.');
+        }
       },
       error: () => {
         this.isTracking.set(false);

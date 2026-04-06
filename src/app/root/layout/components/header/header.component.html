@@ -26,6 +26,14 @@
           >
             Dashboard
           </a>
+          <a
+            [routerLink]="appRoutes.APPLICATIONS"
+            routerLinkActive="app-header__nav-link--active"
+            [routerLinkActiveOptions]="{ exact: true }"
+            class="app-header__nav-link"
+          >
+            Applications
+          </a>
         </nav>
       } @else {
         <nav class="app-header__nav app-header__nav--public" aria-label="Marketing">
@@ -171,6 +179,15 @@
           (click)="closeMobile()"
         >
           Dashboard
+        </a>
+        <a
+          [routerLink]="appRoutes.APPLICATIONS"
+          routerLinkActive="app-header__nav-link--active"
+          [routerLinkActiveOptions]="{ exact: true }"
+          class="app-header__nav-link"
+          (click)="closeMobile()"
+        >
+          Applications
         </a>
         @if (showPremiumChip()) {
           <div class="plan-chip--premium-light">

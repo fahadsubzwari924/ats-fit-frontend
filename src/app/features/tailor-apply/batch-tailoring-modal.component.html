@@ -97,7 +97,8 @@
         @if (batchResponse()) {
           <app-batch-results
             [batchResponse]="batchResponse()!"
-            (tailorAnother)="onTailorAnother()">
+            (tailorAnother)="onTailorAnother()"
+            (finishWithoutTracking)="close()">
           </app-batch-results>
         }
       }

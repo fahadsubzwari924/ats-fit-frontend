@@ -10,6 +10,7 @@ import { ResumeTemplate } from '@features/resume-tailoring/models/resume-templat
 import {
   BatchGenerateRequest,
   BatchGenerateResponse,
+  BatchJobInput,
   BatchTailoringStep,
 } from './models/batch-tailoring.model';
 import { TailoringModalCloseResult } from './models/tailoring-modal-close-result.model';
@@ -55,7 +56,7 @@ export class BatchTailoringModalComponent implements OnInit {
     ).subscribe({
       next: (response) => {
         this.stopTimer();
-        this.batchResponse.set(response);
+        this.batchResponse.set(this.attachJobDescriptions(response, payload.jobs));
         this.step.set('results');
       },
       error: (err) => {
@@ -79,6 +80,19 @@ export class BatchTailoringModalComponent implements OnInit {
       clearInterval(this.timerInterval);
       this.timerInterval = null;
     }
+  }
+
+  private attachJobDescriptions(
+    response: BatchGenerateResponse,
+    jobs: BatchJobInput[],
+  ): BatchGenerateResponse {
+    return {
+      ...response,
+      results: response.results.map((r, i) => ({
+        ...r,
+        jobDescription: jobs[i]?.jobDescription ?? r.jobDescription ?? '',
+      })),
+    };
   }
 
   get progressPercent(): number {

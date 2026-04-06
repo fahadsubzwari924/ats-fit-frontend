@@ -1,4 +1,5 @@
 import { Routes } from '@angular/router';
+import { applicationsAccessGuard } from '@core/guards/applications-access.guard';
 import { authGuard } from '@core/guards/auth.guard';
 import { onboardingGuard } from '@core/guards/onboarding.guard';
 import { publicGuard } from '@core/guards/public.guard';
@@ -28,6 +29,12 @@ export const routes: Routes = [
         canActivate: [authGuard],
 
         loadComponent: () => import('@features/dashboard/dashboard.component').then(m => m.DashboardComponent)
+      },
+      {
+        path: 'applications',
+        canActivate: [applicationsAccessGuard],
+        loadComponent: () =>
+          import('@features/applications/applications-page.component').then(m => m.ApplicationsPageComponent),
       },
       {
         path: 'billing',

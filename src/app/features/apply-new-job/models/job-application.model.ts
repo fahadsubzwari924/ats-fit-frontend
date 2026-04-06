@@ -1,3 +1,10 @@
+function parseOptionalDate(raw: unknown): Date {
+  if (raw == null || raw === '') {
+    return new Date(NaN);
+  }
+  return new Date(raw as string);
+}
+
 export class JobApplication {
   // camelCase properties
   id: string;
@@ -39,16 +46,16 @@ export class JobApplication {
     this.expectedSalary = data?.expected_salary;
     this.status = data?.status;
     this.applicationSource = data?.application_source;
-    this.applicationDeadline = data?.application_deadline;
-    this.appliedAt = new Date(data?.applied_at);
+    this.applicationDeadline = parseOptionalDate(data?.application_deadline);
+    this.appliedAt = parseOptionalDate(data?.applied_at);
     this.atsScore = data?.ats_score;
     this.atsAnalysis = data?.ats_analysis;
     this.coverLetter = data?.cover_letter;
     this.notes = data?.notes;
     this.contactPhone = data?.contact_phone;
-    this.interviewScheduledAt = data?.interview_scheduled_at;
+    this.interviewScheduledAt = parseOptionalDate(data?.interview_scheduled_at);
     this.interviewNotes = data?.interview_notes;
-    this.followUpDate = data?.follow_up_date;
+    this.followUpDate = parseOptionalDate(data?.follow_up_date);
     this.rejectionReason = data?.rejection_reason;
     this.metadata = {
       skillsMatched: data?.metadata?.skills_matched,

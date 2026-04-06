@@ -1,0 +1,101 @@
+// Edit sections + field chrome (applications drawer)
+$surface: #ffffff;
+$border: #e2e8f0;
+$text: #0f172a;
+$muted: #64748b;
+$r: 12px;
+$r-lg: 16px;
+
+%card {
+  background: $surface;
+  border: 1px solid $border;
+  border-radius: $r-lg;
+}
+
+.app-detail-drawer__section {
+  @extend %card;
+  margin-bottom: 1.25rem;
+  padding: 1rem 1rem 1.125rem;
+  box-shadow: 0 1px 2px rgb(15 23 42 / 3%);
+}
+
+.app-detail-drawer__section-title {
+  margin: 0 0 0.875rem;
+  padding-bottom: 0.5rem;
+  font-size: 0.6875rem;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: $muted;
+  border-bottom: 1px solid #f1f5f9;
+}
+
+.app-detail-drawer__fields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0.875rem 1rem;
+}
+
+.app-detail-drawer__field {
+  display: flex;
+  flex-direction: column;
+  gap: 0.375rem;
+  min-width: 0;
+
+  &--full {
+    grid-column: 1 / -1;
+  }
+}
+
+.app-detail-drawer__label {
+  font-size: 0.75rem;
+  font-weight: 600;
+  color: #475569;
+}
+
+.app-detail-drawer__input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  line-height: 1.4;
+  color: $text;
+  background: #f8fafc;
+  border: 1px solid $border;
+  border-radius: $r;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, background 0.15s ease;
+
+  &:hover {
+    border-color: #cbd5e1;
+  }
+
+  &:focus {
+    outline: none;
+    background: $surface;
+    border-color: var(--ats-primary-lightest, #bfdbfe);
+    box-shadow: 0 0 0 3px rgb(37 99 235 / 12%);
+  }
+}
+
+.app-detail-drawer__select {
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  padding-right: 2.25rem;
+}
+
+.app-detail-drawer__textarea {
+  min-height: 4.5rem;
+  resize: vertical;
+}
+
+@media (max-width: 380px) {
+  .app-detail-drawer__fields {
+    grid-template-columns: 1fr;
+  }
+
+  .app-detail-drawer__field--full {
+    grid-column: 1;
+  }
+}
