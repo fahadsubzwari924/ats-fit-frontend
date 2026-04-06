@@ -4,7 +4,6 @@ export class TailoredResume {
   public blob: Blob;
   public filename: string;
   public resumeGenerationId: string;
-  public atsScore: string;
   public tailoringMode: TailoringMode;
   public keywordsAdded: number;
   public sectionsOptimized: number;
@@ -15,7 +14,6 @@ export class TailoredResume {
     blob: Blob;
     filename?: string;
     resumeGenerationId?: string;
-    atsScore?: string;
     tailoringMode?: TailoringMode;
     keywordsAdded?: number;
     sectionsOptimized?: number;
@@ -25,7 +23,6 @@ export class TailoredResume {
     this.blob = data?.blob;
     this.filename = data?.filename ?? '';
     this.resumeGenerationId = data?.resumeGenerationId ?? '';
-    this.atsScore = data?.atsScore ?? '';
     this.tailoringMode = data?.tailoringMode ?? 'standard';
     this.keywordsAdded = data?.keywordsAdded ?? 0;
     this.sectionsOptimized = data?.sectionsOptimized ?? 0;

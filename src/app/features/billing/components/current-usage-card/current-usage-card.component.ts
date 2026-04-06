@@ -17,34 +17,28 @@ export class CurrentUsageCardComponent {
 
   public getCardIconGradient(feature: string | undefined): string {
     switch (feature) {
-      case 'ats_score':
-        return 'from-purple-50 to-pink-50 border-purple-200';
       case 'resume_generation':
         return 'from-emerald-50 to-teal-50 border-emerald-200';
       default:
-        return 'from-purple-50 to-pink-50 border-purple-200';
+        return 'from-emerald-50 to-teal-50 border-emerald-200';
     }
   }
 
   public getTitleColorClass(feature: string | undefined): string {
     switch (feature) {
-      case 'ats_score':
-        return 'text-purple-700';
       case 'resume_generation':
         return 'text-emerald-700';
       default:
-        return 'text-purple-700';
+        return 'text-emerald-700';
     }
   }
 
   public getValueColorClass(feature: string | undefined): string {
     switch (feature) {
-      case 'ats_score':
-        return 'text-purple-900';
       case 'resume_generation':
         return 'text-emerald-900';
       default:
-        return 'text-purple-900';
+        return 'text-emerald-900';
     }
   }
 

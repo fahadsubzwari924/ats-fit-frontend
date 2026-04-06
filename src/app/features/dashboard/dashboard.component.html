@@ -2,7 +2,6 @@
   <app-dashboard-hero
     [userName]="user?.fullName"
     [resumeCount]="resumeHistory().length"
-    [atsCreditsRemaining]="atsCreditsRemaining()"
     (tailorClicked)="openTailorModal()"
     (quickTailorClicked)="openBatchTailoringModal()"
     (resumeHistoryClicked)="openResumeHistoryModal()">

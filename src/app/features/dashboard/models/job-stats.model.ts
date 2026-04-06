@@ -3,7 +3,6 @@ export class JobApplicationStats {
   public totalApplications: number;
   /** May be absent or partial depending on API payload. */
   public applicationsByStatus?: ApplicationsByStatus;
-  public averageAtsScore: number;
   public responseRate: number;
   public interviewRate: number;
   public successRate: number;
@@ -13,7 +12,6 @@ export class JobApplicationStats {
   constructor(dto: any) {
     this.totalApplications = dto?.total_applications ?? 0;
     this.applicationsByStatus = dto?.applications_by_status;
-    this.averageAtsScore = dto?.average_ats_score;
     this.responseRate = dto?.response_rate;
     this.interviewRate = dto?.interview_rate;
     this.successRate = dto?.success_rate;
