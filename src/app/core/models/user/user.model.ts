@@ -6,14 +6,13 @@ export class User {
   fullName!: string;
   email!: string;
   password!: string;
-  guestId: string;
   ipAddress: string;
   userAgent: string;
   id: string;
   plan: string;
   /** Derived from `plan` — use instead of comparing `plan` to `SubscriptionType` in templates. */
   isPremium: boolean;
-  /** Derived from `plan` — freemium-only UI (not the same as `!isPremium` when plan is `guest`). */
+  /** Derived from `plan` — freemium tier (non-premium). */
   isFreemium: boolean;
   userType: string;
   isActive: boolean;
@@ -31,7 +30,6 @@ export class User {
     this.fullName = user?.full_name ?? user?.fullName ?? '';
     this.email = user?.email ?? '';
     this.password = user?.password ?? '';
-    this.guestId = user?.guestId ?? '';
     this.ipAddress = user?.ipAddress ?? '';
     this.userAgent = user?.userAgent ?? '';
     this.id = user?.id ?? '';

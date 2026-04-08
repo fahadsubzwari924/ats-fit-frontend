@@ -99,8 +99,7 @@ export class OverviewTabComponent implements OnInit {
     if (sub?.planName) return sub.planName;
     const u = this.userState.currentUser();
     if (u?.isPremium) return 'Premium';
-    if (u?.isFreemium) return 'Free';
-    return 'Guest';
+    return 'Free';
   }
 
   priceMain(): string {
