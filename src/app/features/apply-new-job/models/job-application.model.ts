@@ -30,7 +30,6 @@ export class JobApplication {
   createdAt: Date;
   updatedAt: Date;
   userId: string;
-  guestId: string;
 
   constructor(data: any) {
     // Convert snake_case to camelCase and handle date conversions
@@ -60,7 +59,6 @@ export class JobApplication {
     this.createdAt = new Date(data?.created_at);
     this.updatedAt = new Date(data?.updated_at);
     this.userId = data?.user_id;
-    this.guestId = data?.guest_id;
   }
 }
 

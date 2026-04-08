@@ -1,33 +1,17 @@
 [
     {
-      "title": "Guest",
-      "price": "Free",
-      "description": "Try our platform with basic features",
-      "icon": "/images/pricing-card/price-card-1.svg",
-      "isPopular": false,
-      "buttonText": "Try Started Free",
-      "buttonLink": "/signup",
-      "type": "guest",
-      "features": [
-        "6 Resume generations/month",
-        "15 ATS scores/month",
-        "No history access",
-        "No resume saving"
-      ]
-    },
-    {
       "title": "Free Account",
       "price": "Free",
-      "description": "Get started with enhanced features",
+      "description": "Sign in for freemium limits and core features",
       "icon": "/images/pricing-card/price-card-1.svg",
       "isPopular": false,
-      "buttonText": "Signup for free",
+      "buttonText": "Sign up free",
       "buttonLink": "/signup",
       "type": "registered",
       "features": [
-        "12 Resume generations/month",
-        "30 ATS scores/month",
-        "Past 5 days history",
+        "Monthly resume generation allowance",
+        "Monthly ATS score allowance",
+        "Limited history access",
         "No resume saving"
       ]
     },

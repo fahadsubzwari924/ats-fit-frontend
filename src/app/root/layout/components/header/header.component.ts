@@ -52,8 +52,7 @@ export class HeaderComponent {
   readonly nonPremiumChipLabel = computed(() => {
     const u = this.currentUser();
     if (!u) return '';
-    if (u.isFreemium) return 'Freemium';
-    return 'Guest';
+    return 'Freemium';
   });
 
   @HostListener('document:click', ['$event'])
@@ -97,8 +96,7 @@ export class HeaderComponent {
   planSubtitle(user: User | null): string {
     if (!user) return '';
     if (user.isPremium) return 'Premium Plan';
-    if (user.isFreemium) return 'Freemium';
-    return 'Guest';
+    return 'Freemium';
   }
 
   toggleUserMenu(event?: Event): void {

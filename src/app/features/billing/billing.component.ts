@@ -31,8 +31,7 @@ export class BillingComponent implements OnInit {
     const u = this.userState.currentUser();
     if (!u) return '—';
     if (u.isPremium) return 'Premium';
-    if (u.isFreemium) return 'Free';
-    return 'Guest';
+    return 'Free';
   });
 
   readonly renewalHeadline = computed(() => {
