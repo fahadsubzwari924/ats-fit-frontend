@@ -1,3 +1,21 @@
+<!-- Comparison overlay — replaces results list when a job diff is active -->
+@if (activeComparisonId()) {
+  <div class="space-y-3">
+    <button type="button" (click)="closeComparison()"
+      class="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2.5">
+        <polyline points="15 18 9 12 15 6"></polyline>
+      </svg>
+      Back to results
+    </button>
+    <app-resume-comparison
+      [resumeGenerationId]="activeComparisonId()!"
+      (close)="closeComparison()">
+    </app-resume-comparison>
+  </div>
+} @else {
+
 <div class="space-y-5">
 
   <!-- Header -->
@@ -69,26 +87,41 @@
           }
         </div>
 
-        <!-- Download button -->
+        <!-- Actions for successful jobs -->
         @if (result.status === 'success') {
-          <button (click)="downloadSingle(result, i)"
-            [disabled]="downloadingIndex() === i"
-            class="shrink-0 h-8 px-3 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 transition-all disabled:opacity-50 flex items-center gap-1.5">
-            @if (downloadingIndex() === i) {
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" class="animate-spin">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
-              </svg>
-            } @else {
-              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2">
-                <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                <polyline points="7 10 12 15 17 10"></polyline>
-                <line x1="12" x2="12" y1="15" y2="3"></line>
-              </svg>
-              Download
+          <div class="flex items-center gap-1.5 shrink-0">
+            <!-- See what changed (only if diff is available) -->
+            @if (result.resumeGenerationId) {
+              <button (click)="openComparison(result.resumeGenerationId)"
+                class="h-8 px-2.5 rounded-xl border border-indigo-200 text-xs font-medium text-indigo-600 hover:bg-indigo-50 transition-all flex items-center gap-1">
+                <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                  <circle cx="12" cy="12" r="3"></circle>
+                </svg>
+                See changes
+              </button>
             }
-          </button>
+            <!-- Download -->
+            <button (click)="downloadSingle(result, i)"
+              [disabled]="downloadingIndex() === i"
+              class="h-8 px-3 rounded-xl border border-slate-200 text-xs font-medium text-slate-600 hover:text-indigo-600 hover:border-indigo-300 hover:bg-indigo-50 transition-all disabled:opacity-50 flex items-center gap-1.5">
+              @if (downloadingIndex() === i) {
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2" class="animate-spin">
+                  <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+                </svg>
+              } @else {
+                <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24" fill="none"
+                  stroke="currentColor" stroke-width="2">
+                  <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                  <polyline points="7 10 12 15 17 10"></polyline>
+                  <line x1="12" x2="12" y1="15" y2="3"></line>
+                </svg>
+                Download
+              }
+            </button>
+          </div>
         }
       </div>
     }
@@ -192,3 +225,5 @@
   </button>
 
 </div>
+
+} <!-- end @else (comparison not active) -->

@@ -10,11 +10,12 @@ import { JobApplicationCreatePayload } from '@features/apply-new-job/models/job-
 import { JobService } from '@features/apply-new-job/services/job.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { trackedApplicationAppliedAtIso } from '@features/applications/lib/date-input-helpers';
+import { ResumeComparisonComponent } from '@features/tailor-apply/components/resume-comparison/resume-comparison.component';
 
 @Component({
   selector: 'app-batch-results',
   standalone: true,
-  imports: [FormsModule],
+  imports: [FormsModule, ResumeComparisonComponent],
   templateUrl: './batch-results.component.html',
 })
 export class BatchResultsComponent {
@@ -26,9 +27,13 @@ export class BatchResultsComponent {
   tailorAnother = output<void>();
   /** Emitted when the user finishes without saving to the job tracker (checkbox off). */
   finishWithoutTracking = output<void>();
+  /** Emitted after applications are successfully tracked — signals the modal to close. */
+  finishWithTracking = output<void>();
 
   /** Default on: user can uncheck to skip tracking when using the primary action. */
   readonly trackApplicationsChecked = signal(true);
+
+  activeComparisonId = signal<string | null>(null);
 
   downloadingIndex = signal<number | null>(null);
   isZipping = signal(false);
@@ -80,6 +85,14 @@ export class BatchResultsComponent {
     }
   }
 
+  openComparison(id: string): void {
+    this.activeComparisonId.set(id);
+  }
+
+  closeComparison(): void {
+    this.activeComparisonId.set(null);
+  }
+
   onFinishWithoutTracking(): void {
     this.finishWithoutTracking.emit();
   }
@@ -126,6 +139,7 @@ export class BatchResultsComponent {
           this.snackbar.showSuccess(
             `${ok} application${ok > 1 ? 's' : ''} tracked!${suffix}`,
           );
+          this.finishWithTracking.emit();
         }
         if (ok === 0) {
           this.snackbar.showError('Could not track applications. Please try again.');

@@ -21,13 +21,14 @@ import {
   ResumeHistoryItem,
 } from '@features/dashboard/models/resume-history.model';
 import { SnackbarService } from '@shared/services/snackbar.service';
+import { ResumeComparisonComponent } from '@features/tailor-apply/components/resume-comparison/resume-comparison.component';
 
 const PAGE_LIMIT = 8;
 
 @Component({
   selector: 'app-resume-history-modal',
   standalone: true,
-  imports: [DatePipe, FormsModule],
+  imports: [DatePipe, FormsModule, ResumeComparisonComponent],
   templateUrl: './resume-history-modal.component.html',
 })
 export class ResumeHistoryModalComponent implements OnInit {
@@ -49,6 +50,10 @@ export class ResumeHistoryModalComponent implements OnInit {
   detailLoadingId = signal<string | null>(null);
   detailCache = new Map<string, ResumeHistoryDetail>();
   downloadingId = signal<string | null>(null);
+
+  /** When set, shows the full ResumeComparisonComponent instead of the list. */
+  activeComparisonId = signal<string | null>(null);
+  activeComparisonItem = signal<ResumeHistoryItem | null>(null);
 
   ngOnInit(): void {
     this.loadPage(1);
@@ -167,6 +172,17 @@ export class ResumeHistoryModalComponent implements OnInit {
         this.downloadingId.set(null);
       },
     });
+  }
+
+  openComparison(item: ResumeHistoryItem, event: Event): void {
+    event.stopPropagation();
+    this.activeComparisonItem.set(item);
+    this.activeComparisonId.set(item.id);
+  }
+
+  closeComparison(): void {
+    this.activeComparisonId.set(null);
+    this.activeComparisonItem.set(null);
   }
 
   close(): void {

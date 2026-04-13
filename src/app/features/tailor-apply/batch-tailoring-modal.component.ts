@@ -15,7 +15,7 @@ import {
 } from './models/batch-tailoring.model';
 import { TailoringModalCloseResult } from './models/tailoring-modal-close-result.model';
 
-const ESTIMATED_SECONDS_PER_JOB = 12;
+const ESTIMATED_SECONDS_PER_JOB = 40; // ~2 minutes for 3 jobs (120 seconds total)
 
 @Component({
   selector: 'app-batch-tailoring-modal',
