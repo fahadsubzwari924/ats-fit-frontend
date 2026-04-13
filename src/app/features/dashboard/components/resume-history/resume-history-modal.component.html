@@ -3,9 +3,25 @@
   <!-- Header -->
   <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-slate-100 shrink-0">
     <div>
-      <h2 class="text-lg font-bold text-slate-900">My Resume History</h2>
-      @if (totalItems() > 0) {
-        <p class="text-xs text-slate-400 mt-0.5">{{ totalItems() }} tailored resume{{ totalItems() !== 1 ? 's' : '' }}</p>
+      @if (activeComparisonId()) {
+        <div class="flex items-center gap-2">
+          <button type="button" (click)="closeComparison()"
+            class="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-indigo-600 transition-colors">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5">
+              <polyline points="15 18 9 12 15 6"></polyline>
+            </svg>
+            Back to history
+          </button>
+        </div>
+        <p class="text-xs text-slate-400 mt-0.5">
+          {{ activeComparisonItem()?.jobPosition }} &#64; {{ activeComparisonItem()?.companyName }}
+        </p>
+      } @else {
+        <h2 class="text-lg font-bold text-slate-900">My Resume History</h2>
+        @if (totalItems() > 0) {
+          <p class="text-xs text-slate-400 mt-0.5">{{ totalItems() }} tailored resume{{ totalItems() !== 1 ? 's' : '' }}</p>
+        }
       }
     </div>
     <button (click)="close()"
@@ -17,7 +33,18 @@
     </button>
   </div>
 
-  <!-- Search -->
+  <!-- Full comparison view -->
+  @if (activeComparisonId()) {
+    <div class="flex-1 overflow-y-auto px-6 py-5">
+      <app-resume-comparison
+        [resumeGenerationId]="activeComparisonId()!"
+        (close)="closeComparison()">
+      </app-resume-comparison>
+    </div>
+  }
+
+  <!-- Search (hidden when comparison is active) -->
+  @if (!activeComparisonId()) {
   <div class="px-6 py-3 border-b border-slate-100 shrink-0">
     <div class="relative">
       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
@@ -222,27 +249,44 @@
                       </div>
                     }
 
-                    <!-- Re-download action -->
-                    <button
-                      (click)="downloadItem(item, $event)"
-                      [disabled]="downloadingId() === item.id"
-                      class="w-full py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-sm shadow-indigo-200 disabled:opacity-60">
-                      @if (downloadingId() === item.id) {
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2" class="animate-spin">
-                          <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
-                        </svg>
-                        Downloading...
-                      } @else {
-                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-                          stroke="currentColor" stroke-width="2">
-                          <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-                          <polyline points="7 10 12 15 17 10"></polyline>
-                          <line x1="12" x2="12" y1="15" y2="3"></line>
-                        </svg>
-                        Download PDF
+                    <!-- Actions row -->
+                    <div class="flex gap-2">
+                      <!-- See full comparison -->
+                      @if (getDetail(item.id)!.changesDiff) {
+                        <button
+                          type="button"
+                          (click)="openComparison(item, $event)"
+                          class="flex-1 py-2.5 rounded-xl border border-indigo-200 text-indigo-600 text-sm font-semibold hover:bg-indigo-50 flex items-center justify-center gap-2 transition-all">
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                          </svg>
+                          See full changes
+                        </button>
                       }
-                    </button>
+                      <!-- Re-download action -->
+                      <button
+                        (click)="downloadItem(item, $event)"
+                        [disabled]="downloadingId() === item.id"
+                        class="flex-1 py-2.5 rounded-xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all shadow-sm shadow-indigo-200 disabled:opacity-60">
+                        @if (downloadingId() === item.id) {
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2" class="animate-spin">
+                            <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+                          </svg>
+                          Downloading...
+                        } @else {
+                          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                            stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" x2="12" y1="15" y2="3"></line>
+                          </svg>
+                          Download PDF
+                        }
+                      </button>
+                    </div>
                   </div>
                 }
               </div>
@@ -253,8 +297,10 @@
     }
   </div>
 
-  <!-- Pagination footer -->
-  @if (totalPages() > 1 && !isLoading()) {
+  } <!-- end @if (!activeComparisonId()) -->
+
+  <!-- Pagination footer (only when list is visible) -->
+  @if (totalPages() > 1 && !isLoading() && !activeComparisonId()) {
     <div class="flex items-center justify-between px-6 py-3 border-t border-slate-100 shrink-0">
       <p class="text-xs text-slate-400">
         Page {{ currentPage() }} of {{ totalPages() }}

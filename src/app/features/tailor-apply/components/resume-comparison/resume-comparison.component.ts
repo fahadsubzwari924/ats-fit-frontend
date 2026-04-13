@@ -179,11 +179,27 @@ export class ResumeComparisonComponent implements OnInit {
   scrollToStep(id: string): void {
     this.activeNavId.set(id);
     queueMicrotask(() => {
-      document.getElementById(id)?.scrollIntoView({
-        behavior: 'smooth',
-        block: 'start',
-      });
+      const el = document.getElementById(id);
+      if (!el) return;
+      const scrollParent = this.findScrollableParent(el);
+      if (scrollParent) {
+        const elRect = el.getBoundingClientRect();
+        const parentRect = scrollParent.getBoundingClientRect();
+        scrollParent.scrollBy({ top: elRect.top - parentRect.top - 16, behavior: 'smooth' });
+      } else {
+        el.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
     });
+  }
+
+  private findScrollableParent(element: HTMLElement): HTMLElement | null {
+    let el = element.parentElement;
+    while (el) {
+      const overflow = getComputedStyle(el).overflowY;
+      if (overflow === 'auto' || overflow === 'scroll') return el;
+      el = el.parentElement;
+    }
+    return null;
   }
 
   stepNumberFor(id: string): number {

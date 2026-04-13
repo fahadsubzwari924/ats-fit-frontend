@@ -16,7 +16,7 @@ import {
 import { ResumeTemplate } from '@features/resume-tailoring/models/resume-template.model';
 import { BatchGenerateRequest } from '@features/tailor-apply/models/batch-tailoring.model';
 
-const MAX_JOBS = 10;
+const MAX_JOBS = 3;
 const MIN_JOBS = 2;
 
 @Component({

@@ -98,7 +98,8 @@
           <app-batch-results
             [batchResponse]="batchResponse()!"
             (tailorAnother)="onTailorAnother()"
-            (finishWithoutTracking)="close()">
+            (finishWithoutTracking)="close()"
+            (finishWithTracking)="close()">
           </app-batch-results>
         }
       }
