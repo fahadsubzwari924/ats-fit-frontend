@@ -95,15 +95,36 @@
 
   <!-- Features List -->
   <ul class="space-y-3 mb-6 flex-grow">
-    @for (feature of plan().features; track feature) {
-      <li class="flex items-center text-sm">
-        <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
-          class="lucide lucide-circle-check-big h-4 w-4 text-emerald-500 mr-3 flex-shrink-0">
-          <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
-          <path d="m9 11 3 3L22 4"></path>
-        </svg>
-        <span class="text-slate-800 font-medium">{{ feature }}</span>
+    @for (feature of plan().features; track $index) {
+      <li
+        class="flex text-sm gap-3"
+        [class.items-start]="isPlanFeatureGroup(feature)"
+        [class.items-center]="!isPlanFeatureGroup(feature)"
+      >
+        @if (isPlanFeatureGroup(feature)) {
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-circle-check-big h-4 w-4 text-emerald-500 mt-0.5 flex-shrink-0">
+            <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
+            <path d="m9 11 3 3L22 4"></path>
+          </svg>
+          <div class="min-w-0">
+            <span class="text-slate-800 font-semibold block">{{ feature.title }}</span>
+            <ul class="mt-1.5 space-y-1 border-l-2 border-slate-200 pl-3 ml-0.5 list-none">
+              @for (sub of feature.subitems; track $index) {
+                <li class="text-slate-600 text-xs leading-relaxed">– {{ sub }}</li>
+              }
+            </ul>
+          </div>
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="lucide lucide-circle-check-big h-4 w-4 text-emerald-500 mr-3 flex-shrink-0">
+            <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
+            <path d="m9 11 3 3L22 4"></path>
+          </svg>
+          <span class="text-slate-800 font-medium">{{ feature }}</span>
+        }
       </li>
     }
   </ul>

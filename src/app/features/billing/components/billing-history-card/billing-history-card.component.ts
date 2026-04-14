@@ -22,8 +22,8 @@ export class BillingHistoryCardComponent {
    * @param status The payment status
    * @returns CSS classes for the status badge
    */
-  public getStatusClasses(status: string): string {
-    switch (status.toLowerCase()) {
+  public getStatusClasses(status: string | undefined): string {
+    switch ((status ?? '').toLowerCase()) {
       case 'success':
         return 'bg-emerald-100 text-emerald-800';
       case 'pending':
@@ -42,8 +42,8 @@ export class BillingHistoryCardComponent {
    * @param status The payment status
    * @returns CSS classes for the icon background
    */
-  public getIconClasses(status: string): string {
-    switch (status.toLowerCase()) {
+  public getIconClasses(status: string | undefined): string {
+    switch ((status ?? '').toLowerCase()) {
       case 'success':
         return 'bg-emerald-100';
       case 'pending':
@@ -62,8 +62,8 @@ export class BillingHistoryCardComponent {
    * @param status The payment status
    * @returns CSS classes for the icon color
    */
-  public getIconColor(status: string): string {
-    switch (status.toLowerCase()) {
+  public getIconColor(status: string | undefined): string {
+    switch ((status ?? '').toLowerCase()) {
       case 'paid':
         return 'text-emerald-600';
       case 'pending':

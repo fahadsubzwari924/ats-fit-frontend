@@ -1,4 +1,5 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { MatDialogRef } from '@angular/material/dialog';
 
 import { AddPaymentMethodModalComponent } from './add-payment-method-modal.component';
 
@@ -8,7 +9,10 @@ describe('AddPaymentMethodModalComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [AddPaymentMethodModalComponent]
+      imports: [AddPaymentMethodModalComponent],
+      providers: [
+        { provide: MatDialogRef, useValue: { close: jasmine.createSpy('close') } },
+      ],
     })
     .compileComponents();
 

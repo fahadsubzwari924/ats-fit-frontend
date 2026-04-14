@@ -1,4 +1,4 @@
-# Error handling — ats-fit-frontend
+# Error handling — resume-maker-fe
 
 ## Philosophy
 

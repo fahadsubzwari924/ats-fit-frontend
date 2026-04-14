@@ -1,3 +1,5 @@
+import { PlanFeature } from '@shared/types/plan-feature.type';
+
 export type BillingCycle = 'weekly' | 'monthly' | 'yearly';
 
 export class SubscriptionPlan {
@@ -8,7 +10,7 @@ export class SubscriptionPlan {
   currency: string;
   paymentGatewayVariantId: string;
   isActive: boolean;
-  features: string[];
+  features: PlanFeature[];
   billingCycle: BillingCycle;
   createdAt: Date;
   updatedAt: Date;

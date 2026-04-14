@@ -6,6 +6,7 @@ import { PaymentTabComponent } from './components/payment-tab/payment-tab.compon
 import { HistoryTabComponent } from './components/history-tab/history-tab.component';
 import { BillingPageHeaderComponent } from './components/billing-page-header/billing-page-header.component';
 import { UserState } from '@core/states/user.state';
+import { PLAN_LABELS } from '@features/billing/constants/billing-overview.constants';
 
 @Component({
   selector: 'app-billing',
@@ -30,8 +31,8 @@ export class BillingComponent implements OnInit {
   readonly planHeadline = computed(() => {
     const u = this.userState.currentUser();
     if (!u) return '—';
-    if (u.isPremium) return 'Premium';
-    return 'Free';
+    if (u.isPremium) return PLAN_LABELS.PREMIUM;
+    return PLAN_LABELS.FREE;
   });
 
   readonly renewalHeadline = computed(() => {

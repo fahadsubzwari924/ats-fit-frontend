@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { GoogleAuthButtonComponent } from './google-auth-button.component';
+import { httpClientTestProviders } from '@testing/http-client-test.providers';
 
 describe('GoogleAuthButtonComponent', () => {
   let component: GoogleAuthButtonComponent;
@@ -8,7 +9,8 @@ describe('GoogleAuthButtonComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [GoogleAuthButtonComponent]
+      imports: [GoogleAuthButtonComponent],
+      providers: [...httpClientTestProviders],
     })
     .compileComponents();
 

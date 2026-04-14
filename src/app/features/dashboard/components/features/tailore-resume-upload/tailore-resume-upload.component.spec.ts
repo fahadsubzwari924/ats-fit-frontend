@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { TailoreResumeUploadComponent } from './tailore-resume-upload.component';
+import { httpClientTestProviders } from '@testing/http-client-test.providers';
 
 describe('TailoreResumeUploadComponent', () => {
   let component: TailoreResumeUploadComponent;
@@ -8,7 +9,8 @@ describe('TailoreResumeUploadComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [TailoreResumeUploadComponent]
+      imports: [TailoreResumeUploadComponent],
+      providers: [...httpClientTestProviders],
     })
     .compileComponents();
 
