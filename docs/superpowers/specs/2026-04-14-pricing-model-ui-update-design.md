@@ -76,10 +76,10 @@ Restructure to two entries matching the new model:
 - Toggle updates `selectedCycle` signal
 
 #### `PriceCardComponent`
-- Add `selectedCycle = input<'monthly' | 'annual'>('monthly')` input signal
-- In the template: when `selectedCycle() === 'annual'` and `priceCard()?.annualPrice` exists:
-  - Display `annualPrice` instead of `price`
-  - Show `annualSavingsBadge` as a small green pill badge rendered inline after the price (same line or directly below it)
+- Add `selectedCycle = input<BillingCycle>(BILLING_CYCLE.MONTHLY)` input signal (type from `pricing.constants.ts`)
+- Add a **single** `priceDisplay = computed<PriceDisplay>()` that returns `{ price: string; badge: string | null }` — one computation, two cohesive derived values, no duplicated conditional
+- Template uses `priceDisplay().price` and `priceDisplay().badge`
+- Inline Tailwind utility classes extracted to semantic BEM classes via `@apply` in the SCSS file (e.g. `.price-card`, `.price-card__price`, `.price-card__cta--primary`) to reduce template noise from 20–30 classes per element to a single semantic class name
 - CTA buttons use `buttonLink` value (both point to `/signup`)
 
 ---

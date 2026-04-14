@@ -1,14 +1,28 @@
 # Pricing Model UI Update — Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> **For agentic workers:** Dispatch each task using the Agency specialist below. Steps use checkbox (`- [ ]`) syntax for tracking. No commits until the user reviews — implement all tasks, then stop.
 
 **Goal:** Align all frontend pricing UI with the new Freemium / Pro pricing model ($12/mo · $89/yr) replacing the stale $19 "Premium" data.
 
-**Architecture:** Three independent change groups — (1) landing page data + interface + component, (2) landing page template toggle, (3) billing section hardcoded values + enterprise button removal. Groups 1 and 3 can be done in parallel; group 2 depends on group 1.
+**Architecture:** Four independent change groups — (1) pricing constants + interface + data, (2) `PriceCardComponent` with single computed + Tailwind `@apply`, (3) landing page toggle wiring, (4) billing section cleanup. Groups 1 and 4 can start in parallel; groups 2 and 3 depend on group 1.
 
-**Tech Stack:** Angular 19 · TypeScript · Tailwind CSS · Angular signals (`signal`, `input`)
+**Tech Stack:** Angular 19 · TypeScript · Tailwind CSS · Angular signals (`signal`, `input`, `computed`)
+
+**Agency dispatch:** All tasks → `subagent_type: "engineering-frontend-developer"`
 
 **Spec:** `docs/superpowers/specs/2026-04-14-pricing-model-ui-update-design.md`
+
+---
+
+## Dispatch template
+
+```
+Task({
+  subagent_type: "engineering-frontend-developer",
+  description: "Implement Task N: <short name>",
+  prompt: "<full task section from this plan>"
+})
+```
 
 ---
 
@@ -16,36 +30,70 @@
 
 | Action | File |
 |--------|------|
+| Create | `src/app/root/landing/constants/pricing.constants.ts` |
+| Create | `src/app/features/billing/constants/billing-overview.constants.ts` |
 | Modify | `src/app/root/landing/interfaces/pricing.interface.ts` |
 | Modify | `public/json/pricing.json` |
 | Modify | `src/app/root/landing/enums/price-card-type.enum.ts` |
 | Modify | `src/app/root/landing/components/price-card/price-card.component.ts` |
 | Modify | `src/app/root/landing/components/price-card/price-card.component.html` |
+| Modify | `src/app/root/landing/components/price-card/price-card.component.scss` |
 | Modify | `src/app/root/landing/components/price-card/price-card.component.spec.ts` |
 | Modify | `src/app/root/landing/landing.component.ts` |
 | Modify | `src/app/root/landing/landing.component.html` |
 | Modify | `src/app/features/billing/components/overview-tab/overview-tab.component.ts` |
+| Modify | `src/app/features/billing/components/overview-tab/overview-tab.component.html` |
 | Modify | `src/app/features/billing/components/billing-current-plan-card/billing-current-plan-card.component.ts` |
 | Modify | `src/app/features/billing/components/billing-current-plan-card/billing-current-plan-card.component.html` |
 
 ---
 
-## Task 1: Update `IPricing` interface and `pricing.json`
+## Task 1: Pricing constants, interface, enum, and data
 
 **Files:**
+- Create: `src/app/root/landing/constants/pricing.constants.ts`
 - Modify: `src/app/root/landing/interfaces/pricing.interface.ts`
 - Modify: `src/app/root/landing/enums/price-card-type.enum.ts`
 - Modify: `public/json/pricing.json`
 
 ### Background
-`IPricing` is the data contract between `pricing.json` and `PriceCardComponent`. It currently has no support for annual pricing variants. `PriceCardType` has `REGISTERED` and `PREMIUM` but the new plan name is "Pro".
+The landing page pricing data is served from `public/json/pricing.json` and typed by `IPricing`. The current data has the wrong price ($19), wrong plan names, and no annual variant. We also need a `BillingCycle` type and constants to replace magic strings throughout the feature. The `PriceCardType` enum needs a `PRO` value.
 
-- [ ] **Step 1: Update `IPricing` interface**
+- [ ] **Step 1: Create the pricing constants file**
+
+Create `src/app/root/landing/constants/pricing.constants.ts`:
+
+```ts
+export const BILLING_CYCLE = {
+  MONTHLY: 'monthly',
+  ANNUAL: 'annual',
+} as const;
+
+export type BillingCycle = (typeof BILLING_CYCLE)[keyof typeof BILLING_CYCLE];
+
+export const PRICING_ROUTES = {
+  SIGNUP: '/signup',
+} as const;
+```
+
+- [ ] **Step 2: Update `PriceCardType` enum**
+
+Replace the entire contents of `src/app/root/landing/enums/price-card-type.enum.ts`:
+
+```ts
+export enum PriceCardType {
+  REGISTERED = 'registered',
+  PREMIUM = 'premium',
+  PRO = 'pro',
+}
+```
+
+- [ ] **Step 3: Update `IPricing` interface**
 
 Replace the entire contents of `src/app/root/landing/interfaces/pricing.interface.ts`:
 
 ```ts
-import { PriceCardType } from "@root/landing/enums/price-card-type.enum";
+import { PriceCardType } from '@root/landing/enums/price-card-type.enum';
 
 export interface IPricing {
   title: string;
@@ -62,19 +110,7 @@ export interface IPricing {
 }
 ```
 
-- [ ] **Step 2: Update `PriceCardType` enum**
-
-Replace the entire contents of `src/app/root/landing/enums/price-card-type.enum.ts`:
-
-```ts
-export enum PriceCardType {
-  REGISTERED = 'registered',
-  PREMIUM = 'premium',
-  PRO = 'pro',
-}
-```
-
-- [ ] **Step 3: Replace `pricing.json` with correct data**
+- [ ] **Step 4: Replace `pricing.json` with correct data**
 
 Replace the entire contents of `public/json/pricing.json`:
 
@@ -121,7 +157,7 @@ Replace the entire contents of `public/json/pricing.json`:
 ]
 ```
 
-- [ ] **Step 4: Run lint to verify no errors**
+- [ ] **Step 5: Run lint**
 
 ```bash
 cd /Users/fahadsubzwari924/Documents/sideProjects/ats-fit-frontend
@@ -130,26 +166,24 @@ npm run lint -- --quiet
 
 Expected: no errors.
 
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/app/root/landing/interfaces/pricing.interface.ts \
-        src/app/root/landing/enums/price-card-type.enum.ts \
-        public/json/pricing.json
-git commit -m "feat: update pricing data and interface for Freemium/Pro model"
-```
-
 ---
 
-## Task 2: Update `PriceCardComponent` to support billing cycle toggle
+## Task 2: Update `PriceCardComponent` — single computed, `@apply` styles, no magic strings
 
 **Files:**
 - Modify: `src/app/root/landing/components/price-card/price-card.component.ts`
 - Modify: `src/app/root/landing/components/price-card/price-card.component.html`
+- Modify: `src/app/root/landing/components/price-card/price-card.component.scss`
 - Modify: `src/app/root/landing/components/price-card/price-card.component.spec.ts`
 
 ### Background
-`PriceCardComponent` currently only renders `priceCard().price`. It needs a `selectedCycle` input to switch between monthly and annual pricing, and to show the savings badge.
+`PriceCardComponent` needs three improvements:
+
+1. **Single computed** — instead of two separate `displayPrice` and `savingsBadge` computeds that each repeat the same conditional logic, use one `priceDisplay` computed that returns `{ price: string; badge: string | null }`. This is cleaner because the `isAnnual` check runs once, the two derived values are cohesive, and the template accesses a single reactive source.
+
+2. **Tailwind `@apply`** — the template currently has elements with 20–30 utility classes inline. Move those into semantic BEM classes defined with `@apply` in the SCSS file. The template then reads `class="price-card"` instead of 30 tokens, which is dramatically easier to maintain and review.
+
+3. **No magic strings** — the `'monthly'`/`'annual'` string literals come from `BILLING_CYCLE` constants defined in Task 1.
 
 - [ ] **Step 1: Write the failing tests**
 
@@ -157,10 +191,10 @@ Replace the entire contents of `src/app/root/landing/components/price-card/price
 
 ```ts
 import { ComponentFixture, TestBed } from '@angular/core/testing';
-import { Component } from '@angular/core';
 import { PriceCardComponent } from './price-card.component';
 import { IPricing } from '@root/landing/interfaces/pricing.interface';
 import { PriceCardType } from '@root/landing/enums/price-card-type.enum';
+import { BILLING_CYCLE } from '@root/landing/constants/pricing.constants';
 
 const FREEMIUM_PLAN: IPricing = {
   title: 'Freemium',
@@ -207,47 +241,63 @@ describe('PriceCardComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  it('shows monthly price by default', () => {
-    fixture.componentRef.setInput('priceCard', PRO_PLAN);
-    fixture.componentRef.setInput('selectedCycle', 'monthly');
-    fixture.detectChanges();
-    const el: HTMLElement = fixture.nativeElement;
-    expect(el.textContent).toContain('$12/mo');
-    expect(el.textContent).not.toContain('$89/yr');
+  describe('priceDisplay computed', () => {
+    it('returns monthly price and null badge on monthly cycle', () => {
+      fixture.componentRef.setInput('priceCard', PRO_PLAN);
+      fixture.componentRef.setInput('selectedCycle', BILLING_CYCLE.MONTHLY);
+      fixture.detectChanges();
+      expect(component.priceDisplay().price).toBe('$12/mo');
+      expect(component.priceDisplay().badge).toBeNull();
+    });
+
+    it('returns annual price and savings badge on annual cycle', () => {
+      fixture.componentRef.setInput('priceCard', PRO_PLAN);
+      fixture.componentRef.setInput('selectedCycle', BILLING_CYCLE.ANNUAL);
+      fixture.detectChanges();
+      expect(component.priceDisplay().price).toBe('$89/yr');
+      expect(component.priceDisplay().badge).toBe('Save 38%');
+    });
+
+    it('returns monthly price when annual cycle selected but no annualPrice set', () => {
+      fixture.componentRef.setInput('priceCard', FREEMIUM_PLAN);
+      fixture.componentRef.setInput('selectedCycle', BILLING_CYCLE.ANNUAL);
+      fixture.detectChanges();
+      expect(component.priceDisplay().price).toBe('Free');
+      expect(component.priceDisplay().badge).toBeNull();
+    });
   });
 
-  it('shows annual price when cycle is annual', () => {
-    fixture.componentRef.setInput('priceCard', PRO_PLAN);
-    fixture.componentRef.setInput('selectedCycle', 'annual');
-    fixture.detectChanges();
-    const el: HTMLElement = fixture.nativeElement;
-    expect(el.textContent).toContain('$89/yr');
-    expect(el.textContent).not.toContain('$12/mo');
-  });
+  describe('template rendering', () => {
+    it('shows monthly price in DOM by default', () => {
+      fixture.componentRef.setInput('priceCard', PRO_PLAN);
+      fixture.componentRef.setInput('selectedCycle', BILLING_CYCLE.MONTHLY);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.textContent).toContain('$12/mo');
+      expect(fixture.nativeElement.textContent).not.toContain('$89/yr');
+    });
 
-  it('shows savings badge on annual cycle for Pro plan', () => {
-    fixture.componentRef.setInput('priceCard', PRO_PLAN);
-    fixture.componentRef.setInput('selectedCycle', 'annual');
-    fixture.detectChanges();
-    const el: HTMLElement = fixture.nativeElement;
-    expect(el.textContent).toContain('Save 38%');
-  });
+    it('shows annual price and savings badge in DOM on annual cycle', () => {
+      fixture.componentRef.setInput('priceCard', PRO_PLAN);
+      fixture.componentRef.setInput('selectedCycle', BILLING_CYCLE.ANNUAL);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.textContent).toContain('$89/yr');
+      expect(fixture.nativeElement.textContent).toContain('Save 38%');
+    });
 
-  it('does not show savings badge on monthly cycle', () => {
-    fixture.componentRef.setInput('priceCard', PRO_PLAN);
-    fixture.componentRef.setInput('selectedCycle', 'monthly');
-    fixture.detectChanges();
-    const el: HTMLElement = fixture.nativeElement;
-    expect(el.textContent).not.toContain('Save 38%');
-  });
+    it('does not show savings badge on monthly cycle', () => {
+      fixture.componentRef.setInput('priceCard', PRO_PLAN);
+      fixture.componentRef.setInput('selectedCycle', BILLING_CYCLE.MONTHLY);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.textContent).not.toContain('Save 38%');
+    });
 
-  it('freemium card shows Free and never shows savings badge', () => {
-    fixture.componentRef.setInput('priceCard', FREEMIUM_PLAN);
-    fixture.componentRef.setInput('selectedCycle', 'annual');
-    fixture.detectChanges();
-    const el: HTMLElement = fixture.nativeElement;
-    expect(el.textContent).toContain('Free');
-    expect(el.textContent).not.toContain('Save 38%');
+    it('freemium card never shows savings badge', () => {
+      fixture.componentRef.setInput('priceCard', FREEMIUM_PLAN);
+      fixture.componentRef.setInput('selectedCycle', BILLING_CYCLE.ANNUAL);
+      fixture.detectChanges();
+      expect(fixture.nativeElement.textContent).toContain('Free');
+      expect(fixture.nativeElement.textContent).not.toContain('Save 38%');
+    });
   });
 });
 ```
@@ -259,7 +309,7 @@ cd /Users/fahadsubzwari924/Documents/sideProjects/ats-fit-frontend
 npm run test -- --include="**/price-card.component.spec.ts" --watch=false --browsers=ChromeHeadless
 ```
 
-Expected: most tests fail because `selectedCycle` input doesn't exist yet.
+Expected: most tests fail because `selectedCycle` input and `priceDisplay` computed don't exist yet.
 
 - [ ] **Step 3: Update `PriceCardComponent` class**
 
@@ -267,127 +317,193 @@ Replace the entire contents of `src/app/root/landing/components/price-card/price
 
 ```ts
 import { Component, computed, input } from '@angular/core';
-import { NgClass } from '@angular/common';
 import { IPricing } from '@root/landing/interfaces/pricing.interface';
 import { PriceCardType } from '@root/landing/enums/price-card-type.enum';
+import {
+  BILLING_CYCLE,
+  BillingCycle,
+} from '@root/landing/constants/pricing.constants';
+
+export interface PriceDisplay {
+  price: string;
+  badge: string | null;
+}
 
 @Component({
   selector: 'app-price-card',
   standalone: true,
-  imports: [NgClass],
+  imports: [],
   templateUrl: './price-card.component.html',
   styleUrl: './price-card.component.scss',
 })
 export class PriceCardComponent {
-  PriceCardType = PriceCardType;
+  readonly PriceCardType = PriceCardType;
 
   priceCard = input<IPricing>();
-  selectedCycle = input<'monthly' | 'annual'>('monthly');
+  selectedCycle = input<BillingCycle>(BILLING_CYCLE.MONTHLY);
 
-  displayPrice = computed(() => {
+  priceDisplay = computed<PriceDisplay>(() => {
     const card = this.priceCard();
-    if (!card) return '';
-    if (this.selectedCycle() === 'annual' && card.annualPrice) {
-      return card.annualPrice;
-    }
-    return card.price;
-  });
-
-  savingsBadge = computed(() => {
-    const card = this.priceCard();
-    if (!card) return null;
-    if (this.selectedCycle() === 'annual' && card.annualSavingsBadge) {
-      return card.annualSavingsBadge;
-    }
-    return null;
+    const isAnnual = this.selectedCycle() === BILLING_CYCLE.ANNUAL;
+    return {
+      price: (isAnnual && card?.annualPrice) ? card.annualPrice : (card?.price ?? ''),
+      badge: (isAnnual && card?.annualSavingsBadge) ? card.annualSavingsBadge : null,
+    };
   });
 }
 ```
 
-- [ ] **Step 4: Update `PriceCardComponent` template**
+- [ ] **Step 4: Update `PriceCardComponent` SCSS — extract utility classes with `@apply`**
+
+Replace the entire contents of `src/app/root/landing/components/price-card/price-card.component.scss`:
+
+```scss
+.price-card {
+  @apply rounded-lg bg-card text-card-foreground relative;
+
+  &--standard {
+    @apply border shadow-sm border-slate-200;
+  }
+
+  &--popular {
+    @apply border-blue-500 border-2 shadow-xl;
+  }
+}
+
+.price-card__popular-badge {
+  @apply inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold
+    border-transparent absolute -top-3 left-1/2 -translate-x-1/2 bg-blue-600 text-white;
+}
+
+.price-card__header {
+  @apply flex flex-col space-y-1.5 p-6 text-center;
+}
+
+.price-card__title {
+  @apply font-semibold tracking-tight text-2xl;
+}
+
+.price-card__price-row {
+  @apply flex items-center justify-center gap-2;
+}
+
+.price-card__price {
+  @apply text-4xl font-bold text-blue-600;
+}
+
+.price-card__savings-badge {
+  @apply inline-flex items-center rounded-full bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5;
+}
+
+.price-card__description {
+  @apply text-sm text-muted-foreground;
+}
+
+.price-card__body {
+  @apply p-6 pt-0 space-y-4;
+}
+
+.price-card__features {
+  @apply space-y-3;
+}
+
+.price-card__feature-item {
+  @apply flex items-center;
+}
+
+.price-card__feature-icon {
+  @apply h-5 w-5 text-green-500 mr-3 flex-shrink-0;
+}
+
+.price-card__feature-text {
+  @apply text-slate-700;
+}
+
+.price-card__cta {
+  @apply inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium
+    ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2
+    focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none
+    disabled:opacity-50 h-11 rounded-md px-8 w-full mt-6;
+
+  &--primary {
+    @apply bg-primary text-primary-foreground hover:bg-primary/90;
+  }
+
+  &--secondary {
+    @apply border border-input bg-background hover:bg-accent hover:text-accent-foreground btn-border-color;
+  }
+}
+```
+
+- [ ] **Step 5: Update `PriceCardComponent` template**
 
 Replace the entire contents of `src/app/root/landing/components/price-card/price-card.component.html`:
 
 ```html
 <div
-  class="rounded-lg bg-card text-card-foreground relative"
-  [ngClass]="{
-    'border shadow-sm border-slate-200': !priceCard()?.isPopular,
-    'border-blue-500 border-2 shadow-xl': priceCard()?.isPopular
-  }"
+  class="price-card"
+  [class.price-card--standard]="!priceCard()?.isPopular"
+  [class.price-card--popular]="priceCard()?.isPopular"
 >
   @if (priceCard()?.isPopular) {
-    <div class="inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold transition-colors focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 border-transparent hover:bg-primary/80 absolute -top-3 left-1/2 transform -translate-x-1/2 bg-blue-600 text-white">
-      Most Popular
-    </div>
+    <div class="price-card__popular-badge">Most Popular</div>
   }
 
-  <div class="flex flex-col space-y-1.5 p-6 text-center">
-    <h3 class="font-semibold tracking-tight text-2xl">{{ priceCard()?.title }}</h3>
-    <div class="flex items-center justify-center gap-2">
-      <span class="text-4xl font-bold text-blue-600">{{ displayPrice() }}</span>
-      @if (savingsBadge()) {
-        <span class="inline-flex items-center rounded-full bg-green-100 text-green-700 text-xs font-semibold px-2 py-0.5">
-          {{ savingsBadge() }}
-        </span>
+  <div class="price-card__header">
+    <h3 class="price-card__title">{{ priceCard()?.title }}</h3>
+    <div class="price-card__price-row">
+      <span class="price-card__price">{{ priceDisplay().price }}</span>
+      @if (priceDisplay().badge) {
+        <span class="price-card__savings-badge">{{ priceDisplay().badge }}</span>
       }
     </div>
-    <p class="text-sm text-muted-foreground">{{ priceCard()?.description }}</p>
+    <p class="price-card__description">{{ priceCard()?.description }}</p>
   </div>
 
-  <div class="p-6 pt-0 space-y-4">
-    <ul class="space-y-3">
+  <div class="price-card__body">
+    <ul class="price-card__features">
       @for (feature of priceCard()?.features; track feature) {
-        <li class="flex items-center">
+        <li class="price-card__feature-item">
           <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24"
             viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
             stroke-linecap="round" stroke-linejoin="round"
-            class="lucide lucide-circle-check-big h-5 w-5 text-green-500 mr-3 flex-shrink-0">
+            class="price-card__feature-icon">
             <path d="M21.801 10A10 10 0 1 1 17 3.335"></path>
             <path d="m9 11 3 3L22 4"></path>
           </svg>
-          <span class="text-slate-700">{{ feature }}</span>
+          <span class="price-card__feature-text">{{ feature }}</span>
         </li>
       }
     </ul>
 
     @if (priceCard()?.isPopular) {
-      <a
-        class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 bg-primary text-primary-foreground hover:bg-primary/90 h-11 rounded-md px-8 w-full mt-6"
-        [href]="priceCard()?.buttonLink">{{ priceCard()?.buttonText }}</a>
+      <a class="price-card__cta price-card__cta--primary" [href]="priceCard()?.buttonLink">
+        {{ priceCard()?.buttonText }}
+      </a>
     } @else {
-      <a
-        class="inline-flex items-center justify-center gap-2 whitespace-nowrap text-sm font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-accent hover:text-accent-foreground h-11 rounded-md px-8 w-full mt-6 btn-border-color"
-        [href]="priceCard()?.buttonLink">{{ priceCard()?.buttonText }}</a>
+      <a class="price-card__cta price-card__cta--secondary" [href]="priceCard()?.buttonLink">
+        {{ priceCard()?.buttonText }}
+      </a>
     }
   </div>
 </div>
 ```
 
-- [ ] **Step 5: Run tests — verify they pass**
+- [ ] **Step 6: Run tests — verify they pass**
 
 ```bash
 npm run test -- --include="**/price-card.component.spec.ts" --watch=false --browsers=ChromeHeadless
 ```
 
-Expected: all 6 tests pass.
+Expected: all 8 tests pass.
 
-- [ ] **Step 6: Run lint**
+- [ ] **Step 7: Run lint**
 
 ```bash
 npm run lint -- --quiet
 ```
 
 Expected: no errors.
-
-- [ ] **Step 7: Commit**
-
-```bash
-git add src/app/root/landing/components/price-card/price-card.component.ts \
-        src/app/root/landing/components/price-card/price-card.component.html \
-        src/app/root/landing/components/price-card/price-card.component.spec.ts
-git commit -m "feat: add billing cycle toggle support to PriceCardComponent"
-```
 
 ---
 
@@ -398,11 +514,11 @@ git commit -m "feat: add billing cycle toggle support to PriceCardComponent"
 - Modify: `src/app/root/landing/landing.component.html`
 
 ### Background
-The pricing section currently uses `md:grid-cols-3` (for 3 cards) and passes no `selectedCycle` to `app-price-card`. We now have 2 cards and need a monthly/annual toggle above them.
+The pricing section currently uses `md:grid-cols-3` (built for 3 cards) and passes no `selectedCycle` to `app-price-card`. We now have 2 cards and need a monthly/annual toggle above them. The toggle drives a `selectedCycle` signal on `LandingComponent`, which is passed down to each card. All string literals use the `BILLING_CYCLE` constants from Task 1.
 
 - [ ] **Step 1: Update `LandingComponent` class**
 
-In `src/app/root/landing/landing.component.ts`, add the `selectedCycle` signal. The full updated file:
+Replace the entire contents of `src/app/root/landing/landing.component.ts`:
 
 ```ts
 import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
@@ -419,6 +535,10 @@ import { ResumeService } from '@shared/services/resume.service';
 import { IFeature } from '@root/landing/interfaces/feature.interface';
 import { IPricing } from '@root/landing/interfaces/pricing.interface';
 import { ITestimonial } from '@root/landing/interfaces/testimonial.interface';
+import {
+  BILLING_CYCLE,
+  BillingCycle,
+} from '@root/landing/constants/pricing.constants';
 
 @Component({
   selector: 'app-landing',
@@ -428,24 +548,26 @@ import { ITestimonial } from '@root/landing/interfaces/testimonial.interface';
   styleUrl: './landing.component.scss',
 })
 export class LandingComponent implements OnInit, OnDestroy {
-  private router = inject(Router);
-  private meta = inject(Meta);
-  private title = inject(Title);
-  private modalService = inject(ModalService);
-  private platformDataService = inject(PlatformDataService);
-  private resumeService = inject(ResumeService);
+  readonly BILLING_CYCLE = BILLING_CYCLE;
+
+  private readonly router = inject(Router);
+  private readonly meta = inject(Meta);
+  private readonly title = inject(Title);
+  private readonly modalService = inject(ModalService);
+  private readonly platformDataService = inject(PlatformDataService);
+  private readonly resumeService = inject(ResumeService);
 
   mobileMenuOpen = signal(false);
   showWizard = signal(false);
   canGenerateResume = signal(false);
   isAuthenticated = signal(false);
-  selectedCycle = signal<'monthly' | 'annual'>('monthly');
+  selectedCycle = signal<BillingCycle>(BILLING_CYCLE.MONTHLY);
 
-  public features = signal<IFeature[]>([]);
-  public pricingPlans = signal<IPricing[]>([]);
-  public testimonials = signal<ITestimonial[]>([]);
+  features = signal<IFeature[]>([]);
+  pricingPlans = signal<IPricing[]>([]);
+  testimonials = signal<ITestimonial[]>([]);
 
-  public templates = this.resumeService.availableTemplates;
+  templates = this.resumeService.availableTemplates;
 
   ngOnInit(): void {
     this.setSEO();
@@ -508,7 +630,7 @@ export class LandingComponent implements OnInit, OnDestroy {
     });
   }
 
-  public openResumeModal(): void {
+  openResumeModal(): void {
     this.modalService.openModal(TailorApplyModalComponent, undefined, {
       width: '620px',
       maxWidth: '95vw',
@@ -536,7 +658,7 @@ export class LandingComponent implements OnInit, OnDestroy {
 
 - [ ] **Step 2: Update the pricing section in `landing.component.html`**
 
-Locate the pricing section (lines 101–113 in the current file) and replace it with:
+Locate the pricing `<section>` (the one with "Choose Your Plan") and replace it with:
 
 ```html
 <section class="py-16 px-4 bg-white">
@@ -545,26 +667,25 @@ Locate the pricing section (lines 101–113 in the current file) and replace it 
       <h2 class="text-4xl font-bold text-slate-900 mb-6">Choose Your Plan</h2>
       <p class="text-xl text-slate-600 mb-8">Start free and upgrade as your job search accelerates</p>
 
-      <!-- Billing cycle toggle -->
       <div class="inline-flex items-center rounded-full bg-slate-100 p-1 gap-1">
         <button
           type="button"
           class="px-5 py-2 rounded-full text-sm font-medium transition-all"
-          [class.bg-white]="selectedCycle() === 'monthly'"
-          [class.shadow-sm]="selectedCycle() === 'monthly'"
-          [class.text-slate-900]="selectedCycle() === 'monthly'"
-          [class.text-slate-500]="selectedCycle() !== 'monthly'"
-          (click)="selectedCycle.set('monthly')">
+          [class.bg-white]="selectedCycle() === BILLING_CYCLE.MONTHLY"
+          [class.shadow-sm]="selectedCycle() === BILLING_CYCLE.MONTHLY"
+          [class.text-slate-900]="selectedCycle() === BILLING_CYCLE.MONTHLY"
+          [class.text-slate-500]="selectedCycle() !== BILLING_CYCLE.MONTHLY"
+          (click)="selectedCycle.set(BILLING_CYCLE.MONTHLY)">
           Monthly
         </button>
         <button
           type="button"
           class="px-5 py-2 rounded-full text-sm font-medium transition-all"
-          [class.bg-white]="selectedCycle() === 'annual'"
-          [class.shadow-sm]="selectedCycle() === 'annual'"
-          [class.text-slate-900]="selectedCycle() === 'annual'"
-          [class.text-slate-500]="selectedCycle() !== 'annual'"
-          (click)="selectedCycle.set('annual')">
+          [class.bg-white]="selectedCycle() === BILLING_CYCLE.ANNUAL"
+          [class.shadow-sm]="selectedCycle() === BILLING_CYCLE.ANNUAL"
+          [class.text-slate-900]="selectedCycle() === BILLING_CYCLE.ANNUAL"
+          [class.text-slate-500]="selectedCycle() !== BILLING_CYCLE.ANNUAL"
+          (click)="selectedCycle.set(BILLING_CYCLE.ANNUAL)">
           Annual
         </button>
       </div>
@@ -595,60 +716,87 @@ npm run build -- --configuration=development 2>&1 | tail -20
 
 Expected: build completes without errors.
 
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/app/root/landing/landing.component.ts \
-        src/app/root/landing/landing.component.html
-git commit -m "feat: add monthly/annual billing cycle toggle to landing pricing section"
-```
-
 ---
 
-## Task 4: Fix billing overview tab hardcoded values and enterprise references
+## Task 4: Fix billing section — constants, hardcoded values, enterprise removal
 
 **Files:**
+- Create: `src/app/features/billing/constants/billing-overview.constants.ts`
 - Modify: `src/app/features/billing/components/overview-tab/overview-tab.component.ts`
+- Modify: `src/app/features/billing/components/overview-tab/overview-tab.component.html`
 - Modify: `src/app/features/billing/components/billing-current-plan-card/billing-current-plan-card.component.ts`
 - Modify: `src/app/features/billing/components/billing-current-plan-card/billing-current-plan-card.component.html`
 
 ### Background
-`overview-tab.component.ts` has three stale values/methods: `$19` fallbacks (should be `$12`), `currentPlanFeatures()` searching for `'premium'` (should be `'pro'`), the `planAccent()` enterprise branch, and `onUpgradeEnterprise()`. The `billing-current-plan-card` has an `upgradeEnterprise` output and an "Upgrade to Enterprise" button in the template that must be removed.
+`overview-tab.component.ts` has five problems: `$19` fallbacks (should be `$12`), `currentPlanFeatures()` searching for `'premium'` (should be `'pro'`), a `planAccent()` enterprise branch, `onUpgradeEnterprise()` method, and all these values are hardcoded strings rather than named constants. The `billing-current-plan-card` has an `upgradeEnterprise` output and an "Upgrade to Enterprise" button to remove.
 
-- [ ] **Step 1: Fix `overview-tab.component.ts`**
+- [ ] **Step 1: Create billing overview constants**
 
-Apply these four targeted changes to `src/app/features/billing/components/overview-tab/overview-tab.component.ts`:
+Create `src/app/features/billing/constants/billing-overview.constants.ts`:
 
-**Change A** — `priceMain()` fallback (line ~109):
+```ts
+export const PLAN_NAME_FRAGMENTS = {
+  PRO: 'pro',
+  FREE: 'free',
+} as const;
+
+export const PLAN_ACCENT_COLORS = {
+  PRO: '#2563EB',
+  DEFAULT: '#64748B',
+} as const;
+
+export const PRO_PLAN_DEFAULTS = {
+  PRICE_MAIN: '$12',
+  NEXT_CHARGE: '$12.00',
+  LABEL: 'Pro',
+} as const;
+```
+
+- [ ] **Step 2: Update `overview-tab.component.ts`**
+
+Apply these targeted changes. The file lives at `src/app/features/billing/components/overview-tab/overview-tab.component.ts`.
+
+**Add import** at the top (after existing imports):
+```ts
+import {
+  PLAN_NAME_FRAGMENTS,
+  PLAN_ACCENT_COLORS,
+  PRO_PLAN_DEFAULTS,
+} from '@features/billing/constants/billing-overview.constants';
+```
+
+**Change A** — `priceMain()` fallback (~line 109):
 ```ts
 // Before:
 if (this.userState.currentUser()?.isPremium) return '$19';
 
 // After:
-if (this.userState.currentUser()?.isPremium) return '$12';
+if (this.userState.currentUser()?.isPremium) return PRO_PLAN_DEFAULTS.PRICE_MAIN;
 ```
 
-**Change B** — `nextChargeAmount()` fallback (line ~163):
+**Change B** — `nextChargeAmount()` fallback (~line 163):
 ```ts
 // Before:
 return this.userState.currentUser()?.isPremium ? '$19.00' : '';
 
 // After:
-return this.userState.currentUser()?.isPremium ? '$12.00' : '';
+return this.userState.currentUser()?.isPremium ? PRO_PLAN_DEFAULTS.NEXT_CHARGE : '';
 ```
 
-**Change C** — `currentPlanFeatures()` substring search (line ~150):
+**Change C** — `currentPlanFeatures()` substring search (~line 150):
 ```ts
 // Before:
 const premium = this.subscriptionPlan().find(p => p.planName?.toLowerCase().includes('premium'));
 return premium?.features?.length ? premium.features : [];
 
 // After:
-const pro = this.subscriptionPlan().find(p => p.planName?.toLowerCase().includes('pro'));
+const pro = this.subscriptionPlan().find(p =>
+  p.planName?.toLowerCase().includes(PLAN_NAME_FRAGMENTS.PRO)
+);
 return pro?.features?.length ? pro.features : [];
 ```
 
-**Change D** — `planAccent()` (line ~166) — remove enterprise branch, add pro:
+**Change D** — `planAccent()` (~line 166):
 ```ts
 // Before:
 planAccent(plan: SubscriptionPlan): string {
@@ -660,36 +808,71 @@ planAccent(plan: SubscriptionPlan): string {
 
 // After:
 planAccent(plan: SubscriptionPlan): string {
-  const n = (plan.planName || '').toLowerCase();
-  if (n.includes('pro')) return '#2563EB';
-  return '#64748B';
+  const n = (plan.planName ?? '').toLowerCase();
+  if (n.includes(PLAN_NAME_FRAGMENTS.PRO)) return PLAN_ACCENT_COLORS.PRO;
+  return PLAN_ACCENT_COLORS.DEFAULT;
 }
 ```
 
-**Change E** — remove `onUpgradeEnterprise()` method entirely (lines ~193–196):
+**Change E** — remove `onUpgradeEnterprise()` method entirely:
 ```ts
-// Remove this method:
+// Remove this entire method (~lines 193–196):
 onUpgradeEnterprise(): void {
   const ent = this.subscriptionPlan().find(p => p.planName?.toLowerCase().includes('enterprise'));
   if (ent) this.onPlanButtonClick(ent);
 }
 ```
 
-- [ ] **Step 2: Fix `billing-current-plan-card.component.ts`**
+**Change F** — `isCurrentPlan()` — replace hardcoded `'free'` with constant (~line 176):
+```ts
+// Before:
+const free = plan.planName?.toLowerCase().includes('free');
 
-Remove the `upgradeEnterprise` output and update the `priceMain` default. Replace the entire file contents:
+// After:
+const free = plan.planName?.toLowerCase().includes(PLAN_NAME_FRAGMENTS.FREE);
+```
+
+- [ ] **Step 3: Remove `(upgradeEnterprise)` binding from `overview-tab.component.html`**
+
+Open `src/app/features/billing/components/overview-tab/overview-tab.component.html`.
+
+Find the `<app-billing-current-plan-card>` element and remove the `(upgradeEnterprise)="onUpgradeEnterprise()"` binding. The element currently looks like:
+
+```html
+<app-billing-current-plan-card
+  [planLabel]="currentPlanLabel()"
+  [showPremiumSkin]="!!userState.currentUser()?.isPremium"
+  [priceMain]="priceMain()"
+  [pricePeriod]="pricePeriod()"
+  [renewSummary]="renewSummary()"
+  [daysRemainingLabel]="daysRemainingLabel()"
+  [renewalProgressPct]="renewalProgressPct()"
+  [features]="currentPlanFeatures()"
+  [autoRenewNote]="autoRenewNote()"
+  [nextChargeAmount]="nextChargeAmount()"
+  (upgradeEnterprise)="onUpgradeEnterprise()"
+  (changePlan)="scrollToPlans()"
+  (cancelPlan)="scrollToPlans()" />
+```
+
+Remove only the `(upgradeEnterprise)="onUpgradeEnterprise()"` line. Leave all other bindings intact.
+
+- [ ] **Step 4: Update `billing-current-plan-card.component.ts`**
+
+Replace the entire contents of `src/app/features/billing/components/billing-current-plan-card/billing-current-plan-card.component.ts`:
 
 ```ts
 import { Component, input, output } from '@angular/core';
+import { PRO_PLAN_DEFAULTS } from '@features/billing/constants/billing-overview.constants';
 
 @Component({
   selector: 'app-billing-current-plan-card',
   templateUrl: './billing-current-plan-card.component.html',
 })
 export class BillingCurrentPlanCardComponent {
-  planLabel = input<string>('Pro');
+  planLabel = input<string>(PRO_PLAN_DEFAULTS.LABEL);
   showPremiumSkin = input(true);
-  priceMain = input<string>('$12');
+  priceMain = input<string>(PRO_PLAN_DEFAULTS.PRICE_MAIN);
   pricePeriod = input<string>('/mo');
   renewSummary = input<string>('Billed monthly');
   daysRemainingLabel = input<string | null>(null);
@@ -703,9 +886,9 @@ export class BillingCurrentPlanCardComponent {
 }
 ```
 
-- [ ] **Step 3: Fix `billing-current-plan-card.component.html`**
+- [ ] **Step 5: Remove "Upgrade to Enterprise" button from template**
 
-Remove the "Upgrade to Enterprise" button from the actions row. The `billing-current-plan__actions` div currently has two buttons; replace it with just the "Change Plan" button:
+In `src/app/features/billing/components/billing-current-plan-card/billing-current-plan-card.component.html`, replace the entire `billing-current-plan__actions` div:
 
 ```html
 <div class="billing-current-plan__actions">
@@ -721,20 +904,7 @@ Remove the "Upgrade to Enterprise" button from the actions row. The `billing-cur
 </div>
 ```
 
-- [ ] **Step 4: Fix any call sites of `upgradeEnterprise` in the overview tab template**
-
-Open `src/app/features/billing/components/overview-tab/overview-tab.component.html` and remove any binding to `(upgradeEnterprise)="onUpgradeEnterprise()"` on the `<app-billing-current-plan-card>` element.
-
-Find the line like:
-```html
-<app-billing-current-plan-card
-  ...
-  (upgradeEnterprise)="onUpgradeEnterprise()"
-  ...
-```
-Remove only the `(upgradeEnterprise)="onUpgradeEnterprise()"` binding. Leave all other bindings intact.
-
-- [ ] **Step 5: Run lint**
+- [ ] **Step 6: Run lint**
 
 ```bash
 npm run lint -- --quiet
@@ -742,7 +912,7 @@ npm run lint -- --quiet
 
 Expected: no errors.
 
-- [ ] **Step 6: Build to verify no compilation errors**
+- [ ] **Step 7: Build to verify no compilation errors**
 
 ```bash
 npm run build -- --configuration=development 2>&1 | tail -20
@@ -750,19 +920,9 @@ npm run build -- --configuration=development 2>&1 | tail -20
 
 Expected: build completes without errors.
 
-- [ ] **Step 7: Commit**
-
-```bash
-git add src/app/features/billing/components/overview-tab/overview-tab.component.ts \
-        src/app/features/billing/components/overview-tab/overview-tab.component.html \
-        src/app/features/billing/components/billing-current-plan-card/billing-current-plan-card.component.ts \
-        src/app/features/billing/components/billing-current-plan-card/billing-current-plan-card.component.html
-git commit -m "fix: remove enterprise references and update Pro pricing fallbacks in billing section"
-```
-
 ---
 
-## Final Verification
+## Final Verification (run after all tasks complete)
 
 - [ ] **Run all tests**
 
@@ -772,7 +932,7 @@ npm run test -- --watch=false --browsers=ChromeHeadless
 
 Expected: all tests pass.
 
-- [ ] **Run full lint**
+- [ ] **Full lint**
 
 ```bash
 npm run lint
@@ -780,10 +940,12 @@ npm run lint
 
 Expected: no errors.
 
-- [ ] **Run build**
+- [ ] **Full build**
 
 ```bash
 npm run build
 ```
 
-Expected: build succeeds with no errors.
+Expected: build succeeds.
+
+> **Stop here.** Do not commit. The user will review the implementation and request a commit when satisfied.
