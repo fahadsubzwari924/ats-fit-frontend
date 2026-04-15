@@ -1,4 +1,4 @@
 export enum PriceCardType {
   REGISTERED = 'registered',
-  PREMIUM = 'premium',
+  PRO = 'pro',
 }

@@ -1,34 +1,45 @@
 [
-    {
-      "title": "Free Account",
-      "price": "Free",
-      "description": "Sign in for freemium limits and core features",
-      "icon": "/images/pricing-card/price-card-1.svg",
-      "isPopular": false,
-      "buttonText": "Sign up free",
-      "buttonLink": "/signup",
-      "type": "registered",
-      "features": [
-        "Monthly resume generation allowance",
-        "Monthly ATS score allowance",
-        "Limited history access",
-        "No resume saving"
-      ]
-    },
-    {
-      "title": "Premium",
-      "price": "$19/month",
-      "description": "Unlock full potential for serious job seekers",
-      "icon": "/images/pricing-card/price-card-2.svg",
-      "isPopular": true,
-      "buttonText": "Go Premium",
-      "buttonLink": "/signup",
-      "type": "premium",
-      "features": [
-        "50 Resume generations/month",
-        "60 ATS scores/month",
-        "Unlimited history access",
-        "Resume saving & management"
-      ]
-    }
-  ]
+  {
+    "title": "Freemium",
+    "price": "Free",
+    "description": "Get started with core features at no cost",
+    "icon": "/images/pricing-card/price-card-1.svg",
+    "buttonText": "Sign up free",
+    "buttonLink": "/signup",
+    "type": "registered",
+    "features": [
+      "3 tailored resumes/month",
+      "1 cover letter/month",
+      "30-day generation history",
+      "Unlimited job application tracking",
+      "Basic resume templates"
+    ]
+  },
+  {
+    "title": "Pro",
+    "price": "$12/mo",
+    "annualPrice": "$89/yr",
+    "annualSavingsBadge": "Save 38%",
+    "description": "For serious job seekers who want the full toolkit",
+    "icon": "/images/pricing-card/price-card-2.svg",
+    "isPopular": true,
+    "buttonText": "Get Pro",
+    "buttonLink": "/signup",
+    "type": "pro",
+    "features": [
+      "30 tailored resumes/month",
+      "15 cover letters/month",
+      {
+        "title": "Batch generation",
+        "subitems": [
+          "Up to 3 jobs/batch",
+          "10 batches/month"
+        ]
+      },
+      "All resume templates",
+      "Unlimited job application tracking",
+      "Full generation history",
+      "Priority support"
+    ]
+  }
+]

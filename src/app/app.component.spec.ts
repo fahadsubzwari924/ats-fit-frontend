@@ -20,10 +20,10 @@ describe('AppComponent', () => {
     expect(app.title).toEqual('resume-maker-fe');
   });
 
-  it('should render title', () => {
+  it('should render router outlet', () => {
     const fixture = TestBed.createComponent(AppComponent);
     fixture.detectChanges();
     const compiled = fixture.nativeElement as HTMLElement;
-    expect(compiled.querySelector('h1')?.textContent).toContain('Hello, resume-maker-fe');
+    expect(compiled.querySelector('router-outlet')).toBeTruthy();
   });
 });

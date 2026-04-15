@@ -1,4 +1,4 @@
-# Testing strategy — ats-fit-frontend
+# Testing strategy — resume-maker-fe
 
 ## Goals
 

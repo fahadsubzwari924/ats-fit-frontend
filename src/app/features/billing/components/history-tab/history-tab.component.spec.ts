@@ -1,6 +1,9 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
+import { provideRouter } from '@angular/router';
 
 import { HistoryTabComponent } from './history-tab.component';
+import { UserState } from '@core/states/user.state';
+import { httpClientTestProviders } from '@testing/http-client-test.providers';
 
 describe('HistoryTabComponent', () => {
   let component: HistoryTabComponent;
@@ -8,7 +11,15 @@ describe('HistoryTabComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [HistoryTabComponent]
+      imports: [HistoryTabComponent],
+      providers: [
+        provideRouter([]),
+        ...httpClientTestProviders,
+        {
+          provide: UserState,
+          useValue: { currentUser: () => null },
+        },
+      ],
     })
     .compileComponents();
 

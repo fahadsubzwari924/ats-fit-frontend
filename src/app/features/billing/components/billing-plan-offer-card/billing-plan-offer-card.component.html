@@ -1,44 +1,153 @@
 <div
-  class="billing-plan-offer"
-  [class.billing-plan-offer--current]="isCurrent()"
-  [style.--billing-plan-accent]="accentColor()">
-  @if (isCurrent()) {
-    <div class="billing-plan-offer__ribbon">
-      <span class="billing-plan-offer__ribbon-text">Your current plan</span>
+  class="relative rounded-2xl bg-white flex flex-col h-full transition-all duration-200"
+  [class.border]="!isBestValue()"
+  [class.border-slate-200]="!isBestValue()"
+  [class.shadow-sm]="!isBestValue()"
+  [class.border-2]="isBestValue()"
+  [class.border-blue-500]="isBestValue()"
+  [class.shadow-xl]="isBestValue()"
+>
+
+  <!-- Best Value / Current Plan badge -->
+  @if (isBestValue() && !isCurrent()) {
+    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-blue-600 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-sm whitespace-nowrap tracking-wide">
+      Best Value
     </div>
   }
-  <div class="billing-plan-offer__body">
-    <div class="billing-plan-offer__head">
-      <div class="billing-plan-offer__icon-wrap">
-        <svg class="billing-svg-icon billing-svg-icon--sm" viewBox="0 0 24 24" fill="none" stroke="var(--billing-plan-accent)" stroke-width="2" aria-hidden="true">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10" />
-        </svg>
-      </div>
-      <span class="billing-plan-offer__name">{{ plan().planName }}</span>
+  @if (isCurrent()) {
+    <div class="absolute -top-4 left-1/2 -translate-x-1/2 bg-slate-700 text-white text-xs font-semibold px-4 py-1.5 rounded-full shadow-sm whitespace-nowrap tracking-wide">
+      Current Plan
     </div>
-    <p class="billing-plan-offer__price">
-      {{ displayPrice() }}<span>{{ periodSuffix() }}</span>
+  }
+
+  <!-- Header -->
+  <div
+    class="px-8 pt-10 pb-7 text-center rounded-t-2xl"
+    [class.bg-gradient-to-b]="isBestValue()"
+    [class.from-blue-50]="isBestValue()"
+    [class.to-white]="isBestValue()"
+  >
+    <p class="text-xs font-semibold uppercase tracking-widest mb-2"
+       [class.text-blue-500]="isBestValue()"
+       [class.text-slate-400]="!isBestValue()">
+      {{ plan().planName }}
     </p>
-    <ul class="billing-plan-offer__features">
-      @for (f of plan().features; track f) {
-        <li class="billing-plan-offer__feature">
-          <span class="billing-plan-offer__feature-dot">
-            <svg class="billing-svg-icon" style="width:0.5rem;height:0.5rem" viewBox="0 0 24 24" fill="none" stroke="var(--billing-plan-accent)" stroke-width="3" aria-hidden="true">
-              <path d="M20 6 9 17l-5-5" />
-            </svg>
-          </span>
-          {{ f }}
+
+    <div class="flex items-baseline justify-center gap-1">
+      <span
+        class="font-extrabold leading-none tracking-tight"
+        [class.text-5xl]="isBestValue()"
+        [class.text-4xl]="!isBestValue()"
+        [class.text-blue-600]="isBestValue()"
+        [class.text-slate-800]="!isBestValue()"
+      >{{ displayPrice() }}</span>
+      <span class="text-base font-medium"
+            [class.text-blue-400]="isBestValue()"
+            [class.text-slate-400]="!isBestValue()">
+        {{ periodSuffix() }}
+      </span>
+    </div>
+
+    @if (isBestValue()) {
+      <p class="mt-2 text-xs text-green-600 font-semibold">Save 38% vs monthly</p>
+    }
+
+    @if (plan().description) {
+      <p class="text-sm mt-2 leading-relaxed"
+         [class.text-blue-600]="isBestValue()"
+         [class.text-slate-500]="!isBestValue()">
+        {{ plan().description }}
+      </p>
+    }
+  </div>
+
+  <!-- Divider -->
+  <div class="mx-8 border-t border-slate-100"></div>
+
+  <!-- Features + CTA -->
+  <div class="px-8 py-7 flex flex-col flex-1">
+    <ul class="space-y-3 flex-1">
+      @for (feature of plan().features; track $index) {
+        <li
+          class="flex gap-3"
+          [class.items-start]="isPlanFeatureGroup(feature)"
+          [class.items-center]="!isPlanFeatureGroup(feature)"
+        >
+          @if (isPlanFeatureGroup(feature)) {
+            <span
+              class="flex-shrink-0 flex items-center justify-center w-5 h-5 rounded-full mt-0.5"
+              [class.bg-blue-100]="isBestValue()"
+              [class.bg-green-100]="!isBestValue()"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg" width="11" height="11"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true"
+                [class.text-blue-600]="isBestValue()"
+                [class.text-green-600]="!isBestValue()"
+              >
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+            </span>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-semibold text-slate-900 leading-snug">{{ feature.title }}</p>
+              <ul class="mt-2 space-y-1.5 border-l-2 border-slate-200 pl-3 ml-0.5 list-none">
+                @for (sub of feature.subitems; track $index) {
+                  <li class="text-sm text-slate-600 leading-snug">– {{ sub }}</li>
+                }
+              </ul>
+            </div>
+          } @else {
+            <span
+              class="flex-shrink-0 flex items-center justify-center w-5 h-5 rounded-full"
+              [class.bg-blue-100]="isBestValue()"
+              [class.bg-green-100]="!isBestValue()"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg" width="11" height="11"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true"
+                [class.text-blue-600]="isBestValue()"
+                [class.text-green-600]="!isBestValue()"
+              >
+                <path d="M20 6 9 17l-5-5"/>
+              </svg>
+            </span>
+            <span class="text-sm font-medium text-slate-800 leading-snug">{{ feature }}</span>
+          }
         </li>
       }
     </ul>
+
     @if (isCurrent()) {
-      <button type="button" class="billing-plan-offer__btn billing-plan-offer__btn--disabled" disabled>Current Plan</button>
+      <button
+        type="button"
+        disabled
+        class="mt-8 w-full text-center font-semibold text-sm py-3.5 px-6 rounded-xl bg-slate-100 text-slate-400 cursor-not-allowed border border-slate-200">
+        Current Plan
+      </button>
     } @else {
-      <button type="button" class="billing-plan-offer__btn billing-plan-offer__btn--accent" (click)="onClick()">
+      <button
+        type="button"
+        class="mt-8 w-full text-center font-semibold text-sm py-3.5 px-6 rounded-xl transition-all duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-500 focus-visible:ring-offset-2 flex items-center justify-center gap-2"
+        [class.bg-blue-600]="isBestValue()"
+        [class.text-white]="isBestValue()"
+        [class.hover:bg-blue-700]="isBestValue()"
+        [class.shadow-md]="isBestValue()"
+        [class.border]="!isBestValue()"
+        [class.border-slate-300]="!isBestValue()"
+        [class.text-slate-700]="!isBestValue()"
+        [class.hover:border-blue-400]="!isBestValue()"
+        [class.hover:text-blue-600]="!isBestValue()"
+        (click)="onClick()">
         {{ buttonLabel() }}
-        <svg class="billing-svg-icon billing-svg-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M5 12h14" />
-          <path d="m12 5 7 7-7 7" />
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15"
+          viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+          stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+          <path d="M5 12h14"/>
+          <path d="m12 5 7 7-7 7"/>
         </svg>
       </button>
     }

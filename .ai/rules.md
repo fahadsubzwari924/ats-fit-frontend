@@ -1,11 +1,11 @@
-# Coding rules — ats-fit-frontend
+# Coding rules — resume-maker-fe
 
 ## Stack
 
 | Field | Value |
 |-------|-------|
 | Language | TypeScript |
-| Framework | Angular |
+| Framework | Angular19 |
 | Database | PostgreSQL |
 | Test | `npm run test` |
 | Lint | `npm run lint` |
