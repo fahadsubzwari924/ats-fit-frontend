@@ -1,4 +1,5 @@
-import { Component, inject, OnDestroy, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { Meta, Title } from '@angular/platform-browser';
 import { Router } from '@angular/router';
 import { forkJoin } from 'rxjs';
@@ -15,6 +16,10 @@ import { ResumeService } from '@shared/services/resume.service';
 import { IFeature } from '@root/landing/interfaces/feature.interface';
 import { IPricing } from '@root/landing/interfaces/pricing.interface';
 import { ITestimonial } from '@root/landing/interfaces/testimonial.interface';
+import {
+  BILLING_CYCLE,
+  BillingCycle,
+} from '@root/landing/constants/pricing.constants';
 
 @Component({
   selector: 'app-landing',
@@ -23,8 +28,11 @@ import { ITestimonial } from '@root/landing/interfaces/testimonial.interface';
   templateUrl: './landing.component.html',
   styleUrl: './landing.component.scss',
 })
-export class LandingComponent implements OnInit, OnDestroy {
+export class LandingComponent implements OnInit {
+  readonly BILLING_CYCLE = BILLING_CYCLE;
+
   // Inject dependencies
+  private readonly destroyRef = inject(DestroyRef);
   private router = inject(Router);
   private meta = inject(Meta);
   private title = inject(Title);
@@ -32,13 +40,11 @@ export class LandingComponent implements OnInit, OnDestroy {
   private platformDataService = inject(PlatformDataService);
   private resumeService = inject(ResumeService);
 
-  // Signals for component state management
   mobileMenuOpen = signal(false);
   showWizard = signal(false);
-
-  // Properties for data binding
   canGenerateResume = signal(false);
   isAuthenticated = signal(false);
+  selectedCycle = signal<BillingCycle>(BILLING_CYCLE.MONTHLY);
 
   public features = signal<IFeature[]>([]);
   public pricingPlans = signal<IPricing[]>([]);
@@ -50,8 +56,6 @@ export class LandingComponent implements OnInit, OnDestroy {
     this.setSEO();
     this.initializeContent();
   }
-
-  ngOnDestroy(): void {}
 
   private setSEO(): void {
     // Set page title
@@ -103,7 +107,9 @@ export class LandingComponent implements OnInit, OnDestroy {
       this.platformDataService.getPricingPlans(),
       this.platformDataService.getTestimonials(),
       this.resumeService.getResumeTemplates(),
-    ]).subscribe(([features, pricingPlans, testimonials]) => {
+    ])
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(([features, pricingPlans, testimonials]) => {
       this.features.set(features ?? []);
       this.pricingPlans.set(pricingPlans ?? []);
       this.testimonials.set(testimonials ?? []);

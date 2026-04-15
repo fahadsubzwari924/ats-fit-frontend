@@ -1,4 +1,4 @@
-# Architecture — ats-fit-frontend
+# Architecture — resume-maker-fe
 
 ## Purpose
 

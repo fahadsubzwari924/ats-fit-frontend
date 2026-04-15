@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 
 import { LandingComponent } from './landing.component';
+import { httpClientTestProviders } from '@testing/http-client-test.providers';
 
 describe('LandingComponent', () => {
   let component: LandingComponent;
@@ -8,7 +9,8 @@ describe('LandingComponent', () => {
 
   beforeEach(async () => {
     await TestBed.configureTestingModule({
-      imports: [LandingComponent]
+      imports: [LandingComponent],
+      providers: [...httpClientTestProviders],
     })
     .compileComponents();
 

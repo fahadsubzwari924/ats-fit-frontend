@@ -21,8 +21,8 @@ export class PaymentMethodCardComponent {
     this.deletePaymentMethod.emit(this.paymentMethod().id);
   }
 
-  getCardIconGradient(cardType: string): string {
-    switch (cardType.toLowerCase()) {
+  getCardIconGradient(cardType: string | undefined): string {
+    switch ((cardType ?? '').toLowerCase()) {
       case 'visa':
         return 'from-blue-600 to-indigo-600';
       case 'mastercard':

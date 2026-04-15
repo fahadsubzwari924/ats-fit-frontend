@@ -1,4 +1,4 @@
-# Agent activation — ats-fit-frontend
+# Agent activation — resume-maker-fe
 
 **Agency Agents** (vendored in `vendor/agency-agents/`) are the default specialist system. **Superpowers** (vendored in `vendor/superpowers/`) is the default workflow engine. Use both together: Superpowers for phase discipline, Agency for role fit.
 

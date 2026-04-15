@@ -4,6 +4,7 @@ import { ModalService } from '@shared/services/modal.service';
 import { AddPaymentMethodModalComponent } from '@features/billing/modal/add-payment-method-modal/add-payment-method-modal.component';
 import { UserState } from '@core/states/user.state';
 import { BillingPaymentSidebarComponent } from '@features/billing/components/billing-payment-sidebar/billing-payment-sidebar.component';
+import { PRO_PLAN_DEFAULTS } from '@features/billing/constants/billing-overview.constants';
 
 @Component({
   selector: 'app-payment-tab',
@@ -14,6 +15,7 @@ import { BillingPaymentSidebarComponent } from '@features/billing/components/bil
 export class PaymentTabComponent {
   private modalService = inject(ModalService);
   readonly userState = inject(UserState);
+  readonly PRO_PLAN_DEFAULTS = PRO_PLAN_DEFAULTS;
 
   paymentMethods = signal<PaymentMethod[]>([
     {

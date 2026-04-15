@@ -1,26 +1,6 @@
-.bg-card {
-    background-color: rgb(255, 255, 255);
-}
-
-.rounded-xl {
-    border-radius: .75rem;
-}
-
-.bg-primary {
-  background-color: rgb(15, 23, 42) !important;
-}
-
-.text-primary-foreground {
-  color: rgb(248, 250, 252) !important;
-}
-
-
-.transition-colors {
-    transition-property: color, background-color, border-color, text-decoration-color, fill, stroke;
-    transition-timing-function: cubic-bezier(.4,0,.2,1);
-    transition-duration: .15s;
-}
-
-.btn-border-color {
-  border-color: rgb(226, 232, 240) !important;
+// Make the host element fill its grid cell so h-full on the inner card works.
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
 }

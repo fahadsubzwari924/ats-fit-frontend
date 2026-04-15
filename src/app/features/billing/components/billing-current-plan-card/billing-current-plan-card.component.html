@@ -43,27 +43,66 @@
       }
     </div>
 
+    <!-- Feature list aligned with landing price-card (pills + nested group layout) -->
     <div class="billing-feature-grid">
-      @for (f of features(); track f) {
-        <div class="billing-feature-grid__item">
-          <span class="billing-feature-grid__check">
-            <svg class="billing-svg-icon billing-svg-icon--check-green" style="width:0.625rem;height:0.625rem" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" aria-hidden="true">
-              <path d="M20 6 9 17l-5-5" />
-            </svg>
-          </span>
-          {{ f }}
+      @for (f of features(); track $index) {
+        <div
+          class="billing-feature-grid__item flex gap-3 min-w-0"
+          [class.items-start]="isPlanFeatureGroup(f)"
+          [class.items-center]="!isPlanFeatureGroup(f)"
+          [class.billing-feature-grid__item--full]="isPlanFeatureGroup(f)"
+          [class.billing-feature-grid__item--stacked]="isPlanFeatureGroup(f)"
+        >
+          @if (isPlanFeatureGroup(f)) {
+            <span
+              class="flex-shrink-0 flex items-center justify-center w-5 h-5 rounded-full mt-0.5"
+              [class.bg-blue-100]="showPremiumSkin()"
+              [class.bg-green-100]="!showPremiumSkin()"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg" width="11" height="11"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true"
+                [class.text-blue-600]="showPremiumSkin()"
+                [class.text-green-600]="!showPremiumSkin()"
+              >
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </span>
+            <div class="min-w-0 flex-1">
+              <p class="text-sm font-semibold text-slate-900 leading-snug">{{ f.title }}</p>
+              <ul class="mt-2 space-y-1.5 border-l-2 border-slate-200 pl-3 ml-0.5 list-none">
+                @for (sub of f.subitems; track $index) {
+                  <li class="text-sm text-slate-600 leading-snug">– {{ sub }}</li>
+                }
+              </ul>
+            </div>
+          } @else {
+            <span
+              class="flex-shrink-0 flex items-center justify-center w-5 h-5 rounded-full"
+              [class.bg-blue-100]="showPremiumSkin()"
+              [class.bg-green-100]="!showPremiumSkin()"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg" width="11" height="11"
+                viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"
+                stroke-linecap="round" stroke-linejoin="round"
+                aria-hidden="true"
+                [class.text-blue-600]="showPremiumSkin()"
+                [class.text-green-600]="!showPremiumSkin()"
+              >
+                <path d="M20 6 9 17l-5-5" />
+              </svg>
+            </span>
+            <span class="text-sm font-medium text-slate-800 leading-snug">{{ f }}</span>
+          }
         </div>
       }
     </div>
 
     <div class="billing-current-plan__actions">
-      <button type="button" class="billing-btn billing-btn--primary" (click)="upgradeEnterprise.emit()">
-        <svg class="billing-svg-icon billing-svg-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-          <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z" />
-        </svg>
-        Upgrade to Enterprise
-      </button>
-      <button type="button" class="billing-btn billing-btn--secondary" (click)="changePlan.emit()">
+      <button type="button" class="billing-btn billing-btn--primary" (click)="changePlan.emit()">
         <svg class="billing-svg-icon billing-svg-icon--sm" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
           <path d="M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8" />
           <path d="M21 3v5h-5" />

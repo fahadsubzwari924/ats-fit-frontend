@@ -1,0 +1,6 @@
+// Make the host fill its grid cell so h-full on the inner card works correctly.
+:host {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}

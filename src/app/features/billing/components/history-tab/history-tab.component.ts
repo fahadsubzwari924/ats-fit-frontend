@@ -4,6 +4,7 @@ import { BillingService } from '@features/billing/services/billing.service';
 import { PaymentHistory } from '@features/billing/models/payment-history.model';
 import { UserState } from '@core/states/user.state';
 import { BillingHistorySidebarComponent } from '@features/billing/components/billing-history-sidebar/billing-history-sidebar.component';
+import { PRO_PLAN_DEFAULTS, BILLING_PERIOD, PLAN_LABELS } from '@features/billing/constants/billing-overview.constants';
 
 @Component({
   selector: 'app-history-tab',
@@ -80,16 +81,16 @@ export class HistoryTabComponent implements OnInit {
   planAmountLabel(): string {
     const sub = this.subscriptionHistory()?.[0]?.subscriptionPlan;
     const p = sub?.price?.trim();
-    const suffix = sub?.billingCycle === 'yearly' ? '/yr' : '/mo';
+    const suffix = sub?.billingCycle === BILLING_PERIOD.YEARLY ? '/yr' : '/mo';
     if (p) return (p.startsWith('$') ? p : `$${p}`) + suffix;
-    return '$19.00/mo';
+    return PRO_PLAN_DEFAULTS.NEXT_CHARGE_WITH_PERIOD;
   }
 
   planNameLabel(): string {
     const sub = this.subscriptionHistory()?.[0]?.subscriptionPlan;
-    if (sub?.planName) return `${sub.planName} ${sub.billingCycle === 'yearly' ? 'Yearly' : 'Monthly'}`.trim();
-    if (this.userState.currentUser()?.isPremium) return 'Premium Monthly';
-    return 'Free';
+    if (sub?.planName) return `${sub.planName} ${sub.billingCycle === BILLING_PERIOD.YEARLY ? 'Yearly' : 'Monthly'}`.trim();
+    if (this.userState.currentUser()?.isPremium) return PLAN_LABELS.PREMIUM_MONTHLY;
+    return PLAN_LABELS.FREE;
   }
 
   onDownloadInvoice(item: PaymentHistory): void {

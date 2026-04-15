@@ -1,9 +1,11 @@
+import type { PlanFeature } from '@shared/types/plan-feature.type';
+
 export interface PricingPlan {
   id: string;
   name: string;
   price: string;
   description: string;
-  features: string[];
+  features: PlanFeature[];
   isCurrentPlan: boolean;
   isPopular?: boolean;
   buttonText: string;

@@ -13,6 +13,13 @@ import {
   BillingUsageRow,
 } from '@features/billing/components/billing-usage-overview-panel/billing-usage-overview-panel.component';
 import { BillingPlanOfferCardComponent } from '@features/billing/components/billing-plan-offer-card/billing-plan-offer-card.component';
+import {
+  PLAN_NAME_FRAGMENTS,
+  PLAN_ACCENT_COLORS,
+  PRO_PLAN_DEFAULTS,
+  BILLING_PERIOD,
+} from '@features/billing/constants/billing-overview.constants';
+import { PlanFeature } from '@shared/types/plan-feature.type';
 
 const USAGE_BAR_COLORS = ['#2563EB', '#7C3AED', '#0891B2'];
 
@@ -98,29 +105,31 @@ export class OverviewTabComponent implements OnInit {
     const sub = this.userSubscribedPlan();
     if (sub?.planName) return sub.planName;
     const u = this.userState.currentUser();
-    if (u?.isPremium) return 'Premium';
-    return 'Free';
+    if (u?.isPremium) return PRO_PLAN_DEFAULTS.LABEL;
+    return PLAN_NAME_FRAGMENTS.FREE;
   }
 
   priceMain(): string {
     const sub = this.userSubscribedPlan();
     const p = sub?.price?.trim();
     if (p) return p.startsWith('$') ? p.replace(/\/.*$/, '').trim() : `$${p}`;
-    if (this.userState.currentUser()?.isPremium) return '$19';
+    if (this.userState.currentUser()?.isPremium) return PRO_PLAN_DEFAULTS.PRICE_MAIN;
     return '$0';
   }
 
   pricePeriod(): string {
     const c = this.userSubscribedPlan()?.billingCycle;
-    if (c === 'yearly') return '/yr';
-    if (c === 'weekly') return '/wk';
+    if (c === BILLING_PERIOD.YEARLY) return '/yr';
+    if (c === BILLING_PERIOD.WEEKLY) return '/wk';
     return '/mo';
   }
 
   renewSummary(): string {
     const reset = this.featureUsage()[0]?.resetDate;
     const tail = reset ? ` · Renews ${this.mediumDate(reset)}` : '';
-    const cycle = this.userSubscribedPlan()?.billingCycle === 'yearly' ? 'yearly' : 'monthly';
+    const cycle = this.userSubscribedPlan()?.billingCycle === BILLING_PERIOD.YEARLY
+      ? BILLING_PERIOD.YEARLY
+      : BILLING_PERIOD.MONTHLY;
     return `Billed ${cycle}${tail}`;
   }
 
@@ -144,11 +153,13 @@ export class OverviewTabComponent implements OnInit {
     return Math.max(5, Math.min(100, Math.round(p)));
   }
 
-  currentPlanFeatures(): string[] {
+  currentPlanFeatures(): PlanFeature[] {
     const sub = this.userSubscribedPlan();
     if (sub?.features?.length) return sub.features;
-    const premium = this.subscriptionPlan().find(p => p.planName?.toLowerCase().includes('premium'));
-    return premium?.features?.length ? premium.features : [];
+    const pro = this.subscriptionPlan().find(p =>
+      p.planName?.toLowerCase().includes(PLAN_NAME_FRAGMENTS.PRO)
+    );
+    return pro?.features?.length ? pro.features : [];
   }
 
   autoRenewNote(): string {
@@ -160,20 +171,19 @@ export class OverviewTabComponent implements OnInit {
     const sub = this.userSubscribedPlan();
     const p = sub?.price?.trim();
     if (p) return p.startsWith('$') ? p : `$${p}`;
-    return this.userState.currentUser()?.isPremium ? '$19.00' : '';
+    return this.userState.currentUser()?.isPremium ? PRO_PLAN_DEFAULTS.NEXT_CHARGE : '';
   }
 
   planAccent(plan: SubscriptionPlan): string {
-    const n = (plan.planName || '').toLowerCase();
-    if (n.includes('enterprise')) return '#7C3AED';
-    if (n.includes('premium')) return '#2563EB';
-    return '#64748B';
+    const n = (plan.planName ?? '').toLowerCase();
+    if (n.includes(PLAN_NAME_FRAGMENTS.PRO)) return PLAN_ACCENT_COLORS.PRO;
+    return PLAN_ACCENT_COLORS.DEFAULT;
   }
 
   isCurrentPlan(plan: SubscriptionPlan): boolean {
     const sub = this.userSubscribedPlan();
     if (sub?.id) return sub.id === plan.id;
-    const free = plan.planName?.toLowerCase().includes('free');
+    const free = plan.planName?.toLowerCase().includes(PLAN_NAME_FRAGMENTS.FREE);
     const u = this.userState.currentUser();
     if (free && u?.isFreemium && !u?.isPremium) return true;
     return false;
@@ -188,11 +198,6 @@ export class OverviewTabComponent implements OnInit {
       },
       error: err => console.error('Checkout error:', err),
     });
-  }
-
-  onUpgradeEnterprise(): void {
-    const ent = this.subscriptionPlan().find(p => p.planName?.toLowerCase().includes('enterprise'));
-    if (ent) this.onPlanButtonClick(ent);
   }
 
   scrollToPlans(): void {
