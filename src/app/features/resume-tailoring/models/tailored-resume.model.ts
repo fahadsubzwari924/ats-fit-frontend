@@ -8,7 +8,11 @@ export class TailoredResume {
   public keywordsAdded: number;
   public sectionsOptimized: number;
   public achievementsQuantified: number;
-  public optimizationConfidence: number;
+  /** @deprecated Always null — use matchScore instead */
+  public optimizationConfidence: number | null;
+  public matchScore: { before: number; after: number; delta: number } | null;
+  public atsChecks: { passed: number; total: number } | null;
+  public bulletsQuantified: { before: number; after: number; total: number } | null;
 
   constructor(data: {
     blob: Blob;
@@ -18,7 +22,10 @@ export class TailoredResume {
     keywordsAdded?: number;
     sectionsOptimized?: number;
     achievementsQuantified?: number;
-    optimizationConfidence?: number;
+    optimizationConfidence?: number | null;
+    matchScore?: { before: number; after: number; delta: number } | null;
+    atsChecks?: { passed: number; total: number } | null;
+    bulletsQuantified?: { before: number; after: number; total: number } | null;
   }) {
     this.blob = data?.blob;
     this.filename = data?.filename ?? '';
@@ -27,6 +34,9 @@ export class TailoredResume {
     this.keywordsAdded = data?.keywordsAdded ?? 0;
     this.sectionsOptimized = data?.sectionsOptimized ?? 0;
     this.achievementsQuantified = data?.achievementsQuantified ?? 0;
-    this.optimizationConfidence = data?.optimizationConfidence ?? 0;
+    this.optimizationConfidence = null;
+    this.matchScore = data?.matchScore ?? null;
+    this.atsChecks = data?.atsChecks ?? null;
+    this.bulletsQuantified = data?.bulletsQuantified ?? null;
   }
 }

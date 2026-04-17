@@ -53,7 +53,33 @@ export class ResumeService {
             keywordsAdded: Number(response.headers.get('x-keywords-added') ?? 0),
             sectionsOptimized: Number(response.headers.get('x-sections-optimized') ?? 0),
             achievementsQuantified: Number(response.headers.get('x-achievements-quantified') ?? 0),
-            optimizationConfidence: Number(response.headers.get('x-optimization-confidence') ?? 0),
+            optimizationConfidence: null,
+            matchScore: (() => {
+              const after = response.headers.get('x-match-score-after');
+              if (after === null) return null;
+              return {
+                before: Number(response.headers.get('x-match-score-before') ?? 0),
+                after: Number(after),
+                delta: Number(response.headers.get('x-match-score-delta') ?? 0),
+              };
+            })(),
+            atsChecks: (() => {
+              const passed = response.headers.get('x-ats-checks-passed');
+              if (passed === null) return null;
+              return {
+                passed: Number(passed),
+                total: Number(response.headers.get('x-ats-checks-total') ?? 10),
+              };
+            })(),
+            bulletsQuantified: (() => {
+              const before = response.headers.get('x-bullets-quantified-before');
+              if (before === null) return null;
+              return {
+                before: Number(before),
+                after: Number(response.headers.get('x-bullets-quantified-after') ?? 0),
+                total: Number(response.headers.get('x-bullets-quantified-total') ?? 0),
+              };
+            })(),
           };
           return new TailoredResume(data);
         })

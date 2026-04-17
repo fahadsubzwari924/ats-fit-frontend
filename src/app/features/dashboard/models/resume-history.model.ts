@@ -2,16 +2,21 @@ export interface ResumeHistoryItem {
   id: string;
   companyName: string;
   jobPosition: string;
+  /** @deprecated Use matchScore instead */
   optimizationConfidence: number | null;
   keywordsAdded: number | null;
   sectionsOptimized: number | null;
   templateId: string | null;
   createdAt: string | Date;
+  canDownload: boolean;
+  matchScore: { before: number; after: number; delta: number } | null;
+  atsChecks: { passed: number; total: number } | null;
 }
 
 export interface ResumeHistoryDetail extends ResumeHistoryItem {
   achievementsQuantified: number | null;
   changesDiff: ResumeDiffSummary | null;
+  bulletsQuantified: { before: number; after: number; total: number } | null;
 }
 
 export interface PaginatedHistoryResponse {
