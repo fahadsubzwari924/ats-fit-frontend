@@ -116,10 +116,14 @@
                 <p class="text-xs text-slate-400 mt-0.5">{{ item.createdAt | date:'MMM d, y' }}</p>
               </div>
 
-              <!-- Confidence badge -->
-              @if (item.optimizationConfidence) {
+              <!-- Match score badge -->
+              @if (item.matchScore) {
                 <span class="text-xs font-bold px-2 py-0.5 bg-emerald-100 text-emerald-700 rounded-full shrink-0">
-                  {{ item.optimizationConfidence }}%
+                  {{ item.matchScore.after }}%
+                </span>
+              } @else if (item.atsChecks) {
+                <span class="text-xs font-bold px-2 py-0.5 bg-blue-100 text-blue-700 rounded-full shrink-0">
+                  {{ item.atsChecks.passed }}/{{ item.atsChecks.total }}
                 </span>
               }
 
@@ -168,23 +172,54 @@
                 } @else if (getDetail(item.id)) {
                   <div class="pt-4 space-y-4">
 
-                    <!-- Metrics row -->
-                    <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                      <div class="bg-white rounded-xl p-3 border border-slate-200/70 text-center">
-                        <p class="text-xl font-bold text-emerald-600">{{ getDetail(item.id)!.keywordsAdded ?? '—' }}</p>
-                        <p class="text-[10px] text-slate-400 font-medium mt-0.5">Keywords Added</p>
-                      </div>
-                      <div class="bg-white rounded-xl p-3 border border-slate-200/70 text-center">
-                        <p class="text-xl font-bold text-blue-600">{{ getDetail(item.id)!.sectionsOptimized ?? '—' }}</p>
-                        <p class="text-[10px] text-slate-400 font-medium mt-0.5">Sections Optimized</p>
-                      </div>
-                      <div class="bg-white rounded-xl p-3 border border-slate-200/70 text-center">
-                        <p class="text-xl font-bold text-purple-600">{{ getDetail(item.id)!.achievementsQuantified ?? '—' }}</p>
-                        <p class="text-[10px] text-slate-400 font-medium mt-0.5">Enhanced</p>
-                      </div>
-                      <div class="bg-white rounded-xl p-3 border border-slate-200/70 text-center">
-                        <p class="text-xl font-bold text-amber-600">{{ getDetail(item.id)!.optimizationConfidence ?? '—' }}%</p>
-                        <p class="text-[10px] text-slate-400 font-medium mt-0.5">Confidence</p>
+                    <!-- Stats: hero + 3 cards -->
+                    <div class="space-y-3">
+                      <!-- Hero match score (from matchScore field or changesDiff fallback) -->
+                      @if (getDetail(item.id)!.matchScore || getDetail(item.id)!.changesDiff?.keywordAnalysis) {
+                        @let ms = getDetail(item.id)!.matchScore ?? { before: getDetail(item.id)!.changesDiff!.keywordAnalysis!.coverageOriginal, after: getDetail(item.id)!.changesDiff!.keywordAnalysis!.coverageOptimized, delta: getDetail(item.id)!.changesDiff!.keywordAnalysis!.coverageOptimized - getDetail(item.id)!.changesDiff!.keywordAnalysis!.coverageOriginal };
+                        <div class="flex items-center gap-4 bg-gradient-to-r from-emerald-50 to-white rounded-xl px-4 py-3 border border-emerald-100">
+                          <div class="relative w-16 h-16 shrink-0">
+                            <svg class="w-16 h-16 -rotate-90" viewBox="0 0 64 64">
+                              <circle cx="32" cy="32" r="26" fill="none" stroke="#e2e8f0" stroke-width="6"/>
+                              <circle cx="32" cy="32" r="26" fill="none" stroke="#10b981" stroke-width="6"
+                                stroke-linecap="round"
+                                [attr.stroke-dasharray]="163.4"
+                                [attr.stroke-dashoffset]="163.4 - (163.4 * (ms.after / 100))"/>
+                            </svg>
+                            <div class="absolute inset-0 flex items-center justify-center">
+                              <span class="text-sm font-black text-emerald-700">{{ ms.after }}%</span>
+                            </div>
+                          </div>
+                          <div>
+                            <p class="text-sm font-bold text-slate-800">Match Score</p>
+                            <p class="text-xs text-slate-500 mt-0.5">{{ ms.before }}% → {{ ms.after }}%</p>
+                            <span class="inline-block mt-1 text-[11px] px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded font-bold">+{{ ms.delta }}% improvement</span>
+                          </div>
+                        </div>
+                      }
+
+                      <!-- 3 supporting cards -->
+                      <div class="grid grid-cols-3 gap-2">
+                        <div class="bg-white rounded-xl p-2.5 border border-slate-200/70 text-center">
+                          <p class="text-lg font-bold text-indigo-600">{{ getDetail(item.id)!.keywordsAdded ?? '—' }}</p>
+                          <p class="text-[10px] text-slate-400 font-medium mt-0.5 leading-tight">Keywords<br>Added</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-2.5 border border-slate-200/70 text-center">
+                          @if (getDetail(item.id)!.atsChecks) {
+                            <p class="text-lg font-bold text-emerald-600">{{ getDetail(item.id)!.atsChecks!.passed }}/{{ getDetail(item.id)!.atsChecks!.total }}</p>
+                          } @else {
+                            <p class="text-lg font-bold text-emerald-600">—</p>
+                          }
+                          <p class="text-[10px] text-slate-400 font-medium mt-0.5 leading-tight">ATS<br>Checks</p>
+                        </div>
+                        <div class="bg-white rounded-xl p-2.5 border border-slate-200/70 text-center">
+                          @if (getDetail(item.id)!.bulletsQuantified) {
+                            <p class="text-lg font-bold text-purple-600">{{ getDetail(item.id)!.bulletsQuantified!.before }}→{{ getDetail(item.id)!.bulletsQuantified!.after }}</p>
+                          } @else {
+                            <p class="text-lg font-bold text-purple-600">{{ getDetail(item.id)!.sectionsOptimized ?? '—' }}</p>
+                          }
+                          <p class="text-[10px] text-slate-400 font-medium mt-0.5 leading-tight">Bullets<br>Quantified</p>
+                        </div>
                       </div>
                     </div>
 
@@ -198,31 +233,6 @@
                             · {{ getDetail(item.id)!.changesDiff!.sectionsChanged }} sections
                           </span>
                         </div>
-
-                        <!-- Enhanced diff (version 2): show keyword coverage -->
-                        @if (getDetail(item.id)!.changesDiff!.version === 2 && getDetail(item.id)!.changesDiff!.keywordAnalysis) {
-                          <div class="mb-2 space-y-1">
-                            <div class="flex items-center justify-between text-[10px]">
-                              <span class="text-slate-500">Keyword coverage</span>
-                              <span class="font-semibold text-emerald-600">
-                                {{ getDetail(item.id)!.changesDiff!.keywordAnalysis!.coverageOriginal }}%
-                                → {{ getDetail(item.id)!.changesDiff!.keywordAnalysis!.coverageOptimized }}%
-                              </span>
-                            </div>
-                            <div class="h-1.5 bg-slate-100 rounded-full overflow-hidden">
-                              <div class="h-full bg-emerald-500 rounded-full"
-                                [style.width]="getDetail(item.id)!.changesDiff!.keywordAnalysis!.coverageOptimized + '%'">
-                              </div>
-                            </div>
-                            @if (getDetail(item.id)!.changesDiff!.keywordAnalysis!.newlyAdded.length) {
-                              <div class="flex flex-wrap gap-1 pt-0.5">
-                                @for (kw of getDetail(item.id)!.changesDiff!.keywordAnalysis!.newlyAdded.slice(0, 5); track kw) {
-                                  <span class="px-1.5 py-0.5 bg-emerald-100 text-emerald-700 rounded text-[10px] font-medium">+{{ kw }}</span>
-                                }
-                              </div>
-                            }
-                          </div>
-                        }
 
                         <!-- Section-level changes list (works for both legacy and enhanced) -->
                         <div class="space-y-1.5">
