@@ -1,6 +1,8 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
-import { forkJoin, of } from 'rxjs';
+import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
+import { forkJoin, of, switchMap } from 'rxjs';
 import { catchError } from 'rxjs/operators';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { BillingService } from '@features/billing/services/billing.service';
 import { SubscriptionPlan } from '@features/billing/models/subscription-plan.model';
 import { UserState } from '@core/states/user.state';
@@ -20,6 +22,9 @@ import {
   BILLING_PERIOD,
 } from '@features/billing/constants/billing-overview.constants';
 import { PlanFeature } from '@shared/types/plan-feature.type';
+import { CancelSubscriptionDialogComponent } from '../cancel-subscription-dialog/cancel-subscription-dialog.component';
+import { SnackbarService } from '@shared/services/snackbar.service';
+import { UserApiService } from '@shared/services/user-api.service';
 
 const USAGE_BAR_COLORS = ['#2563EB', '#7C3AED', '#0891B2'];
 
@@ -29,6 +34,7 @@ const USAGE_BAR_COLORS = ['#2563EB', '#7C3AED', '#0891B2'];
     BillingCurrentPlanCardComponent,
     BillingUsageOverviewPanelComponent,
     BillingPlanOfferCardComponent,
+    MatDialogModule,
   ],
   templateUrl: './overview-tab.component.html',
   styleUrl: './overview-tab.component.scss',
@@ -36,7 +42,11 @@ const USAGE_BAR_COLORS = ['#2563EB', '#7C3AED', '#0891B2'];
 export class OverviewTabComponent implements OnInit {
   private billingService = inject(BillingService);
   private resumeService = inject(ResumeService);
+  private dialog = inject(MatDialog);
+  private snackbar = inject(SnackbarService);
+  private userApiService = inject(UserApiService);
   readonly userState = inject(UserState);
+  private destroyRef = inject(DestroyRef);
 
   subscriptionPlan = signal<SubscriptionPlan[]>([]);
   userSubscribedPlan = signal<SubscriptionPlan | null>(null);
@@ -134,22 +144,20 @@ export class OverviewTabComponent implements OnInit {
   }
 
   daysRemainingLabel(): string | null {
-    const reset = this.featureUsage()[0]?.resetDate;
-    if (!reset) return null;
-    const end = new Date(reset);
-    const days = Math.ceil((end.getTime() - Date.now()) / (24 * 60 * 60 * 1000));
+    const usage = this.featureUsage()[0];
+    if (!usage?.resetDate) return null;
+    const days = usage.daysRemaining ?? 0;
     if (days < 0) return null;
     return `${days} days remaining`;
   }
 
   renewalProgressPct(): number {
-    const reset = this.featureUsage()[0]?.resetDate;
-    if (!reset) return 43;
-    const end = new Date(reset).getTime();
-    const cycleMs = 30 * 24 * 60 * 60 * 1000;
-    const start = end - cycleMs;
-    const now = Date.now();
-    const p = ((now - start) / (end - start)) * 100;
+    const usage = this.featureUsage()[0];
+    if (!usage?.cycleStart || !usage?.resetDate) return 43;
+    const start = new Date(usage.cycleStart).getTime();
+    const end = new Date(usage.resetDate).getTime();
+    if (end <= start) return 43;
+    const p = ((Date.now() - start) / (end - start)) * 100;
     return Math.max(5, Math.min(100, Math.round(p)));
   }
 
@@ -194,9 +202,38 @@ export class OverviewTabComponent implements OnInit {
       next: response => {
         if (response?.status && response?.data?.checkoutUrl) {
           window.location.href = response.data.checkoutUrl as string;
+        } else {
+          this.snackbar.showError('Could not start checkout. Please try again.');
         }
       },
-      error: err => console.error('Checkout error:', err),
+      error: () => {
+        this.snackbar.showError('Checkout failed. Please try again or contact support.');
+      },
+    });
+  }
+
+  onCancelPlan(): void {
+    const subscriptionId = this.userSubscribedPlan()?.id;
+    if (!subscriptionId) return;
+
+    const ref = this.dialog.open(CancelSubscriptionDialogComponent, { width: '420px' });
+
+    ref.afterClosed().pipe(takeUntilDestroyed(this.destroyRef)).subscribe((confirmed: boolean) => {
+      if (!confirmed) return;
+
+      this.billingService.cancelSubscription(subscriptionId).pipe(
+        switchMap(() => this.userApiService.getCurrentUser()),
+        takeUntilDestroyed(this.destroyRef),
+      ).subscribe({
+        next: (user) => {
+          this.userState.setUser(user);
+          this.userSubscribedPlan.set(null);
+          this.snackbar.showSuccess("Subscription cancelled. You'll retain access until the period ends.");
+        },
+        error: () => {
+          this.snackbar.showError('Failed to cancel subscription. Please contact support.');
+        },
+      });
     });
   }
 
