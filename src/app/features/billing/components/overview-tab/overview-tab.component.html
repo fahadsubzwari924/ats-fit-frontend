@@ -12,7 +12,7 @@
       [autoRenewNote]="autoRenewNote()"
       [nextChargeAmount]="nextChargeAmount()"
       (changePlan)="scrollToPlans()"
-      (cancelPlan)="scrollToPlans()" />
+      (cancelPlan)="onCancelPlan()" />
 
     <app-billing-usage-overview-panel
       [usages]="usageRows()"

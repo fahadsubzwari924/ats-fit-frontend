@@ -17,7 +17,6 @@ export class BillingPageHeaderComponent {
 
   readonly tabs: { id: BillingTab; label: string }[] = [
     { id: BillingTab.OVERVIEW, label: 'Overview' },
-    { id: BillingTab.PAYMENT, label: 'Payment' },
     { id: BillingTab.HISTORY, label: 'History' },
   ];
 

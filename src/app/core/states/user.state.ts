@@ -3,6 +3,7 @@ import { computed, inject, Injectable, signal } from '@angular/core';
 import { UploadedResume } from '@core/models/user/uploaded-resumes.model';
 import { User } from '@core/models/user/user.model';
 import { StorageService } from '@shared/services/storage.service';
+import { UserApiService } from '@shared/services/user-api.service';
 
 @Injectable({
   providedIn: 'root'
@@ -11,6 +12,7 @@ export class UserState {
 
   // Injection
   private storageService = inject(StorageService);
+  private userApiService = inject(UserApiService);
 
   private platform = new Platform();
 
@@ -101,7 +103,20 @@ export class UserState {
     if (user) {
       this._currentUser.set(user);
       this._isLoggedIn.set(true);
+      this.refreshFromApi();
     }
+  }
+
+  private refreshFromApi(): void {
+    this.userApiService.getCurrentUser().subscribe({
+      next: (user) => {
+        this._currentUser.set(user);
+        this.saveToStorage();
+      },
+      error: () => {
+        // Silently keep stale localStorage data if API fails
+      },
+    });
   }
 
   // Utility methods

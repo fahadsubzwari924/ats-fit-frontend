@@ -34,4 +34,10 @@ export class BillingService {
     return this._http.post<ApiResponse<ICheckout>>(API_ROUTES.createAPIRoute(API_ROUTES.SUBSCRIPTIONS.CHECKOUT), payload);
   }
 
+  public cancelSubscription(subscriptionId: string): Observable<ApiResponse<any>> {
+    return this._http.delete<ApiResponse<any>>(
+      API_ROUTES.createAPIRoute(`${API_ROUTES.SUBSCRIPTIONS.CANCEL_SUBSCRIPTION}/${subscriptionId}/cancel`)
+    );
+  }
+
 }

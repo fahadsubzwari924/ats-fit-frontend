@@ -20,6 +20,7 @@ export const API_ROUTES = {
     STATS: 'job-applications/stats',
   },
   USER: {
+    ME: 'users/me',
     UPLOAD_RESUME: 'users/upload-resume',
     DELETE_RESUME: 'users/delete-resume',
     FEATURE_USAGE: 'users/feature-usage',
@@ -36,7 +37,7 @@ export const API_ROUTES = {
     CHECKOUT: 'subscriptions/checkout',
     USER_SUBSCRIPTION: 'subscriptions/user/subscriptions',
     PAYMENT_HISTORY: 'subscriptions/payment-history',
-    // CANCEL_SUBSCRIPTION: 'subscriptions/cancel',
+    CANCEL_SUBSCRIPTION: 'subscriptions',
     // BILLING_INFO: 'subscriptions/billing-info',
   },
 
