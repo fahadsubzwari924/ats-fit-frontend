@@ -1,4 +1,4 @@
-# /review — resume-maker-fe
+# /review — ats-fit-frontend
 
 ## Goal
 
