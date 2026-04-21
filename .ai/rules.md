@@ -1,4 +1,4 @@
-# Coding rules — resume-maker-fe
+# Coding rules — ats-fit-frontend
 
 ## Stack
 

@@ -1,4 +1,4 @@
-# API patterns — resume-maker-fe
+# API patterns — ats-fit-frontend
 
 ## REST shape
 

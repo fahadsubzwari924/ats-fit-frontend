@@ -6,19 +6,8 @@ import { publicGuard } from '@core/guards/public.guard';
 import { LayoutComponent } from '@root/layout/layout.component';
 
 export const routes: Routes = [
-  // Public routes (no auth required)
-  {
-    path: '',
-    component: LayoutComponent,
-    children: [
-      {
-        path: '',
-        loadComponent: () => import('@root/landing/landing.component').then(m => m.LandingComponent)
-      }
-    ]
-  },
+  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
 
-  // Protected routes (auth required)
   {
     path: '',
     component: LayoutComponent,
@@ -27,7 +16,6 @@ export const routes: Routes = [
       {
         path: 'dashboard',
         canActivate: [authGuard],
-
         loadComponent: () => import('@features/dashboard/dashboard.component').then(m => m.DashboardComponent)
       },
       {
@@ -48,7 +36,6 @@ export const routes: Routes = [
     canActivate: [authGuard],
     loadComponent: () => import('@features/onboarding/onboarding.component').then(m => m.OnboardingComponent)
   },
-  // Auth pages (only accessible when not logged in)
   {
     path: 'signin',
     canActivate: [publicGuard],
@@ -59,5 +46,5 @@ export const routes: Routes = [
     canActivate: [publicGuard],
     loadComponent: () => import('@features/authentication/components/signup/signup.component').then(m => m.SignupComponent)
   },
-  { path: '**', redirectTo: '' }
+  { path: '**', redirectTo: 'dashboard' },
 ];

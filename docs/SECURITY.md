@@ -1,4 +1,4 @@
-# Security — resume-maker-fe
+# Security — ats-fit-frontend
 
 ## Input
 

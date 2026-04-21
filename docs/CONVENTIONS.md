@@ -1,4 +1,4 @@
-# Conventions — resume-maker-fe
+# Conventions — ats-fit-frontend
 
 
 ## TypeScript
