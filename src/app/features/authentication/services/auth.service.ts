@@ -13,22 +13,32 @@ export class AuthService {
 
   private _http = inject(HttpClient);
 
-  public login(payload: any): Observable<LoginResponse> {
-    return this._http.post<ApiResponse<any>>(API_ROUTES.createAPIRoute(API_ROUTES.AUTH.SIGNIN), payload)
-    .pipe(
-      map(response => new LoginResponse(response.data)),
-    );
+  public login(payload: Record<string, unknown>): Observable<LoginResponse> {
+    return this._http
+      .post<ApiResponse<unknown>>(API_ROUTES.createAPIRoute(API_ROUTES.AUTH.SIGNIN), payload)
+      .pipe(
+        map((response) =>
+          new LoginResponse(
+            response.data as { user: Record<string, unknown>; access_token: string },
+          ),
+        ),
+      );
   }
 
-  public signup(user: any): Observable<ApiResponse<User>> {
+  public signup(user: Record<string, unknown>): Observable<ApiResponse<User>> {
     return this._http.post<ApiResponse<User>>(API_ROUTES.createAPIRoute(API_ROUTES.AUTH.SIGNUP), user);
   }
 
-  public googleAuth(payload: any): Observable<LoginResponse> {
-    return this._http.post<ApiResponse<any>>(API_ROUTES.createAPIRoute(API_ROUTES.AUTH.GOOGLE_LOGIN), payload)
-    .pipe(
-      map(response => new LoginResponse(response.data)),
-    );
+  public googleAuth(payload: Record<string, unknown>): Observable<LoginResponse> {
+    return this._http
+      .post<ApiResponse<unknown>>(API_ROUTES.createAPIRoute(API_ROUTES.AUTH.GOOGLE_LOGIN), payload)
+      .pipe(
+        map((response) =>
+          new LoginResponse(
+            response.data as { user: Record<string, unknown>; access_token: string },
+          ),
+        ),
+      );
   }
 
 }

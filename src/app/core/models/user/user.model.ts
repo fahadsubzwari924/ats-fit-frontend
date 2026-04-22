@@ -26,31 +26,32 @@ export class User {
    * Supports both API payloads (snake_case) and JSON persisted from the client (camelCase).
    * localStorage stores the result of `JSON.stringify(user)` after login, so reload must read `fullName`, etc.
    */
-  constructor(user: any) {
-    this.fullName = user?.full_name ?? user?.fullName ?? '';
-    this.email = user?.email ?? '';
-    this.password = user?.password ?? '';
-    this.ipAddress = user?.ipAddress ?? '';
-    this.userAgent = user?.userAgent ?? '';
-    this.id = user?.id ?? '';
-    this.plan = user?.plan ?? '';
+  constructor(user: unknown) {
+    const u = user as Record<string, unknown>;
+    this.fullName = (u['full_name'] ?? u['fullName'] ?? '') as string;
+    this.email = (u['email'] ?? '') as string;
+    this.password = (u['password'] ?? '') as string;
+    this.ipAddress = (u['ipAddress'] ?? '') as string;
+    this.userAgent = (u['userAgent'] ?? '') as string;
+    this.id = (u['id'] ?? '') as string;
+    this.plan = (u['plan'] ?? '') as string;
     this.isPremium = this.plan === SubscriptionType.PREMIUM;
     this.isFreemium = this.plan === SubscriptionType.FREEMIUM;
-    this.userType = user?.user_type ?? user?.userType ?? '';
-    this.isActive = user?.is_active ?? user?.isActive ?? false;
-    this.createdAt = user?.created_at ?? user?.createdAt ?? '';
-    this.updatedAt = user?.updated_at ?? user?.updatedAt ?? '';
+    this.userType = (u['user_type'] ?? u['userType'] ?? '') as string;
+    this.isActive = (u['is_active'] ?? u['isActive'] ?? false) as boolean;
+    this.createdAt = (u['created_at'] ?? u['createdAt'] ?? '') as string;
+    this.updatedAt = (u['updated_at'] ?? u['updatedAt'] ?? '') as string;
     this.onboardingCompleted =
-      user?.onboarding_completed ?? user?.onboardingCompleted ?? true;
+      (u['onboarding_completed'] ?? u['onboardingCompleted'] ?? true) as boolean;
 
-    const usageList = user?.featureUsage ?? user?.feature_usage;
+    const usageList = u['featureUsage'] ?? u['feature_usage'];
     this.featureUsage = Array.isArray(usageList)
-      ? usageList.map((usage: any) => new FeatureUsage(usage))
+      ? usageList.map((usage: Record<string, unknown>) => new FeatureUsage(usage))
       : [];
 
-    const resumeList = user?.uploadedResumes ?? user?.uploaded_resumes;
+    const resumeList = u['uploadedResumes'] ?? u['uploaded_resumes'];
     this.uploadedResumes = Array.isArray(resumeList)
-      ? resumeList.map((resume: any) => new UploadedResume(resume))
+      ? resumeList.map((resume: Record<string, unknown>) => new UploadedResume(resume))
       : [];
   }
 }

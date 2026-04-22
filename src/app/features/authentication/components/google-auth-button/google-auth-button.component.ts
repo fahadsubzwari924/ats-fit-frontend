@@ -1,4 +1,4 @@
-import { ChangeDetectorRef, Component, inject, signal } from '@angular/core';
+import { ChangeDetectorRef, Component, inject, signal, OnInit } from '@angular/core';
 import { finalize } from 'rxjs';
 import { Router } from '@angular/router';
 import { AppRoutes } from '@core/constants/app-routes.contant';
@@ -8,7 +8,21 @@ import { environment } from '@env/environment';
 import { AuthService } from '@features/authentication/services/auth.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { StorageService } from '@shared/services/storage.service';
-declare const google: any;
+
+/** Minimal typings for Google Identity Services (script from CDN). */
+interface GoogleCredentialResponse {
+  credential: string;
+}
+
+interface GoogleAccountsId {
+  initialize: (cfg: {
+    client_id: string;
+    callback: (response: GoogleCredentialResponse) => void;
+  }) => void;
+  renderButton: (el: HTMLElement | null, opts: Record<string, string>) => void;
+}
+
+declare const google: { accounts?: { id?: GoogleAccountsId } };
 
 @Component({
   selector: 'app-google-auth-button',
@@ -17,7 +31,7 @@ declare const google: any;
   templateUrl: './google-auth-button.component.html',
   styleUrl: './google-auth-button.component.scss',
 })
-export class GoogleAuthButtonComponent {
+export class GoogleAuthButtonComponent implements OnInit {
 
   /** Backend token exchange in flight after Google credential. */
   public isCompletingSignIn = signal(false);
@@ -35,13 +49,13 @@ export class GoogleAuthButtonComponent {
   }
 
   initializeGoogleSignIn(): void {
-    if (typeof google === 'undefined' || !google?.accounts?.id) {
+    if (typeof google === 'undefined' || !google.accounts?.id) {
       return;
     }
 
     google.accounts.id.initialize({
       client_id: environment.googleClientId,
-      callback: (response: any) => this.handleCredentialResponse(response),
+      callback: (response: GoogleCredentialResponse) => this.handleCredentialResponse(response),
     });
 
     google.accounts.id.renderButton(
@@ -55,7 +69,7 @@ export class GoogleAuthButtonComponent {
     );
   }
 
-  public handleCredentialResponse(googleResponse: any): void {
+  public handleCredentialResponse(googleResponse: GoogleCredentialResponse): void {
     const token = googleResponse.credential;
     if (!token) {
       return;
@@ -65,7 +79,7 @@ export class GoogleAuthButtonComponent {
     this.cdr.detectChanges();
 
     this.authService
-      .googleAuth({ token })
+      .googleAuth({ token } as Record<string, unknown>)
       .pipe(
         finalize(() => {
           this.isCompletingSignIn.set(false);

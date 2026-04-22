@@ -11,7 +11,7 @@ export class UserApiService {
 
   public getCurrentUser(): Observable<User> {
     return this._http
-      .get<ApiResponse<any>>(API_ROUTES.createAPIRoute(API_ROUTES.USER.ME))
+      .get<ApiResponse<unknown>>(API_ROUTES.createAPIRoute(API_ROUTES.USER.ME))
       .pipe(map(response => new User(response?.data)));
   }
 }

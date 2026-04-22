@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { finalize } from 'rxjs';
 import { RouterLink, Router } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule } from '@angular/forms';
@@ -26,7 +26,7 @@ import { AppRoutes } from '@core/constants/app-routes.contant';
   templateUrl: './signin.component.html',
   styleUrl: './signin.component.scss'
 })
-export class SigninComponent {
+export class SigninComponent implements OnInit {
 
   // Inject dependencies
   private router = inject(Router);
@@ -74,7 +74,7 @@ export class SigninComponent {
     this.signinForm.disable({ emitEvent: false });
 
     this.authService
-      .login(this.signinForm.getRawValue())
+      .login(this.signinForm.getRawValue() as Record<string, unknown>)
       .pipe(
         finalize(() => {
           this.isSubmitting.set(false);

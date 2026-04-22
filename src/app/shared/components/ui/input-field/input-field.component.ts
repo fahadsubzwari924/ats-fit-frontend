@@ -1,13 +1,20 @@
-import { Component, forwardRef, input, output, computed, effect } from '@angular/core';
-import { AbstractControl, FormControl, FormsModule, NG_VALIDATORS, NG_VALUE_ACCESSOR, ReactiveFormsModule, ValidationErrors } from '@angular/forms';
+import { Component, forwardRef, input, output, computed, effect, OnDestroy } from '@angular/core';
+import {
+  AbstractControl,
+  FormControl,
+  FormsModule,
+  NG_VALIDATORS,
+  NG_VALUE_ACCESSOR,
+  ReactiveFormsModule,
+  ValidationErrors,
+} from '@angular/forms';
 import { InputFieldCustomValidator } from '@shared/components/ui/input-field/interface/input-field-custom-validator.interface';
 import { Subscription } from 'rxjs';
-
 
 @Component({
   selector: 'app-input-field',
   standalone: true,
-  imports: [FormsModule, FormsModule, ReactiveFormsModule],
+  imports: [FormsModule, ReactiveFormsModule],
   templateUrl: './input-field.component.html',
   styleUrl: './input-field.component.scss',
   providers: [
@@ -23,9 +30,7 @@ import { Subscription } from 'rxjs';
     },
   ],
 })
-export class InputFieldComponent {
-
-  // Component Inputs
+export class InputFieldComponent implements OnDestroy {
   public label = input<string>('');
   public type = input<string>('text');
   public placeholder = input<string>('');
@@ -36,37 +41,37 @@ export class InputFieldComponent {
   public minLength = input<number | null>(null);
   public maxLength = input<number | null>(null);
 
-  // Component Outputs
-  public onInput = output<Event>();
-  public onChangeEvent = output<Event>();
-  public onBlur = output<Event>();
-  public onFocus = output<Event>();
-  public onKeydown = output<KeyboardEvent>();
-  public onKeyup = output<KeyboardEvent>();
-  public onKeypress = output<KeyboardEvent>();
-  public onClick = output<MouseEvent>();
+  public fieldInput = output<Event>();
+  public domChange = output<Event>();
+  public blurEvent = output<Event>();
+  public focusEvent = output<Event>();
+  public keydownEvent = output<KeyboardEvent>();
+  public keyupEvent = output<KeyboardEvent>();
+  public keypressEvent = output<KeyboardEvent>();
+  public pointerClick = output<MouseEvent>();
   public customEvent = output<{ eventName: string; event: Event }>();
 
-  // ControlValueAccessor properties
-  public onChange: (value: any) => void = () => {};
-  public onTouched: () => void = () => {};
+  private propagateChange: (value: unknown) => void = () => {
+    void 0;
+  };
+  private notifyTouched: () => void = () => {
+    void 0;
+  };
   public control: FormControl = new FormControl('');
 
   private subscriptions$ = new Subscription();
 
-  // Signal to track error messages
   public errorMessages = computed(() => {
     if (!this.control.errors || !(this.control.touched || this.control.dirty)) {
       return [];
     }
-    return Object.keys(this.control.errors).map(errorKey => {
-      const customValidator = this.customValidators().find(v => v.errorKey === errorKey);
+    return Object.keys(this.control.errors).map((errorKey) => {
+      const customValidator = this.customValidators().find((v) => v.errorKey === errorKey);
       return customValidator ? customValidator.errorMessage : this.getDefaultErrorMessage(errorKey);
     });
   });
 
   constructor() {
-    // Debug effect to log control state
     effect(() => {
       console.log('Control state:', {
         value: this.control.value,
@@ -77,18 +82,17 @@ export class InputFieldComponent {
     });
   }
 
-  writeValue(value: any): void {
+  writeValue(value: unknown): void {
     this.control.setValue(value, { emitEvent: false });
   }
 
-  registerOnChange(fn: (value: any) => void): void {
-    this.onChange = fn;
-    // Sync with FormControl
+  registerOnChange(fn: (value: unknown) => void): void {
+    this.propagateChange = fn;
     this.subscriptions$ = this.control.valueChanges.subscribe((value) => fn(value));
   }
 
   registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
+    this.notifyTouched = fn;
     this.control.statusChanges.subscribe(() => {
       if (this.control.touched) {
         fn();
@@ -96,15 +100,12 @@ export class InputFieldComponent {
     });
   }
 
-  setDisabledState(_isDisabled: boolean): void {
-    // No-op: `validate()` assigns `this.control` to the parent FormControl. Calling
-    // disable()/enable() here would mutate that same control while Angular is syncing
-    // the CVA and causes infinite recursion (Maximum call stack size exceeded).
-    // The template’s `[formControl]="control"` already reflects disabled state on the input.
+  setDisabledState(isDisabled: boolean): void {
+    void isDisabled;
   }
 
   validate(control: AbstractControl): ValidationErrors | null {
-    this.control = control as FormControl; // Update the control instance
+    this.control = control as FormControl;
 
     const errors: ValidationErrors = {};
 
@@ -119,7 +120,7 @@ export class InputFieldComponent {
   }
 
   private getDefaultErrorMessage(errorKey: string): string {
-    const errorMessagesMap: { [key: string]: string } = {
+    const errorMessagesMap: Record<string, string> = {
       required: `${this.label()} is required`,
       email: `Please enter a valid email address`,
       minlength: `Minimum leng th is ${this.control.errors?.['minlength']?.requiredLength} characters`,
@@ -137,7 +138,17 @@ export class InputFieldComponent {
     }
   }
 
-  ngOnDestroy() {
+  ngOnDestroy(): void {
     this.subscriptions$.unsubscribe();
   }
+
+  onModelChange(value: unknown): void {
+    this.propagateChange(value);
+  }
+
+  onInputBlur(event: Event): void {
+    this.notifyTouched();
+    this.blurEvent.emit(event);
+  }
 }
+

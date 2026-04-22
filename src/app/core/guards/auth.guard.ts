@@ -6,7 +6,7 @@ import { StorageService } from '@shared/services/storage.service';
 import { AppRoutes } from '@core/constants/app-routes.contant';
 import { Platform } from '@angular/cdk/platform';
 
-export const authGuard: CanActivateFn = (route, state) => {
+export const authGuard: CanActivateFn = (_route, _state) => {
 
   const platform = new Platform();
 

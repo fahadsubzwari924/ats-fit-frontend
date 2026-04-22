@@ -8,15 +8,15 @@ export class UploadedResume {
   public createdAt: Date;
   public updatedAt: Date;
 
-  constructor(data: any) {
-    this.id = data?.id;
-    this.fileName = data?.fileName;
-    this.fileSize = data?.fileSize;
-    this.mimeType = data?.mimeType;
-    this.s3Url = data?.s3Url;
-    this.isActive = data?.isActive;
-    this.createdAt = data?.createdAt;
-    this.updatedAt = data?.updatedAt;
+  constructor(data: Record<string, unknown>) {
+    this.id = data['id'] as string;
+    this.fileName = data['fileName'] as string;
+    this.fileSize = data['fileSize'] as number;
+    this.mimeType = data['mimeType'] as string;
+    this.s3Url = data['s3Url'] as string;
+    this.isActive = data['isActive'] as boolean;
+    this.createdAt = data['createdAt'] as Date;
+    this.updatedAt = data['updatedAt'] as Date;
   }
 }
 

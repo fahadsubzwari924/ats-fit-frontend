@@ -3,7 +3,7 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AppRoutes } from '@core/constants/app-routes.contant';
 import { StorageService } from '@shared/services/storage.service';
 
-export const publicGuard: CanActivateFn = (route, state) => {
+export const publicGuard: CanActivateFn = (_route, _state) => {
   const router = inject(Router);
   const storageService = inject(StorageService);
 

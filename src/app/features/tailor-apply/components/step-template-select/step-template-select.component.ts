@@ -1,4 +1,4 @@
-import { Component, computed, inject, input, output, signal } from '@angular/core';
+import { Component, computed, inject, input, output } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { FormGroup } from '@angular/forms';
 import { ResumeState } from '@core/states/resume.state';

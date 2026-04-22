@@ -66,21 +66,21 @@
           <div class="px-4 pb-4 space-y-3 border-t border-slate-100 pt-3">
             <div class="grid grid-cols-2 gap-3">
               <div>
-                <label class="block text-xs font-medium text-slate-600 mb-1">Job Position *</label>
-                <input formControlName="jobPosition" type="text" placeholder="e.g. Senior Frontend Engineer"
+                <label class="block text-xs font-medium text-slate-600 mb-1" [attr.for]="'batch-job-position-' + i">Job Position *</label>
+                <input [id]="'batch-job-position-' + i" formControlName="jobPosition" type="text" placeholder="e.g. Senior Frontend Engineer"
                   class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all placeholder:text-slate-400"
                   [class.border-red-300]="jobs.at(i).get('jobPosition')?.invalid && jobs.at(i).get('jobPosition')?.touched" />
               </div>
               <div>
-                <label class="block text-xs font-medium text-slate-600 mb-1">Company *</label>
-                <input formControlName="companyName" type="text" placeholder="e.g. Google"
+                <label class="block text-xs font-medium text-slate-600 mb-1" [attr.for]="'batch-job-company-' + i">Company *</label>
+                <input [id]="'batch-job-company-' + i" formControlName="companyName" type="text" placeholder="e.g. Google"
                   class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all placeholder:text-slate-400"
                   [class.border-red-300]="jobs.at(i).get('companyName')?.invalid && jobs.at(i).get('companyName')?.touched" />
               </div>
             </div>
             <div>
-              <label class="block text-xs font-medium text-slate-600 mb-1">Job Description *</label>
-              <textarea formControlName="jobDescription" rows="4"
+              <label class="block text-xs font-medium text-slate-600 mb-1" [attr.for]="'batch-job-description-' + i">Job Description *</label>
+              <textarea [id]="'batch-job-description-' + i" formControlName="jobDescription" rows="4"
                 placeholder="Paste the full job description here..."
                 class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all placeholder:text-slate-400 resize-none"
                 [class.border-red-300]="jobs.at(i).get('jobDescription')?.invalid && jobs.at(i).get('jobDescription')?.touched">
@@ -118,8 +118,8 @@
 
   <!-- Template selector -->
   <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
-    <label class="block text-xs font-semibold text-slate-600 mb-2">Resume Template</label>
-    <select formControlName="templateId"
+    <label class="block text-xs font-semibold text-slate-600 mb-2" for="batch-job-template-id">Resume Template</label>
+    <select id="batch-job-template-id" formControlName="templateId"
       class="w-full px-3 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all text-slate-700"
       [class.border-red-300]="form.get('templateId')?.invalid && form.get('templateId')?.touched">
       <option value="" disabled>Select a template</option>

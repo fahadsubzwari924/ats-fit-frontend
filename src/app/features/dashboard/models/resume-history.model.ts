@@ -30,13 +30,13 @@ export interface ResumeDiffSummary {
   version?: number;
   totalChanges: number;
   sectionsChanged: number;
-  changes: Array<{
+  changes: {
     section: string;
     changeType: 'modified' | 'added' | 'removed' | 'unchanged';
     original: string;
     optimized: string;
     addedKeywords: string[];
-  }>;
+  }[];
   /** Present only when version === 2 (programmatic diff). */
   keywordAnalysis?: {
     coverageOriginal: number;

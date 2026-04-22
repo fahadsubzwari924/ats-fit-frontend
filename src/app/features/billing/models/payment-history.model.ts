@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any -- Lemon Squeezy webhook payloads are deeply nested and untyped at the boundary */
 import { SubscriptionPlan } from './subscription-plan.model';
 
 export type PaymentStatus = 'success' | 'failed' | 'pending' | 'refunded';

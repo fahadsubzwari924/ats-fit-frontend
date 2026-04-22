@@ -35,7 +35,7 @@ export class ResumeService {
   public readonly availableTemplates = toSignal(this.templates$, {
     initialValue: [],
   });
-  public generateTailoredResume(payload: any): Observable<TailoredResume> {
+  public generateTailoredResume(payload: FormData | Record<string, unknown>): Observable<TailoredResume> {
     return this._http
       .post(API_ROUTES.createAPIRoute(API_ROUTES.RESUME.GENERATE), payload, {
         observe: 'response',
@@ -100,7 +100,7 @@ export class ResumeService {
       .pipe(
         map((response) =>
           ((response?.data || []) as ResumeTemplate[])?.map(
-            (template: any) => new ResumeTemplate(template)
+            (template: unknown) => new ResumeTemplate(template as Record<string, unknown>),
           )
         ),
         tap((templates) => this._templatesCache$.next(templates)),
@@ -126,20 +126,22 @@ export class ResumeService {
     );
   }
 
-  public deleteResume(resumeId: string): Observable<ApiResponse<any>> {
-    return this._http.delete<ApiResponse<any>>(
+  public deleteResume(resumeId: string): Observable<ApiResponse<unknown>> {
+    return this._http.delete<ApiResponse<unknown>>(
       API_ROUTES.createAPIRoute(`${API_ROUTES.USER.DELETE_RESUME}/${resumeId}`)
     );
   }
 
   public getFeatureUsage(): Observable<FeatureUsage[]> {
     return this._http
-      .get<ApiResponse<any>>(
+      .get<ApiResponse<unknown>>(
         API_ROUTES.createAPIRoute(API_ROUTES.USER.FEATURE_USAGE)
       )
       .pipe(
         map((response) =>
-          (response.data || [])?.map((item: any) => new FeatureUsage(item))
+          ((response.data as unknown[]) || []).map(
+            (item: unknown) => new FeatureUsage(item as Record<string, unknown>),
+          ),
         )
       );
   }

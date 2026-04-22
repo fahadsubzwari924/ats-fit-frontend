@@ -1,5 +1,5 @@
 import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
-import { Component, input, output, signal } from '@angular/core';
+import { Component, input, output, signal, OnInit } from '@angular/core';
 import { FormsModule } from '@angular/forms';
 // Models
 import { JobApplication } from '@features/apply-new-job/models/job-application.model';
@@ -12,7 +12,7 @@ import { ApplicationStatus } from '@features/dashboard/enums/application-status.
   templateUrl: './job-history-card.component.html',
   styleUrl: './job-history-card.component.scss'
 })
-export class JobHistoryCardComponent {
+export class JobHistoryCardComponent implements OnInit {
 
   // Input property
   public jobHistory = input<JobApplication>();

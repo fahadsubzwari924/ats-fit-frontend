@@ -4,17 +4,12 @@ import { provideAnimations } from '@angular/platform-browser/animations';
 
 import { routes } from './app.routes';
 import {
-  provideClientHydration,
-  withEventReplay,
-} from '@angular/platform-browser';
-import {
   provideHttpClient,
   withFetch,
   withInterceptors,
 } from '@angular/common/http';
 import { tokenInterceptorFn } from '@core/interceptors/token.interceptor';
 import { authInterceptor } from '@core/interceptors/auth.interceptor';
-import { ssrAbsoluteUrlInterceptor } from '@core/interceptors/ssr-absolute-url.interceptor';
 
 export const appConfig: ApplicationConfig = {
   providers: [
@@ -26,15 +21,10 @@ export const appConfig: ApplicationConfig = {
         anchorScrolling: 'enabled',
       })
     ),
-    provideClientHydration(withEventReplay()),
     provideAnimations(),
     provideHttpClient(
       withFetch(),
-      withInterceptors([
-        ssrAbsoluteUrlInterceptor,
-        tokenInterceptorFn,
-        authInterceptor,
-      ])
+      withInterceptors([tokenInterceptorFn, authInterceptor])
     ),
   ],
 };

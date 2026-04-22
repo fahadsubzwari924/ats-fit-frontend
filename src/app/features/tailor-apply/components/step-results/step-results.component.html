@@ -3,7 +3,7 @@
   <!-- Cover Letter panel — full takeover -->
   @if (activePanel() === 'coverLetter' && coverLetterResult()) {
   <div>
-    <app-cover-letter-preview [coverLetter]="coverLetterResult()!" (close)="onCloseCoverLetter()">
+    <app-cover-letter-preview [coverLetter]="coverLetterResult()!" (dismissed)="onCloseCoverLetter()">
     </app-cover-letter-preview>
   </div>
   }
@@ -11,7 +11,7 @@
   <!-- Comparison panel — full takeover -->
   @else if (activePanel() === 'comparison' && tailoredResume().resumeGenerationId) {
   <div>
-    <app-resume-comparison [resumeGenerationId]="tailoredResume().resumeGenerationId" (close)="onCloseComparison()">
+    <app-resume-comparison [resumeGenerationId]="tailoredResume().resumeGenerationId" (dismissed)="onCloseComparison()">
     </app-resume-comparison>
   </div>
   }

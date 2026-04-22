@@ -7,11 +7,15 @@ export class AppliedJob {
   offset: number;
   total: number;
 
-  constructor(data: any) {
-    this.applications = (data?.applications || []).map((item: any) => new JobApplication(item));
-    this.count = data?.count;
-    this.limit = data?.limit;
-    this.offset = data?.offset;
-    this.total = data?.total;
+  constructor(data: unknown) {
+    const d = data as Record<string, unknown>;
+    const rows = d['applications'];
+    this.applications = Array.isArray(rows)
+      ? rows.map((item: unknown) => new JobApplication(item))
+      : [];
+    this.count = d['count'] as number;
+    this.limit = d['limit'] as number;
+    this.offset = d['offset'] as number;
+    this.total = d['total'] as number;
   }
 }

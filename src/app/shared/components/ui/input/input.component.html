@@ -1,6 +1,30 @@
-<div class="form-group" *ngIf="label || error || hint">
-  <label class="form-group__label" *ngIf="label">{{ label }}</label>
+@if (label || error || hint) {
+  <div class="form-group">
+    @if (label) {
+      <label class="form-group__label" [attr.for]="fieldId">{{ label }}</label>
+    }
+    <input
+      [id]="fieldId"
+      [ngClass]="inputClasses"
+      [type]="type"
+      [placeholder]="placeholder"
+      [disabled]="disabled"
+      [readonly]="readonly"
+      [value]="value"
+      (input)="onInput($event)"
+      (blur)="onBlur()" />
+    @if (error) {
+      <div class="form-group__error">{{ error }}</div>
+    }
+    @if (hint && !error) {
+      <div class="form-group__hint">{{ hint }}</div>
+    }
+  </div>
+}
+
+@if (!label && !error && !hint) {
   <input
+    [id]="fieldId"
     [ngClass]="inputClasses"
     [type]="type"
     [placeholder]="placeholder"
@@ -9,17 +33,4 @@
     [value]="value"
     (input)="onInput($event)"
     (blur)="onBlur()" />
-  <div class="form-group__error" *ngIf="error">{{ error }}</div>
-  <div class="form-group__hint" *ngIf="hint && !error">{{ hint }}</div>
-</div>
-
-<input
-  *ngIf="!label && !error && !hint"
-  [ngClass]="inputClasses"
-  [type]="type"
-  [placeholder]="placeholder"
-  [disabled]="disabled"
-  [readonly]="readonly"
-  [value]="value"
-  (input)="onInput($event)"
-  (blur)="onBlur()" />
+}

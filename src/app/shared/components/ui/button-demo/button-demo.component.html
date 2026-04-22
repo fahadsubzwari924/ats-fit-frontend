@@ -7,14 +7,14 @@
   <div class="space-y-4">
     <h2 class="text-xl font-semibold text-slate-800">Button Variants</h2>
     <div class="flex flex-wrap gap-4">
-      <app-button variant="primary" text="Primary" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button variant="secondary" text="Secondary" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button variant="success" text="Success" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button variant="danger" text="Danger" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button variant="warning" text="Warning" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button variant="info" text="Info" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button variant="outline" text="Outline" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button variant="ghost" text="Ghost" (onClick)="handleButtonClick($event)"></app-button>
+      <app-button variant="primary" text="Primary" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button variant="secondary" text="Secondary" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button variant="success" text="Success" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button variant="danger" text="Danger" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button variant="warning" text="Warning" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button variant="info" text="Info" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button variant="outline" text="Outline" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button variant="ghost" text="Ghost" (clicked)="handleButtonClick($event)"></app-button>
     </div>
   </div>
 
@@ -22,11 +22,11 @@
   <div class="space-y-4">
     <h2 class="text-xl font-semibold text-slate-800">Button Sizes</h2>
     <div class="flex flex-wrap items-center gap-4">
-      <app-button size="xs" text="XS" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button size="sm" text="Small" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button size="md" text="Medium" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button size="lg" text="Large" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button size="xl" text="Extra Large" (onClick)="handleButtonClick($event)"></app-button>
+      <app-button size="xs" text="XS" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button size="sm" text="Small" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button size="md" text="Medium" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button size="lg" text="Large" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button size="xl" text="Extra Large" (clicked)="handleButtonClick($event)"></app-button>
     </div>
   </div>
 
@@ -34,16 +34,16 @@
   <div class="space-y-4">
     <h2 class="text-xl font-semibold text-slate-800">Icons from IconsConstant</h2>
     <div class="flex flex-wrap gap-4">
-      <app-button text="Download" icon="download" iconAlign="left" iconType="svg" variant="success" (onClick)="downloadFile()"></app-button>
-      <app-button text="Generate" icon="sparkles" iconAlign="left" iconType="svg" variant="primary" (onClick)="generateResume()"></app-button>
-      <app-button text="Target" icon="target" iconAlign="left" iconType="svg" variant="info" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button text="Back" icon="arrowLeft" iconAlign="left" iconType="svg" variant="outline" (onClick)="goBack()"></app-button>
-      <app-button text="Next" icon="arrowRight" iconAlign="right" iconType="svg" variant="primary" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button text="Save" icon="save" iconAlign="left" iconType="svg" variant="success" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button text="Edit" icon="edit" iconAlign="left" iconType="svg" variant="info" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button text="Check" icon="check" iconAlign="left" iconType="svg" variant="success" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button text="Close" icon="cross" iconAlign="left" iconType="svg" variant="danger" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button text="Add" icon="plus" iconAlign="left" iconType="svg" variant="primary" (onClick)="handleButtonClick($event)"></app-button>
+      <app-button text="Download" icon="download" iconAlign="left" iconType="svg" variant="success" (clicked)="downloadFile()"></app-button>
+      <app-button text="Generate" icon="sparkles" iconAlign="left" iconType="svg" variant="primary" (clicked)="generateResume()"></app-button>
+      <app-button text="Target" icon="target" iconAlign="left" iconType="svg" variant="info" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button text="Back" icon="arrowLeft" iconAlign="left" iconType="svg" variant="outline" (clicked)="goBack()"></app-button>
+      <app-button text="Next" icon="arrowRight" iconAlign="right" iconType="svg" variant="primary" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button text="Save" icon="save" iconAlign="left" iconType="svg" variant="success" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button text="Edit" icon="edit" iconAlign="left" iconType="svg" variant="info" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button text="Check" icon="check" iconAlign="left" iconType="svg" variant="success" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button text="Close" icon="cross" iconAlign="left" iconType="svg" variant="danger" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button text="Add" icon="plus" iconAlign="left" iconType="svg" variant="primary" (clicked)="handleButtonClick($event)"></app-button>
     </div>
   </div>
 
@@ -57,7 +57,7 @@
         iconAlign="left"
         iconType="svg"
         variant="secondary"
-        (onClick)="handleButtonClick($event)">
+        (clicked)="handleButtonClick($event)">
       </app-button>
 
       <app-button
@@ -66,7 +66,7 @@
         iconAlign="left"
         iconType="svg"
         variant="info"
-        (onClick)="handleButtonClick($event)">
+        (clicked)="handleButtonClick($event)">
       </app-button>
 
       <app-button
@@ -75,7 +75,7 @@
         iconAlign="left"
         iconType="material"
         variant="primary"
-        (onClick)="handleButtonClick($event)">
+        (clicked)="handleButtonClick($event)">
       </app-button>
 
       <app-button
@@ -85,7 +85,7 @@
         iconType="svg"
         variant="outline"
         size="lg"
-        (onClick)="handleButtonClick($event)">
+        (clicked)="handleButtonClick($event)">
       </app-button>
     </div>
   </div>
@@ -94,10 +94,10 @@
   <div class="space-y-4">
     <h2 class="text-xl font-semibold text-slate-800">Button States</h2>
     <div class="flex flex-wrap gap-4">
-      <app-button text="Normal Button" variant="primary" (onClick)="handleButtonClick($event)"></app-button>
-      <app-button text="Loading..." [loading]="isLoading()" variant="primary" (onClick)="handleLoadingDemo()"></app-button>
+      <app-button text="Normal Button" variant="primary" (clicked)="handleButtonClick($event)"></app-button>
+      <app-button text="Loading..." [loading]="isLoading()" variant="primary" (clicked)="handleLoadingDemo()"></app-button>
       <app-button text="Disabled" [disabled]="isDisabledExample()" variant="primary"></app-button>
-      <app-button text="Toggle Disabled" [disabled]="isDisabled()" variant="secondary" (onClick)="toggleDisabled()"></app-button>
+      <app-button text="Toggle Disabled" [disabled]="isDisabled()" variant="secondary" (clicked)="toggleDisabled()"></app-button>
     </div>
   </div>
 
@@ -115,7 +115,7 @@
         size="lg"
         [loading]="isLoading()"
         [fullWidth]="false"
-        (onClick)="generateResume()">
+        (clicked)="generateResume()">
       </app-button>
 
       <!-- Download Button -->
@@ -126,7 +126,7 @@
         iconType="svg"
         variant="success"
         size="md"
-        (onClick)="downloadFile()">
+        (clicked)="downloadFile()">
       </app-button>
 
       <!-- Close Button -->
@@ -134,7 +134,7 @@
         text="Done"
         variant="ghost"
         size="sm"
-        (onClick)="closeModal()">
+        (clicked)="closeModal()">
       </app-button>
 
       <!-- Full Width Button -->
@@ -143,7 +143,7 @@
         variant="primary"
         size="lg"
         [fullWidth]="true"
-        (onClick)="handleButtonClick($event)">
+        (clicked)="handleButtonClick($event)">
       </app-button>
     </div>
   </div>
@@ -152,12 +152,12 @@
   <div class="space-y-4">
     <h2 class="text-xl font-semibold text-slate-800">Custom Content (Content Projection)</h2>
     <div class="flex flex-wrap gap-4">
-      <app-button variant="primary" (onClick)="handleButtonClick($event)">
+      <app-button variant="primary" (clicked)="handleButtonClick($event)">
         <span class="font-bold">Custom</span>
         <span class="text-sm opacity-90">Content</span>
       </app-button>
 
-      <app-button variant="success" (onClick)="handleButtonClick($event)">
+      <app-button variant="success" (clicked)="handleButtonClick($event)">
         <div class="flex items-center gap-2">
           <span>🎯</span>
           <span>Target Achievement</span>
@@ -171,7 +171,7 @@
     <h3 class="text-lg font-semibold text-slate-800 mb-4">How to Use the Button Component</h3>
     <div class="text-sm text-slate-600 space-y-2">
       <p><strong>Import:</strong> Add <code class="bg-slate-100 px-2 py-1 rounded">ButtonComponent</code> to your component's imports</p>
-      <p><strong>Basic Usage:</strong> <code class="bg-slate-100 px-2 py-1 rounded">&lt;app-button text="Click me" (onClick)="handleClick($event)"&gt;&lt;/app-button&gt;</code></p>
+      <p><strong>Basic Usage:</strong> <code class="bg-slate-100 px-2 py-1 rounded">&lt;app-button text="Click me" (clicked)="handleClick($event)"&gt;&lt;/app-button&gt;</code></p>
       <p><strong>With Icons:</strong> Use <code class="bg-slate-100 px-2 py-1 rounded">icon="downlaod" iconAlign="left" iconType="svg"</code> or <code class="bg-slate-100 px-2 py-1 rounded">icon="home" iconType="material"</code></p>
       <p><strong>Variants:</strong> Choose from primary, secondary, success, danger, warning, info, outline, ghost</p>
       <p><strong>Sizes:</strong> Available sizes: xs, sm, md (default), lg, xl</p>

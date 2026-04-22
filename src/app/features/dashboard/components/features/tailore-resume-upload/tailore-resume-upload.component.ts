@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal } from '@angular/core';
+import { Component, effect, inject, signal, OnDestroy } from '@angular/core';
 import { Messages } from '@core/enums/messages.enum';
 import { ResponseStatus } from '@core/enums/response-status.enum';
 import { IResumeUpload } from '@features/dashboard/enums/resume-upload.interface';
@@ -15,7 +15,7 @@ import { Subscription } from 'rxjs';
   templateUrl: './tailore-resume-upload.component.html',
   styleUrl: './tailore-resume-upload.component.scss'
 })
-export class TailoreResumeUploadComponent {
+export class TailoreResumeUploadComponent implements OnDestroy {
 
   // Injections
   private resumeService = inject(ResumeService);
@@ -35,9 +35,6 @@ export class TailoreResumeUploadComponent {
     effect(() => {
       this.uploadedResumes.set(this.userState.uploadedResumes());
     });
-  }
-
-  ngOnInit(): void {
   }
 
   public async handleUpload(event: EventTarget | null): Promise<void> {

@@ -14,7 +14,7 @@ export class CoverLetterPreviewComponent {
   private readonly snackbar = inject(SnackbarService);
 
   coverLetter = input.required<CoverLetterResult>();
-  close = output<void>();
+  dismissed = output<void>();
 
   get fullText(): string {
     const cl = this.coverLetter()?.coverLetter;

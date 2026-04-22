@@ -4,8 +4,8 @@ export class LoginResponse {
   user: User;
   accessToken: string;
 
-  constructor(response: {user: any, access_token: string}) {
-    this.user = new User(response?.user);
-    this.accessToken = response?.access_token;
+  constructor(response: { user: Record<string, unknown>; access_token: string }) {
+    this.user = new User(response.user);
+    this.accessToken = response.access_token;
   }
 }

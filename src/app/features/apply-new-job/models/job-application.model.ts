@@ -31,34 +31,36 @@ export class JobApplication {
   updatedAt: Date;
   userId: string;
 
-  constructor(data: any) {
+  constructor(data: unknown) {
+    const d = data as Record<string, unknown>;
     // Convert snake_case to camelCase and handle date conversions
-    this.id = data?.id;
-    this.companyName = data?.company_name;
-    this.jobPosition = data?.job_position;
-    this.jobDescription = data?.job_description;
-    this.jobUrl = data?.job_url;
-    this.jobLocation = data?.job_location;
-    this.currentSalary = data?.current_salary;
-    this.expectedSalary = data?.expected_salary;
-    this.status = data?.status;
-    this.applicationSource = data?.application_source;
-    this.applicationDeadline = parseOptionalDate(data?.application_deadline);
-    this.appliedAt = parseOptionalDate(data?.applied_at);
-    this.coverLetter = data?.cover_letter;
-    this.notes = data?.notes;
-    this.contactPhone = data?.contact_phone;
-    this.interviewScheduledAt = parseOptionalDate(data?.interview_scheduled_at);
-    this.interviewNotes = data?.interview_notes;
-    this.followUpDate = parseOptionalDate(data?.follow_up_date);
-    this.rejectionReason = data?.rejection_reason;
+    this.id = d['id'] as string;
+    this.companyName = d['company_name'] as string;
+    this.jobPosition = d['job_position'] as string;
+    this.jobDescription = d['job_description'] as string;
+    this.jobUrl = d['job_url'] as string;
+    this.jobLocation = d['job_location'] as string;
+    this.currentSalary = d['current_salary'] as number;
+    this.expectedSalary = d['expected_salary'] as number;
+    this.status = d['status'] as string;
+    this.applicationSource = d['application_source'] as string;
+    this.applicationDeadline = parseOptionalDate(d['application_deadline']);
+    this.appliedAt = parseOptionalDate(d['applied_at']);
+    this.coverLetter = d['cover_letter'] as string;
+    this.notes = d['notes'] as string;
+    this.contactPhone = d['contact_phone'] as string;
+    this.interviewScheduledAt = parseOptionalDate(d['interview_scheduled_at']);
+    this.interviewNotes = d['interview_notes'] as string;
+    this.followUpDate = parseOptionalDate(d['follow_up_date']);
+    this.rejectionReason = d['rejection_reason'] as string;
+    const meta = (d['metadata'] as Record<string, unknown> | undefined) ?? {};
     this.metadata = {
-      skillsMatched: data?.metadata?.skills_matched,
-      skillsMissing: data?.metadata?.skills_missing
+      skillsMatched: meta['skills_matched'] as string[],
+      skillsMissing: meta['skills_missing'] as string[]
     };
-    this.createdAt = new Date(data?.created_at);
-    this.updatedAt = new Date(data?.updated_at);
-    this.userId = data?.user_id;
+    this.createdAt = new Date(d['created_at'] as string);
+    this.updatedAt = new Date(d['updated_at'] as string);
+    this.userId = d['user_id'] as string;
   }
 }
 
