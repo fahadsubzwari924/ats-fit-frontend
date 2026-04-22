@@ -6,7 +6,7 @@ import { publicGuard } from '@core/guards/public.guard';
 import { LayoutComponent } from '@root/layout/layout.component';
 
 export const routes: Routes = [
-  { path: '', pathMatch: 'full', redirectTo: 'dashboard' },
+  { path: '', pathMatch: 'full', redirectTo: 'signin' },
 
   {
     path: '',

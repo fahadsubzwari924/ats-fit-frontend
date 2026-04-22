@@ -1,9 +1,11 @@
+import { NgClass } from '@angular/common';
 import { Component, Input, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
 
 @Component({
   selector: 'app-input',
   standalone: true,
+  imports: [NgClass],
   templateUrl: './input.component.html',
   styleUrl: './input.component.scss',
   providers: [
@@ -15,29 +17,36 @@ import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
   ]
 })
 export class InputComponent implements ControlValueAccessor {
-  @Input() type: string = 'text';
-  @Input() placeholder: string = '';
-  @Input() disabled: boolean = false;
-  @Input() readonly: boolean = false;
+  private static nextFieldId = 0;
+  readonly fieldId = `app-input-${InputComponent.nextFieldId++}`;
+
+  @Input() type = 'text';
+  @Input() placeholder = '';
+  @Input() disabled = false;
+  @Input() readonly = false;
   @Input() size: 'sm' | 'md' | 'lg' = 'md';
-  @Input() label: string = '';
-  @Input() error: string = '';
-  @Input() hint: string = '';
+  @Input() label = '';
+  @Input() error = '';
+  @Input() hint = '';
 
-  value: string = '';
-  onChange: (value: string) => void = () => {};
-  onTouched: () => void = () => {};
+  value = '';
+  private propagateChange: (value: string) => void = () => {
+    void 0;
+  };
+  private notifyTouched: () => void = () => {
+    void 0;
+  };
 
-  writeValue(value: any): void {
-    this.value = value || '';
+  writeValue(value: unknown): void {
+    this.value = (value as string) || '';
   }
 
   registerOnChange(fn: (value: string) => void): void {
-    this.onChange = fn;
+    this.propagateChange = fn;
   }
 
   registerOnTouched(fn: () => void): void {
-    this.onTouched = fn;
+    this.notifyTouched = fn;
   }
 
   setDisabledState(isDisabled: boolean): void {
@@ -47,11 +56,11 @@ export class InputComponent implements ControlValueAccessor {
   onInput(event: Event): void {
     const value = (event.target as HTMLInputElement).value;
     this.value = value;
-    this.onChange(value);
+    this.propagateChange(value);
   }
 
   onBlur(): void {
-    this.onTouched();
+    this.notifyTouched();
   }
 
   get inputClasses(): string {

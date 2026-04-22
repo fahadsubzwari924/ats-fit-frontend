@@ -1,4 +1,10 @@
-<div class="app-detail-drawer__overlay" (click)="onBackdropClick()" role="presentation">
+<div
+  class="app-detail-drawer__overlay"
+  (click)="onBackdropClick()"
+  (keydown)="onBackdropOverlayKeydown($event)"
+  tabindex="-1"
+  role="presentation"
+>
   <aside
     class="app-detail-drawer__panel"
     role="dialog"
@@ -7,6 +13,7 @@
     cdkTrapFocus
     cdkTrapFocusAutoCapture
     (click)="onPanelClick($event)"
+    (keydown)="onPanelKeydown($event)"
   >
     <div class="app-detail-drawer">
       <header class="app-detail-drawer__header">

@@ -1,4 +1,4 @@
-import { Component, computed, input, signal } from '@angular/core';
+import { Component, computed, inject, input, signal, OnInit } from '@angular/core';
 import { DomSanitizer, SafeHtml } from '@angular/platform-browser';
 import { FeatureTitles } from '@features/dashboard/constants/feature-title.constant';
 import { IconsConstant } from '@core/constants/icons.contant';
@@ -11,7 +11,9 @@ import { FeatureUsage } from '@core/models/user/feature-usage.model';
   templateUrl: './stat-widget.component.html',
   styleUrl: './stat-widget.component.scss'
 })
-export class StatWidgetComponent {
+export class StatWidgetComponent implements OnInit {
+
+  private readonly sanitizer = inject(DomSanitizer);
 
   public featureUsage = input<FeatureUsage>();
   public title = signal<string | null>(null);
@@ -24,8 +26,6 @@ export class StatWidgetComponent {
     if (f.remaining != null) return f.remaining;
     return Math.max(0, (f.allowed ?? 0) - (f.used ?? 0));
   });
-
-  constructor(private sanitizer: DomSanitizer) {}
 
   ngOnInit() {
     const feature = this.featureUsage()?.feature;

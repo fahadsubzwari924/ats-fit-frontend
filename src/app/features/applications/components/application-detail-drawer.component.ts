@@ -131,7 +131,18 @@ export class ApplicationDetailDrawerComponent {
     this.closed.emit();
   }
 
+  onBackdropOverlayKeydown(event: KeyboardEvent): void {
+    if (event.key === 'Enter' || event.key === ' ') {
+      event.preventDefault();
+      this.onBackdropClick();
+    }
+  }
+
   onPanelClick(event: MouseEvent): void {
+    event.stopPropagation();
+  }
+
+  onPanelKeydown(event: KeyboardEvent): void {
     event.stopPropagation();
   }
 

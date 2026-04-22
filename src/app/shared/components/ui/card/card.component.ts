@@ -10,7 +10,7 @@ type CardVariant = 'default' | 'elevated' | 'outlined';
 })
 export class CardComponent {
   @Input() variant: CardVariant = 'default';
-  @Input() padding: string = 'lg';
+  @Input() padding = 'lg';
 
   get cardClasses(): string {
     const classes = ['card'];

@@ -41,7 +41,7 @@ export class ResumeComparisonComponent implements OnInit {
   private readonly highlightService = inject(ResumeDiffHighlightService);
 
   resumeGenerationId = input.required<string>();
-  close = output<void>();
+  dismissed = output<void>();
 
   diff = signal<ResumeDiff | EnhancedResumeDiff | null>(null);
   loading = signal(false);
@@ -208,7 +208,11 @@ export class ResumeComparisonComponent implements OnInit {
 
   toggleShowOriginal(key: string): void {
     const current = new Set(this.showOriginal());
-    current.has(key) ? current.delete(key) : current.add(key);
+    if (current.has(key)) {
+      current.delete(key);
+    } else {
+      current.add(key);
+    }
     this.showOriginal.set(current);
   }
 

@@ -1,4 +1,4 @@
-import { HttpClient } from '@angular/common/http';
+import { HttpClient, HttpParams } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { Observable, map } from 'rxjs';
 import { API_ROUTES } from '@core/constants/api.constant';
@@ -20,17 +20,20 @@ export class ResumeHistoryService {
   private http = inject(HttpClient);
 
   getHistory(params: HistoryQueryParams = {}): Observable<PaginatedHistoryResponse> {
-    const queryParams: Record<string, string | number> = {
-      page: params.page ?? 1,
-      limit: params.limit ?? 10,
-    };
-    if (params.search) queryParams['search'] = params.search;
-    if (params.sortOrder) queryParams['sortOrder'] = params.sortOrder;
+    let httpParams = new HttpParams()
+      .set('page', String(params.page ?? 1))
+      .set('limit', String(params.limit ?? 10));
+    if (params.search) {
+      httpParams = httpParams.set('search', params.search);
+    }
+    if (params.sortOrder) {
+      httpParams = httpParams.set('sortOrder', params.sortOrder);
+    }
 
     return this.http
       .get<ApiResponse<PaginatedHistoryResponse>>(
         API_ROUTES.createAPIRoute(API_ROUTES.RESUME.HISTORY),
-        { params: queryParams as any },
+        { params: httpParams },
       )
       .pipe(map((res) => res.data as PaginatedHistoryResponse));
   }

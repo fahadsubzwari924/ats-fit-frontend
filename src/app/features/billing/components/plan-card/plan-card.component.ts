@@ -17,14 +17,11 @@ export class PlanCardComponent {
   selected = input<boolean>(false);
 
   // Outputs
-  onPlanSelect = output<SubscriptionPlan>();
-
-  ngOnInit() {
-  }
+  planSelected = output<SubscriptionPlan>();
 
   handlePlanButtonClick(plan: SubscriptionPlan) {
     if (!this.selected()) {
-      this.onPlanSelect.emit(plan);
+      this.planSelected.emit(plan);
     }
   }
 

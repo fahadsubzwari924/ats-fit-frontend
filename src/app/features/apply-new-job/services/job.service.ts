@@ -43,7 +43,7 @@ export class JobService {
   getJobs(params?: JobApplicationListParams): Observable<AppliedJob> {
     const httpParams = this.toListParams(params);
     return this.http
-      .get<ApiResponse<any>>(API_ROUTES.createAPIRoute(API_ROUTES.JOBS.APPLICATIONS), {
+      .get<ApiResponse<unknown>>(API_ROUTES.createAPIRoute(API_ROUTES.JOBS.APPLICATIONS), {
         params: httpParams,
       })
       .pipe(map((response) => new AppliedJob(response?.data)));
@@ -51,7 +51,7 @@ export class JobService {
 
   getJobStats(): Observable<JobApplicationStats> {
     return this.http
-      .get<ApiResponse<any>>(API_ROUTES.createAPIRoute(API_ROUTES.JOBS.STATS))
+      .get<ApiResponse<unknown>>(API_ROUTES.createAPIRoute(API_ROUTES.JOBS.STATS))
       .pipe(map((response) => new JobApplicationStats(response?.data)));
   }
 

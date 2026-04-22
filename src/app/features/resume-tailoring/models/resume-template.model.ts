@@ -7,12 +7,12 @@ export class ResumeTemplate {
   remoteUrl: string;
 
 
-  constructor(data: any) {
-    this.id = data?.id;
-    this.name = data?.name;
-    this.key = data?.key;
-    this.description = data?.description;
-    this.thumbnailImageUrl = data?.thumbnailImageUrl;
-    this.remoteUrl = data?.remoteUrl;
+  constructor(data: Record<string, unknown>) {
+    this.id = data['id'] as string;
+    this.name = data['name'] as string;
+    this.key = data['key'] as string;
+    this.description = data['description'] as string;
+    this.thumbnailImageUrl = data['thumbnailImageUrl'] as string;
+    this.remoteUrl = data['remoteUrl'] as string;
   }
 }

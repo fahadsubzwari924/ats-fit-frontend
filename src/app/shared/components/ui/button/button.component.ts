@@ -11,21 +11,21 @@ import { BaseClasses, SizeClasses, VariantClasses } from './constants/button.con
   styleUrl: './button.component.scss',
 })
 export class ButtonComponent {
-  @Input() text: string = '';
-  @Input() label: string = '';
+  @Input() text = '';
+  @Input() label = '';
   @Input() variant: tButtonVariant = 'primary';
   @Input() size: tButtonSize = 'md';
   @Input() type: tButtonType = 'button';
   @Input() icon?: string;
   @Input() iconAlign: tIconAlign = 'left';
   @Input() iconType: tIconType = 'svg';
-  @Input() loading: boolean = false;
+  @Input() loading = false;
   /** Inline spinner (default) or subtle dot pulse — prefer dots for primary auth CTAs. */
   @Input() loadingIndicator: 'spinner' | 'dots' = 'spinner';
-  @Input() disabled: boolean = false;
-  @Input() customClass: string = '';
-  @Input() fullWidth: boolean = false;
-  @Output() onClick = new EventEmitter<void>();
+  @Input() disabled = false;
+  @Input() customClass = '';
+  @Input() fullWidth = false;
+  @Output() clicked = new EventEmitter<void>();
 
   @HostBinding('style.display') get hostDisplay(): string {
     return this.fullWidth ? 'block' : 'inline-flex';
@@ -52,7 +52,7 @@ export class ButtonComponent {
 
   handleClick(): void {
     if (!this.disabled && !this.loading) {
-      this.onClick.emit();
+      this.clicked.emit();
     }
   }
 

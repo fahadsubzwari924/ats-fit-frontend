@@ -1,4 +1,4 @@
-import { Component, inject, signal } from '@angular/core';
+import { Component, inject, signal, OnInit } from '@angular/core';
 import { Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
 import { MatIconModule } from '@angular/material/icon';
@@ -23,11 +23,12 @@ import { AppRoutes } from '@core/constants/app-routes.contant';
   templateUrl: './signup.component.html',
   styleUrl: './signup.component.scss'
 })
-export class SignupComponent {
+export class SignupComponent implements OnInit {
 
   private authService = inject(AuthService);
   private snackbarService = inject(SnackbarService);
   private router = inject(Router);
+  private fb = inject(FormBuilder);
 
   // component internal objects
   public signupForm!: FormGroup;
@@ -37,8 +38,6 @@ export class SignupComponent {
   confirmPasswordFieldType = signal<string>(InputType.PASSWORD);
 
   InputType = InputType;
-
-  constructor(private fb: FormBuilder) { }
 
   ngOnInit() {
     this.initializeForm();
@@ -83,7 +82,7 @@ export class SignupComponent {
       password: this.signupForm.value.password,
     }
 
-    this.authService.signup(payload).subscribe({
+    this.authService.signup(payload as Record<string, unknown>).subscribe({
       next: (response) => {
         // Handle successful signup response
         this.snackbarService.showSuccess(response.message || Messages.SIGNUP_SUCCESS);

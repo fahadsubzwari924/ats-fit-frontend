@@ -9,10 +9,10 @@
         </p>
       </div>
       <div class="flex items-center gap-2 flex-shrink-0">
-        <app-button text="Answer Questions First" (onClick)="onAnswerFirst()"
+        <app-button text="Answer Questions First" (clicked)="onAnswerFirst()"
           customClass="inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 bg-amber-600 hover:bg-amber-700 text-white border-0">
         </app-button>
-        <app-button text="Continue" (onClick)="onContinue()"
+        <app-button text="Continue" (clicked)="onContinue()"
           customClass="inline-flex items-center justify-center rounded-md text-sm font-medium h-8 px-3 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700">
         </app-button>
         <button type="button" class="p-1 rounded hover:bg-amber-100 text-amber-600 text-lg font-bold leading-none" aria-label="Dismiss" (click)="dismiss()">×</button>
