@@ -1,11 +1,14 @@
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
-import { catchError, forkJoin, interval, of, switchMap, takeWhile } from 'rxjs';
+import { catchError, forkJoin, interval, of, switchMap, takeWhile, timer } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DashboardUsageCardComponent } from '@features/dashboard/components/ui/dashboard-usage-card/dashboard-usage-card.component';
 import { DashboardTipsCardComponent } from '@features/dashboard/components/ui/dashboard-tips-card/dashboard-tips-card.component';
 import { TailoreResumeUploadComponent } from '@features/dashboard/components/features/tailore-resume-upload/tailore-resume-upload.component';
 import { ResumeProfileCardComponent } from '@features/dashboard/components/resume-profile-card/resume-profile-card.component';
-import { QuestionsDrawerComponent } from '@features/dashboard/components/questions-drawer/questions-drawer.component';
+import {
+  QuestionsDrawerComponent,
+  QUESTIONS_DRAWER_EXIT_MS,
+} from '@features/dashboard/components/questions-drawer/questions-drawer.component';
 import { TailorApplyModalComponent } from '@features/tailor-apply/tailor-apply-modal.component';
 import { BatchTailoringModalComponent } from '@features/tailor-apply/batch-tailoring-modal.component';
 import { ResumeHistoryModalComponent } from '@features/dashboard/components/resume-history/resume-history-modal.component';
@@ -29,7 +32,6 @@ import { saveAs } from 'file-saver';
 import { DashboardHeroComponent } from '@shared/components/dashboard-hero/dashboard-hero.component';
 import { QuestionsBannerComponent } from '@shared/components/questions-banner/questions-banner.component';
 import { ResumeHistoryCardComponent } from '@shared/components/resume-history-card/resume-history-card.component';
-import { JobApplicationsCardComponent } from '@shared/components/job-applications-card/job-applications-card.component';
 
 const POLL_INTERVAL_MS = 5000;
 const POLL_MAX_ATTEMPTS = 24;
@@ -46,7 +48,6 @@ const POLL_MAX_ATTEMPTS = 24;
     DashboardHeroComponent,
     QuestionsBannerComponent,
     ResumeHistoryCardComponent,
-    JobApplicationsCardComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
@@ -70,6 +71,9 @@ export class DashboardComponent implements OnInit {
   public user = this.userState.currentUser();
 
   drawerOpen = signal<boolean>(false);
+  /** Keeps `QuestionsDrawerComponent` in the DOM while open or during exit animation. */
+  drawerMounted = signal<boolean>(false);
+  private pendingDrawerCloseToken = 0;
   private enrichmentAutoTriggered = signal(false);
   private hasAutoOpenedDrawer = signal(false);
 
@@ -138,7 +142,7 @@ export class DashboardComponent implements OnInit {
 
           if (justCompleted) {
             this.hasAutoOpenedDrawer.set(true);
-            setTimeout(() => this.drawerOpen.set(true), 1000);
+            setTimeout(() => this.openQuestionsDrawer(), 1000);
           }
 
           prevProcessingStatus = status.processingStatus;
@@ -194,11 +198,25 @@ export class DashboardComponent implements OnInit {
   }
 
   onScrollToQuestions(): void {
-    this.drawerOpen.set(true);
+    this.openQuestionsDrawer();
   }
 
   onDrawerClosed(): void {
     this.drawerOpen.set(false);
+    const token = ++this.pendingDrawerCloseToken;
+    timer(QUESTIONS_DRAWER_EXIT_MS)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe(() => {
+        if (this.pendingDrawerCloseToken === token && !this.drawerOpen()) {
+          this.drawerMounted.set(false);
+        }
+      });
+  }
+
+  private openQuestionsDrawer(): void {
+    this.pendingDrawerCloseToken++;
+    this.drawerMounted.set(true);
+    this.drawerOpen.set(true);
   }
 
   private initializeContent(): void {
@@ -224,7 +242,7 @@ export class DashboardComponent implements OnInit {
 
     if (typeof result === 'string') {
       if (result === 'scrollToQuestions') {
-        this.drawerOpen.set(true);
+        this.openQuestionsDrawer();
       }
       return;
     }
@@ -232,7 +250,7 @@ export class DashboardComponent implements OnInit {
     if (typeof result === 'object') {
       const r = result as TailoringModalCloseResult;
       if (r.scrollToQuestions) {
-        this.drawerOpen.set(true);
+        this.openQuestionsDrawer();
       }
       if (r.refreshDashboard) {
         this.refreshDashboardData();

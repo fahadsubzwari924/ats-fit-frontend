@@ -7,31 +7,18 @@
   </div>
 
   <div class="max-w-[1280px] mx-auto px-6 py-8 relative">
-    <div class="flex items-center justify-between">
-      <div>
-        <p
-          class="text-[#93C5FD] text-[12px] font-medium mb-1 uppercase"
-          style="letter-spacing: 0.08em">
-          Welcome back
-        </p>
-        <h1 class="text-[26px] font-bold text-white tracking-tight leading-tight">
-          {{ displayName() }}
-        </h1>
-        <p class="text-[#BFDBFE] text-[13.5px] mt-1">
-          Ready to land your next role? Let's tailor your resume.
-        </p>
-      </div>
-
-      <div class="flex items-center gap-3">
-        @for (stat of heroStats(); track stat.label) {
-          <div
-            class="text-center px-4 py-3 rounded-xl"
-            style="background: rgba(255,255,255,0.1); backdrop-filter: blur(8px); border: 1px solid rgba(255,255,255,0.2)">
-            <p class="text-white text-[22px] font-bold leading-none">{{ stat.value }}</p>
-            <p class="text-[#93C5FD] text-[11px] mt-0.5">{{ stat.label }}</p>
-          </div>
-        }
-      </div>
+    <div>
+      <p
+        class="text-[#93C5FD] text-[12px] font-medium mb-1 uppercase"
+        style="letter-spacing: 0.08em">
+        Welcome back
+      </p>
+      <h1 class="text-[26px] font-bold text-white tracking-tight leading-tight">
+        {{ displayName() }}
+      </h1>
+      <p class="text-[#BFDBFE] text-[13.5px] mt-1">
+        Ready to land your next role? Let's tailor your resume.
+      </p>
     </div>
 
     <div class="grid grid-cols-3 gap-4 mt-6">
@@ -147,7 +134,7 @@
           </svg>
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-white font-semibold text-[13.5px]">My Resumes</p>
+          <p class="text-white font-semibold text-[13.5px]">Tailored resume history</p>
           <p class="text-[#93C5FD] text-[12px] mt-0.5">
             @if (resumeCount()) {
               {{ resumeCount() }} saved version{{ resumeCount() !== 1 ? 's' : '' }}

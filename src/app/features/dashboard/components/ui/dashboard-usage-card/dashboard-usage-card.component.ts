@@ -1,6 +1,11 @@
 import { Component, input } from '@angular/core';
 import { DatePipe } from '@angular/common';
 import { FeatureUsage } from '@core/models/user/feature-usage.model';
+import {
+  featureUsageConsumedPercent,
+  getFeatureUsageBarColor,
+  getFeatureUsageLabel,
+} from '@shared/usage/feature-usage-display';
 
 interface UsageRow {
   label: string;
@@ -19,20 +24,12 @@ interface UsageRow {
 export class DashboardUsageCardComponent {
   featureUsages = input<FeatureUsage[]>([]);
 
-  private readonly colorMap: Record<string, string> = {
-    resume_generation: '#7C3AED',
-  };
-
-  private readonly labelMap: Record<string, string> = {
-    resume_generation: 'Resume Generations',
-  };
-
   get usageRows(): UsageRow[] {
-    return (this.featureUsages() ?? []).map((f) => ({
-      label: this.labelMap[f.feature] ?? f.feature,
+    return (this.featureUsages() ?? []).map((f, i) => ({
+      label: getFeatureUsageLabel(f.feature),
       used: f.used ?? 0,
       total: f.allowed ?? 0,
-      color: this.colorMap[f.feature] ?? '#2563EB',
+      color: getFeatureUsageBarColor(f.feature, i),
     }));
   }
 
@@ -41,8 +38,7 @@ export class DashboardUsageCardComponent {
     return first?.resetDate ?? null;
   }
 
-  remainingPercent(row: UsageRow): number {
-    if (!row.total) return 0;
-    return ((row.total - row.used) / row.total) * 100;
+  usedPercent(row: UsageRow): number {
+    return featureUsageConsumedPercent(row.used, row.total);
   }
 }

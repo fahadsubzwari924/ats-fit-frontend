@@ -1,9 +1,6 @@
 <div class="min-h-screen bg-[#F8FAFC]">
-  <app-dashboard-hero
-    [userName]="user?.fullName"
-    [resumeCount]="resumeHistory().length"
-    (tailorClicked)="openTailorModal()"
-    (quickTailorClicked)="openBatchTailoringModal()"
+  <app-dashboard-hero [userName]="user?.fullName" [resumeCount]="resumeHistory().length"
+    (tailorClicked)="openTailorModal()" (quickTailorClicked)="openBatchTailoringModal()"
     (resumeHistoryClicked)="openResumeHistoryModal()">
   </app-dashboard-hero>
 
@@ -14,31 +11,18 @@
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
       <div class="space-y-5">
         <div id="dashboard-profile" class="app-dashboard-anchor">
-          <app-resume-profile-card
-            (uploadRequested)="onProfileUploadRequested($event)"
-            (scrollToQuestions)="onScrollToQuestions()"
-            (retryRequested)="onRetryProcessing()">
+          <app-resume-profile-card (uploadRequested)="onProfileUploadRequested($event)"
+            (scrollToQuestions)="onScrollToQuestions()" (retryRequested)="onRetryProcessing()">
           </app-resume-profile-card>
         </div>
 
-        <app-resume-history-card
-          [items]="resumeHistory()"
-          [loading]="resumeHistoryLoading()"
-          [downloadingId]="downloadingId()"
-          (viewAllClicked)="openResumeHistoryModal()"
-          (createFirstClicked)="openTailorModal()"
-          (downloadItem)="downloadHistoryItem($event)">
+        <app-resume-history-card [items]="resumeHistory()" [loading]="resumeHistoryLoading()"
+          [downloadingId]="downloadingId()" (viewAllClicked)="openResumeHistoryModal()"
+          (createFirstClicked)="openTailorModal()" (downloadItem)="downloadHistoryItem($event)">
         </app-resume-history-card>
 
         @if (user?.isPremium) {
-          <app-tailore-resume-upload></app-tailore-resume-upload>
-        }
-
-        @if (user?.isPremium && jobHistory()?.applications?.length) {
-          <app-job-applications-card
-            [applications]="jobHistory()!.applications!"
-            (jobStatusChange)="onJobStatusChange($event)">
-          </app-job-applications-card>
+        <app-tailore-resume-upload></app-tailore-resume-upload>
         }
       </div>
 
@@ -54,4 +38,6 @@
   </div>
 </div>
 
-<app-questions-drawer [open]="drawerOpen()" (closed)="onDrawerClosed()"></app-questions-drawer>
+@if (drawerMounted()) {
+  <app-questions-drawer [open]="drawerOpen()" (closed)="onDrawerClosed()"></app-questions-drawer>
+}

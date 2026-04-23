@@ -25,8 +25,7 @@ import { PlanFeature } from '@shared/types/plan-feature.type';
 import { CancelSubscriptionDialogComponent } from '../cancel-subscription-dialog/cancel-subscription-dialog.component';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { UserApiService } from '@shared/services/user-api.service';
-
-const USAGE_BAR_COLORS = ['#2563EB', '#7C3AED', '#0891B2'];
+import { getFeatureUsageBarColor, getFeatureUsageLabel } from '@shared/usage/feature-usage-display';
 
 @Component({
   selector: 'app-overview-tab',
@@ -76,10 +75,10 @@ export class OverviewTabComponent implements OnInit {
 
   usageRows(): BillingUsageRow[] {
     return this.featureUsage().map((u, i) => ({
-      label: this.formatFeatureLabel(u.feature),
+      label: getFeatureUsageLabel(u.feature),
       used: u.used ?? 0,
       total: u.allowed ?? 0,
-      color: USAGE_BAR_COLORS[i % USAGE_BAR_COLORS.length],
+      color: getFeatureUsageBarColor(u.feature, i),
     }));
   }
 
@@ -246,12 +245,6 @@ export class OverviewTabComponent implements OnInit {
       plan_id: planId,
       metadata: { email: this.userState.currentUser()?.email },
     };
-  }
-
-  private formatFeatureLabel(key: string): string {
-    if (!key) return 'Usage';
-    const k = key.toLowerCase().replace(/_/g, ' ');
-    return k.replace(/\b\w/g, c => c.toUpperCase());
   }
 
   private mediumDate(value: string): string {
