@@ -116,7 +116,7 @@ export class BatchTailoringModalComponent implements OnInit {
     const shouldRefresh =
       this.step() === 'results' && summary !== undefined && summary.succeeded > 0;
     const result: TailoringModalCloseResult | undefined = shouldRefresh
-      ? { refreshDashboard: true }
+      ? { refreshDashboard: true, tailoringCompleted: true }
       : undefined;
     this.dialogRef.close(result);
   }

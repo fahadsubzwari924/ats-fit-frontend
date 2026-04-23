@@ -2,7 +2,7 @@
 @if (isProcessing()) {
   <div class="space-y-5 py-4">
     <div class="text-center">
-      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-indigo-500 to-violet-500 mb-4 shadow-lg shadow-indigo-200 relative">
+      <div class="inline-flex items-center justify-center w-14 h-14 rounded-2xl bg-gradient-to-br from-primary to-accent-purple mb-4 shadow-lg shadow-primary/20 relative">
         <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" class="text-white animate-spin">
           <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
@@ -24,9 +24,9 @@
         <div class="text-center">
           <div class="w-9 h-9 rounded-full mx-auto mb-1.5 flex items-center justify-center transition-all duration-500"
             [ngClass]="processingPhase() > $index
-              ? 'bg-gradient-to-br from-emerald-500 to-teal-500 shadow-sm'
+              ? 'bg-gradient-to-br from-success to-success-strong shadow-sm'
               : processingPhase() === $index
-                ? 'bg-gradient-to-br from-indigo-500 to-violet-500 shadow-sm'
+                ? 'bg-gradient-to-br from-primary to-accent-purple shadow-sm'
                 : 'bg-slate-100'">
             @if (processingPhase() > $index) {
               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
@@ -44,7 +44,7 @@
             }
           </div>
           <p class="text-xs font-medium"
-            [ngClass]="processingPhase() >= $index ? 'text-indigo-600' : 'text-slate-400'">
+            [ngClass]="processingPhase() >= $index ? 'text-primary' : 'text-slate-400'">
             {{ phase }}
           </p>
         </div>
@@ -54,20 +54,20 @@
     <!-- Progress bar -->
     <div class="space-y-1">
       <div class="relative h-2 bg-slate-100 rounded-full overflow-hidden">
-        <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-indigo-500 to-violet-500 rounded-full transition-all duration-1000"
+        <div class="absolute inset-y-0 left-0 bg-gradient-to-r from-primary to-accent-purple rounded-full transition-all duration-1000"
           [style.width.%]="progress()">
           <div class="absolute inset-0 bg-gradient-to-r from-transparent via-white/30 to-transparent animate-shimmer"></div>
         </div>
       </div>
       <div class="flex justify-between text-xs text-slate-500">
-        <span class="font-semibold text-indigo-600">{{ progress() }}%</span>
+        <span class="font-semibold text-primary">{{ progress() }}%</span>
         <span>This takes about 30–60 seconds</span>
       </div>
     </div>
 
     <!-- Minimize button -->
     <button (click)="minimize.emit()"
-      class="w-full py-2 text-sm text-slate-500 hover:text-indigo-600 transition-colors border border-slate-200 rounded-lg hover:border-indigo-200 hover:bg-indigo-50/30">
+      class="w-full py-2 text-sm text-slate-500 hover:text-primary transition-colors border border-slate-200 rounded-lg hover:border-primary-soft-border hover:bg-primary-soft/30">
       Minimize — continue in background
     </button>
   </div>
@@ -87,12 +87,12 @@
       @for (template of templates(); track template.id) {
         <button type="button"
           (click)="selectTemplate(template.id)"
-          class="relative rounded-xl border-2 p-3.5 text-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+          class="relative rounded-xl border-2 p-3.5 text-center transition-all duration-200 focus:outline-none focus:ring-2 focus:ring-primary/40"
           [ngClass]="selectedTemplate?.value === template.id
-            ? 'border-indigo-400 bg-indigo-50 shadow-md'
-            : 'border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/30'">
+            ? 'border-primary-soft-border bg-primary-soft shadow-md'
+            : 'border-slate-200 hover:border-primary-soft-border hover:bg-primary-soft/30'">
           @if (selectedTemplate?.value === template.id) {
-            <div class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-indigo-500 flex items-center justify-center shadow-sm">
+            <div class="absolute -top-2 -right-2 w-5 h-5 rounded-full bg-primary flex items-center justify-center shadow-sm">
               <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none"
                 stroke="currentColor" stroke-width="3" class="text-white">
                 <polyline points="20 6 9 17 4 12"></polyline>
@@ -110,14 +110,14 @@
             <!-- Distinct icons per template type -->
             <div class="w-12 h-14 mx-auto mb-2 rounded-lg flex items-center justify-center border shadow-sm"
               [ngClass]="{
-                'bg-gradient-to-br from-emerald-50 to-teal-50 border-emerald-200': template.key === TemplateKey.MINIMALLIST,
-                'bg-gradient-to-br from-indigo-50 to-violet-50 border-indigo-200': template.key === TemplateKey.MODREN,
+                'bg-gradient-to-br from-success-soft to-success-softer border-success-border': template.key === TemplateKey.MINIMALLIST,
+                'bg-gradient-to-br from-primary-soft to-accent-purple-soft border-primary-soft-border': template.key === TemplateKey.MODREN,
                 'bg-gradient-to-br from-slate-50 to-slate-100 border-slate-300': template.key === TemplateKey.PROFESSIONAL
               }">
               <!-- Minimalist: clean lines icon -->
               @if (template.key === TemplateKey.MINIMALLIST) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="1.5" class="text-emerald-600">
+                  stroke="currentColor" stroke-width="1.5" class="text-success">
                   <rect x="3" y="3" width="18" height="18" rx="2"></rect>
                   <path d="M7 8h10"></path>
                   <path d="M7 12h6"></path>
@@ -127,7 +127,7 @@
               <!-- Modern: sparkle/creative icon -->
               @if (template.key === TemplateKey.MODREN) {
                 <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-                  stroke="currentColor" stroke-width="1.5" class="text-indigo-600">
+                  stroke="currentColor" stroke-width="1.5" class="text-primary">
                   <path d="M9.937 15.5A2 2 0 0 0 8.5 14.063l-6.135-1.582a.5.5 0 0 1 0-.962L8.5 9.936A2 2 0 0 0 9.937 8.5l1.582-6.135a.5.5 0 0 1 .963 0L14.063 8.5A2 2 0 0 0 15.5 9.937l6.135 1.581a.5.5 0 0 1 0 .964L15.5 14.063a2 2 0 0 0-1.437 1.437l-1.582 6.135a.5.5 0 0 1-.963 0z"></path>
                   <path d="M20 3v4"></path>
                   <path d="M22 5h-4"></path>
@@ -159,9 +159,9 @@
     <button
       (click)="onGenerate()"
       [disabled]="!canGenerate"
-      class="w-full py-3 px-6 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-indigo-300"
+      class="w-full py-3 px-6 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary/40"
       [ngClass]="canGenerate
-        ? 'bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-lg shadow-indigo-200 hover:shadow-indigo-300'
+        ? 'bg-gradient-to-r from-primary to-accent-purple hover:from-primary-hover hover:to-accent-purple-strong text-white shadow-lg shadow-primary/20 hover:shadow-primary/30'
         : 'bg-slate-100 text-slate-400 cursor-not-allowed'"
     >
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"

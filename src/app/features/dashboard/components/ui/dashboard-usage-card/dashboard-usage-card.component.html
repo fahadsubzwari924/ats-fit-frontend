@@ -6,9 +6,15 @@
     <h2 class="font-semibold text-[14px] text-[#0F172A]">Usage This Month</h2>
   </div>
 
+  @if (!isPremium() && showUsageUpgradeNudge()) {
+    <div class="px-5 py-3 border-b border-[#F1F5F9] bg-[#F8FAFC]">
+      <p class="text-[12px] text-[#475569] leading-snug">{{ usageNudgeMessage() }}</p>
+    </div>
+  }
+
   <!-- Usage bars -->
   <div class="px-5 py-4 space-y-4">
-    @for (row of usageRows; track row.label) {
+    @for (row of usageRows(); track row.label) {
       <div>
         <div class="flex items-center justify-between mb-2">
           <span class="text-[12.5px] font-medium text-[#374151]">{{ row.label }}</span>
@@ -27,29 +33,47 @@
       </div>
     }
 
-    @if (usageRows.length === 0) {
+    @if (usageRows().length === 0) {
       <p class="text-[12.5px] text-[#94A3B8] text-center py-2">No usage data available</p>
     }
   </div>
 
-  <!-- Footer -->
-  <div class="px-5 py-3 bg-[#F8FAFC] border-t border-[#F1F5F9] flex items-center justify-between">
-    <div class="flex items-center gap-1.5 text-[#64748B]">
+  <!-- Footer: stack vertically — card sits in a ~320px column while sm: breakpoints follow viewport. -->
+  <div class="px-5 py-3.5 bg-[#F8FAFC] border-t border-[#F1F5F9] flex flex-col gap-3.5">
+    <div class="flex gap-2.5 items-center min-w-0">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
            class="shrink-0 text-[#64748B]"
-           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+           fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+           aria-hidden="true">
         <circle cx="12" cy="12" r="10"></circle>
         <path d="M12 16v-4"></path>
         <path d="M12 8h.01"></path>
       </svg>
-      @if (resetDate) {
-        <span class="text-[12px] font-medium text-[#475569]">Resets on {{ resetDate | date:'MMM d, y' }}</span>
-      } @else {
-        <span class="text-[12px] font-medium text-[#475569]">Usage resets monthly</span>
-      }
+      <div class="min-w-0 flex-1">
+        @if (resetDate(); as rd) {
+          <p class="text-[12px] leading-snug text-[#475569]">
+            <span class="font-medium text-[#64748B]">Resets on </span><span class="font-semibold text-[#0F172A]">{{ rd | date:'MMM d, y' }}</span>
+          </p>
+        } @else {
+          <p class="text-[12px] font-medium leading-snug text-[#475569]">Usage resets monthly</p>
+        }
+      </div>
     </div>
-    <button class="text-[12px] font-medium text-[#2563EB] hover:text-[#1D4ED8] transition-colors">
-      Upgrade
-    </button>
+    @if (!isPremium()) {
+      <div class="flex flex-col gap-2 items-stretch pt-2.5 border-t border-[#E8EDF4]">
+        <button
+          type="button"
+          class="w-full inline-flex items-center justify-center rounded-lg bg-primary px-4 py-2.5 text-[13px] font-semibold text-primary-foreground shadow-sm transition-colors hover:bg-primary-hover focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/35 focus-visible:ring-offset-2 focus-visible:ring-offset-[#F8FAFC]"
+          (click)="onUpgradeClick()">
+          Upgrade
+        </button>
+        <button
+          type="button"
+          class="w-full text-center text-[11px] font-medium leading-snug text-[#64748B] hover:text-primary transition-colors underline-offset-2 hover:underline text-pretty"
+          (click)="onPlansTeaserClick()">
+          {{ copy.plansTeaser }}
+        </button>
+      </div>
+    }
   </div>
 </div>

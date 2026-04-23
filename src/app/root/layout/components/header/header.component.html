@@ -60,7 +60,14 @@
             <span>Premium</span>
           </div>
         } @else if (showNonPremiumChip()) {
-          <div class="app-header__plan-chip--muted">{{ nonPremiumChipLabel() }}</div>
+          <a
+            [routerLink]="[appRoutes.BILLING]"
+            [queryParams]="{ tab: 'overview' }"
+            fragment="billing-plans"
+            class="app-header__plan-chip--muted app-header__plan-chip--link"
+            aria-label="View available plans to upgrade from Freemium">
+            {{ nonPremiumChipLabel() }}
+          </a>
         }
 
         <button type="button" class="app-header__notify" aria-label="Notifications">
@@ -109,7 +116,7 @@
                 </svg>
                 Usage &amp; Limits
               </button>
-              <a routerLink="/billing" class="app-header__dropdown-item" role="menuitem" (click)="closeUserMenu()">
+              <a [routerLink]="[appRoutes.BILLING]" class="app-header__dropdown-item" role="menuitem" (click)="closeUserMenu()">
                 <svg class="app-header__dropdown-icon" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
                   <rect width="20" height="14" x="2" y="5" rx="2" />
                   <path d="M2 10h20" />
@@ -203,11 +210,18 @@
             <span>Premium</span>
           </div>
         } @else if (showNonPremiumChip()) {
-          <div class="app-header__plan-chip--muted">{{ nonPremiumChipLabel() }}</div>
+          <a
+            [routerLink]="[appRoutes.BILLING]"
+            [queryParams]="{ tab: 'overview' }"
+            fragment="billing-plans"
+            class="app-header__plan-chip--muted app-header__plan-chip--link"
+            aria-label="View available plans to upgrade from Freemium">
+            {{ nonPremiumChipLabel() }}
+          </a>
         }
         <button type="button" class="app-header__dropdown-item" (click)="goToDashboardSection('profile')">Profile</button>
         <button type="button" class="app-header__dropdown-item" (click)="goToDashboardSection('usage')">Usage &amp; Limits</button>
-        <a routerLink="/billing" class="app-header__dropdown-item" (click)="closeMobile()">Billing</a>
+        <a [routerLink]="[appRoutes.BILLING]" class="app-header__dropdown-item" (click)="closeMobile()">Billing</a>
         <button type="button" class="app-header__dropdown-item" (click)="goToDashboardSection('settings')">Settings</button>
         <button type="button" class="app-header__dropdown-item app-header__dropdown-item--danger" (click)="logout()">Sign Out</button>
       } @else {

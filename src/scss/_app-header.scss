@@ -351,6 +351,18 @@ $app-header-z: 30;
   line-height: 1;
 }
 
+a.app-header__plan-chip--link {
+  text-decoration: none;
+  cursor: pointer;
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+
+  &:hover {
+    background: var(--ats-slate-200);
+    border-color: var(--ats-slate-300);
+    color: var(--ats-slate-700);
+  }
+}
+
 // ── Public CTA area ─────────────────────────────────────────────────────────
 .app-header__public-actions {
   display: none;

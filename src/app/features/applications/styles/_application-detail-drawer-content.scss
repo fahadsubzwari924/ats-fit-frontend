@@ -53,8 +53,8 @@ $r-lg: 16px;
   border: 1px solid transparent;
   &--slate { color: #334155; background: #f1f5f9; border-color: #e2e8f0; }
   &--rose { color: #9f1239; background: #ffe4e6; border-color: #fecdd3; }
-  &--emerald { color: #065f46; background: #d1fae5; border-color: #a7f3d0; }
-  &--violet { color: #5b21b6; background: #ede9fe; border-color: #ddd6fe; }
+  &--emerald { color: var(--ats-green-700); background: var(--ats-green-50); border-color: var(--ats-green-border); }
+  &--violet { color: var(--ats-purple); background: hsl(250 100% 97%); border-color: hsl(255 91% 91%); }
 }
 
 .app-detail-drawer__chip {

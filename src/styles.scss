@@ -28,6 +28,27 @@
   /* Primary — blue-600 (#2563EB) */
   --color-primary: hsl(221 83% 53%);
   --color-primary-foreground: hsl(0 0% 100%);
+  /*
+   * Semantic palette (mirrors :root --ats-*). Prefer these utilities over raw
+   * Tailwind indigo/violet/emerald ramps so the app stays one blue + slate brand.
+   *   indigo-* (CTAs, steppers) → primary / primary-hover / primary-soft*
+   *   violet-* (secondary cards, cover letter) → accent-purple*
+   *   emerald-* (success) → success*
+   */
+  --color-primary-hover: hsl(226 71% 50%);
+  --color-primary-darkest: hsl(226 57% 21%);
+  --color-primary-soft: hsl(214 100% 97%);
+  --color-primary-muted: hsl(213 94% 93%);
+  --color-primary-soft-border: hsl(213 97% 87%);
+  --color-success: hsl(142 71% 45%);
+  --color-success-strong: hsl(142 72% 29%);
+  --color-success-soft: hsl(138 76% 97%);
+  --color-success-softer: hsl(141 84% 93%);
+  --color-success-border: hsl(142 76% 85%);
+  --color-accent-purple: hsl(258 82% 58%);
+  --color-accent-purple-soft: hsl(250 100% 97%);
+  --color-accent-purple-border: hsl(255 91% 91%);
+  --color-accent-purple-strong: hsl(263 47% 40%);
 
   /* Secondary — slate-100 */
   --color-secondary: hsl(214 32% 96%);
@@ -272,10 +293,10 @@ body {
     text-align: center;
 
     &--keywords {
-      background: #eff6ff;   // indigo-50
-      border: 1px solid #bfdbfe; // indigo-200
-      .result-stat-card__value { color: #1d4ed8; } // indigo-700
-      .result-stat-card__label { color: #3730a3; } // indigo-800
+      background: var(--ats-primary-bg);
+      border: 1px solid var(--ats-primary-lightest);
+      .result-stat-card__value { color: var(--ats-primary-dark); }
+      .result-stat-card__label { color: var(--ats-primary-darker); }
     }
 
     &--ats {
@@ -286,10 +307,10 @@ body {
     }
 
     &--bullets {
-      background: #f5f3ff;   // violet-50
-      border: 1px solid #ddd6fe; // violet-200
+      background: hsl(250 100% 97%);
+      border: 1px solid hsl(255 91% 91%);
       .result-stat-card__value { color: var(--ats-purple); }
-      .result-stat-card__label { color: #5b21b6; } // violet-800
+      .result-stat-card__label { color: hsl(263 47% 40%); }
     }
 
     &__value {
@@ -309,6 +330,14 @@ body {
 }
 
 // ── Material Dialog panel overrides ─────────────────────────────────────────
+// Material M3 (prebuilt azure-blue) — primary aligns with --ats-primary
+html {
+  --mat-sys-primary: var(--ats-primary);
+  --mat-sys-on-primary: #ffffff;
+  --mat-sys-primary-container: var(--ats-primary-bg);
+  --mat-sys-on-primary-container: var(--ats-primary-darker);
+}
+
 .tailor-modal-panel {
   &.mat-mdc-dialog-panel {
     padding: 0 !important;
@@ -325,4 +354,13 @@ body {
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.08) !important;
     overflow: hidden !important;
   }
+}
+
+// Standard opaque surface for text-heavy dialogs (do not use tailor-modal-panel — that is transparent for embedded cards).
+// panelClass is on the overlay pane; surface is a descendant (same as .tailor-modal-panel rules above).
+.upgrade-feature-dialog-panel .mat-mdc-dialog-surface,
+.upgrade-feature-dialog-panel .mdc-dialog__surface {
+  background-color: var(--color-card, #ffffff);
+  border-radius: 0.75rem;
+  box-shadow: 0 20px 60px rgba(0, 0, 0, 0.15), 0 4px 16px rgba(0, 0, 0, 0.08);
 }

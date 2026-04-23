@@ -1,4 +1,6 @@
 import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { StorageService } from '@shared/services/storage.service';
+import { StorageKeys } from '@core/enums/storage-keys.enum';
 import { catchError, forkJoin, interval, of, switchMap, takeWhile, timer } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DashboardUsageCardComponent } from '@features/dashboard/components/ui/dashboard-usage-card/dashboard-usage-card.component';
@@ -32,8 +34,11 @@ import { saveAs } from 'file-saver';
 import { DashboardHeroComponent } from '@shared/components/dashboard-hero/dashboard-hero.component';
 import { QuestionsBannerComponent } from '@shared/components/questions-banner/questions-banner.component';
 import { ResumeHistoryCardComponent } from '@shared/components/resume-history-card/resume-history-card.component';
+import { UpgradeFeatureDialogComponent } from '@shared/components/upgrade-feature-dialog/upgrade-feature-dialog.component';
+import { DashboardPostTailorUpgradeBannerComponent } from '@features/dashboard/components/dashboard-post-tailor-upgrade-banner/dashboard-post-tailor-upgrade-banner.component';
 
 const POLL_INTERVAL_MS = 5000;
+const POST_TAILOR_UPGRADE_SUPPRESS_MS = 7 * 24 * 60 * 60 * 1000;
 const POLL_MAX_ATTEMPTS = 24;
 
 @Component({
@@ -48,12 +53,13 @@ const POLL_MAX_ATTEMPTS = 24;
     DashboardHeroComponent,
     QuestionsBannerComponent,
     ResumeHistoryCardComponent,
+    DashboardPostTailorUpgradeBannerComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
 })
 export class DashboardComponent implements OnInit {
-  private userState = inject(UserState);
+  readonly userState = inject(UserState);
   private profileStateService = inject(ResumeProfileState);
   private destroyRef = inject(DestroyRef);
   private modalService = inject(ModalService);
@@ -61,6 +67,7 @@ export class DashboardComponent implements OnInit {
   private resumeService = inject(ResumeService);
   private snackbarService = inject(SnackbarService);
   private profileQuestionsService = inject(ProfileQuestionsService);
+  private storageService = inject(StorageService);
 
   public featureUsage = signal<FeatureUsage[]>([]);
   public jobHistory = signal<AppliedJob | null>(null);
@@ -68,7 +75,8 @@ export class DashboardComponent implements OnInit {
   public resumeHistoryLoading = signal(false);
   public downloadingId = signal<string | null>(null);
 
-  public user = this.userState.currentUser();
+  /** Shown after a successful tailor when user is not premium and has not dismissed recently. */
+  showPostTailorUpgradeNudge = signal(false);
 
   drawerOpen = signal<boolean>(false);
   /** Keeps `QuestionsDrawerComponent` in the DOM while open or during exit animation. */
@@ -255,7 +263,23 @@ export class DashboardComponent implements OnInit {
       if (r.refreshDashboard) {
         this.refreshDashboardData();
       }
+      if (r.tailoringCompleted && !this.userState.isPremiumUser() && !this.shouldSuppressPostTailorUpgrade()) {
+        this.showPostTailorUpgradeNudge.set(true);
+      }
     }
+  }
+
+  private shouldSuppressPostTailorUpgrade(): boolean {
+    const raw = this.storageService.getItem(StorageKeys.POST_TAILOR_UPGRADE_DISMISSED_AT);
+    if (!raw) return false;
+    const t = Date.parse(raw);
+    if (Number.isNaN(t)) return false;
+    return Date.now() - t < POST_TAILOR_UPGRADE_SUPPRESS_MS;
+  }
+
+  onPostTailorUpgradeDismissed(): void {
+    this.storageService.setItem(StorageKeys.POST_TAILOR_UPGRADE_DISMISSED_AT, new Date().toISOString());
+    this.showPostTailorUpgradeNudge.set(false);
   }
 
   private loadResumeHistory(): void {
@@ -279,6 +303,18 @@ export class DashboardComponent implements OnInit {
   }
 
   public openBatchTailoringModal(): void {
+    if (!this.userState.isPremiumUser()) {
+      this.modalService
+        .openModal(UpgradeFeatureDialogComponent, undefined, {
+          width: '420px',
+          maxWidth: '95vw',
+          panelClass: 'upgrade-feature-dialog-panel',
+        })
+        .afterClosed()
+        .subscribe();
+      return;
+    }
+
     this.modalService
       .openModal(BatchTailoringModalComponent, undefined, {
         width: '640px',
