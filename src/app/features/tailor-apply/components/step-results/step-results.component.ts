@@ -83,7 +83,7 @@ export class StepResultsComponent {
       this.snackbar.showWarning(Messages.NO_RESUME_AVAILABLE);
       return;
     }
-    saveAs(resume.blob, DownloadFileName.TAILORED_RESUME);
+    saveAs(resume.blob, resume.filename || DownloadFileName.TAILORED_RESUME);
     this.download.emit();
   }
 
