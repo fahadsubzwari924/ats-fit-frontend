@@ -19,6 +19,9 @@ import { EmployerQuestionGroupComponent } from '../resume-insights-questions/emp
 const ENRICHMENT_POLL_INTERVAL_MS = 4000;
 const ENRICHMENT_POLL_MAX_ATTEMPTS = 15;
 
+/** Matches drawer panel `transform` and backdrop `duration-300` in the template. */
+export const QUESTIONS_DRAWER_EXIT_MS = 300;
+
 export const DRAWER_COMPANY_COLORS = ['#2563EB', '#7C3AED', '#0891B2'];
 
 export interface DrawerCompanyPill {

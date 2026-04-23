@@ -13,13 +13,13 @@
         <div class="flex items-center justify-between mb-2">
           <span class="text-[12.5px] font-medium text-[#374151]">{{ row.label }}</span>
           <span class="text-[12px] font-semibold text-[#0F172A]">
-            {{ row.total - row.used }}
+            {{ row.used }}
             <span class="text-[#94A3B8] font-normal">/ {{ row.total }}</span>
           </span>
         </div>
         <div class="w-full bg-[#F1F5F9] rounded-full h-2">
           <div class="h-2 rounded-full transition-all"
-               [style.width.%]="remainingPercent(row)"
+               [style.width.%]="usedPercent(row)"
                [style.background]="row.color">
           </div>
         </div>
@@ -34,17 +34,18 @@
 
   <!-- Footer -->
   <div class="px-5 py-3 bg-[#F8FAFC] border-t border-[#F1F5F9] flex items-center justify-between">
-    <div class="flex items-center gap-1.5 text-[#94A3B8]">
+    <div class="flex items-center gap-1.5 text-[#64748B]">
       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24"
+           class="shrink-0 text-[#64748B]"
            fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
         <circle cx="12" cy="12" r="10"></circle>
         <path d="M12 16v-4"></path>
         <path d="M12 8h.01"></path>
       </svg>
       @if (resetDate) {
-        <span class="text-[11.5px]">Resets on {{ resetDate | date:'MMM d, y' }}</span>
+        <span class="text-[12px] font-medium text-[#475569]">Resets on {{ resetDate | date:'MMM d, y' }}</span>
       } @else {
-        <span class="text-[11.5px]">Usage resets monthly</span>
+        <span class="text-[12px] font-medium text-[#475569]">Usage resets monthly</span>
       }
     </div>
     <button class="text-[12px] font-medium text-[#2563EB] hover:text-[#1D4ED8] transition-colors">
