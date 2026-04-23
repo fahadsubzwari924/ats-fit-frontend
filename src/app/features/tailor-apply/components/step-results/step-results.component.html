@@ -23,7 +23,7 @@
     <!-- Success icon + headline -->
     <div class="flex flex-col items-center gap-2">
       <div>
-        <h3 class="text-xl font-bold bg-gradient-to-r from-emerald-600 to-teal-600 bg-clip-text text-transparent">
+        <h3 class="text-xl font-bold bg-gradient-to-r from-success to-success-strong bg-clip-text text-transparent">
           Resume Ready!
         </h3>
         <p class="text-xs text-slate-500 mt-0.5">Your AI-optimized resume is ready to download.</p>
@@ -53,8 +53,8 @@
           </svg>
 
           <div class="text-center">
-            <p class="text-3xl font-extrabold" style="color: var(--ats-green-600)">{{ ms.after }}%</p>
-            <p class="text-[11px] font-semibold mt-0.5" style="color: var(--ats-green-600)">After</p>
+            <p class="text-3xl font-extrabold text-success">{{ ms.after }}%</p>
+            <p class="text-[11px] font-semibold mt-0.5 text-success">After</p>
           </div>
         </div>
 
@@ -75,7 +75,7 @@
       @let ats = tailoredResume().atsChecks!;
       <div class="result-hero-card text-center">
         <p class="result-section-label">ATS Compatibility</p>
-        <p class="text-3xl font-extrabold" style="color: var(--ats-green-600)">
+        <p class="text-3xl font-extrabold text-success">
           {{ ats.passed }}<span class="text-lg font-semibold text-slate-400">/{{ ats.total }}</span>
         </p>
         <p class="text-[11px] font-medium text-slate-400 mt-1">Checks Passed</p>
@@ -122,7 +122,7 @@
     <!-- Primary actions -->
     <div class="flex gap-3">
       <button (click)="onDownload()"
-        class="flex-1 py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 text-white shadow-md shadow-indigo-200 hover:shadow-indigo-300 transition-all duration-200 flex items-center justify-center gap-2">
+        class="flex-1 py-3 px-4 rounded-xl font-semibold text-sm bg-gradient-to-r from-primary to-accent-purple hover:from-primary-hover hover:to-accent-purple-strong text-white shadow-md shadow-primary/20 hover:shadow-primary/30 transition-all duration-200 flex items-center justify-center gap-2">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2" class="shrink-0">
           <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
@@ -132,7 +132,7 @@
         Download
       </button>
       <button (click)="createAnother.emit()"
-        class="flex-1 py-3 px-4 rounded-xl font-semibold text-sm border-2 border-slate-200 hover:border-indigo-200 hover:bg-indigo-50/40 text-slate-700 hover:text-indigo-700 transition-all duration-200">
+        class="flex-1 py-3 px-4 rounded-xl font-semibold text-sm border-2 border-slate-200 hover:border-primary-soft-border hover:bg-primary-soft/40 text-slate-700 hover:text-primary-hover transition-all duration-200">
         Create Another
       </button>
     </div>
@@ -140,35 +140,35 @@
     <!-- Explore features -->
     <div class="grid grid-cols-2 gap-2.5">
       <button (click)="openComparison()"
-        class="group flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-indigo-50 hover:bg-indigo-100/70 border border-indigo-100 hover:border-indigo-200 transition-all duration-200 text-left">
+        class="group flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-primary-soft hover:bg-primary-muted/70 border border-primary-muted hover:border-primary-soft-border transition-all duration-200 text-left">
         <div
-          class="w-7 h-7 rounded-lg bg-indigo-100 group-hover:bg-indigo-200 flex items-center justify-center shrink-0 transition-colors">
+          class="w-7 h-7 rounded-lg bg-primary-muted group-hover:bg-primary-soft-border flex items-center justify-center shrink-0 transition-colors">
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" class="text-indigo-600">
+            stroke="currentColor" stroke-width="2" class="text-primary">
             <path d="M2 12s3-7 10-7 10 7 10 7-3 7-10 7-10-7-10-7Z"></path>
             <circle cx="12" cy="12" r="3"></circle>
           </svg>
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-xs font-semibold text-indigo-700">See what changed</p>
-          <p class="text-[10px] text-indigo-400 leading-tight">Before vs. after</p>
+          <p class="text-xs font-semibold text-primary-hover">See what changed</p>
+          <p class="text-[10px] text-primary/55 leading-tight">Before vs. after</p>
         </div>
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2"
-          class="text-indigo-300 group-hover:text-indigo-500 shrink-0 transition-colors">
+          class="text-primary/40 group-hover:text-primary shrink-0 transition-colors">
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
       </button>
 
       <button (click)="onGenerateCoverLetter()" [disabled]="isGeneratingCoverLetter()"
-        class="group flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-violet-50 hover:bg-violet-100/70 border border-violet-100 hover:border-violet-200 transition-all duration-200 text-left disabled:opacity-60 disabled:cursor-not-allowed">
+        class="group flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-accent-purple-soft hover:bg-accent-purple-border/70 border border-accent-purple-border hover:border-accent-purple/40 transition-all duration-200 text-left disabled:opacity-60 disabled:cursor-not-allowed">
         <div
-          class="w-7 h-7 rounded-lg bg-violet-100 group-hover:bg-violet-200 flex items-center justify-center shrink-0 transition-colors">
+          class="w-7 h-7 rounded-lg bg-accent-purple-border group-hover:bg-accent-purple/25 flex items-center justify-center shrink-0 transition-colors">
           @if (isGeneratingCoverLetter()) {
-          <div class="w-3.5 h-3.5 border-2 border-violet-500 border-t-transparent rounded-full animate-spin"></div>
+          <div class="w-3.5 h-3.5 border-2 border-accent-purple border-t-transparent rounded-full animate-spin"></div>
           } @else {
           <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" class="text-violet-600">
+            stroke="currentColor" stroke-width="2" class="text-accent-purple">
             <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
             <polyline points="14 2 14 8 20 8"></polyline>
             <line x1="16" x2="8" y1="13" y2="13"></line>
@@ -177,15 +177,15 @@
           }
         </div>
         <div class="flex-1 min-w-0">
-          <p class="text-xs font-semibold text-violet-700">
+          <p class="text-xs font-semibold text-accent-purple-strong">
             {{ isGeneratingCoverLetter() ? 'Generating...' : coverLetterResult() ? 'View cover letter' : 'Cover letter'
             }}
           </p>
-          <p class="text-[10px] text-violet-400 leading-tight">Matching letter</p>
+          <p class="text-[10px] text-accent-purple/55 leading-tight">Matching letter</p>
         </div>
         <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2"
-          class="text-violet-300 group-hover:text-violet-500 shrink-0 transition-colors">
+          class="text-accent-purple/40 group-hover:text-accent-purple shrink-0 transition-colors">
           <polyline points="9 18 15 12 9 6"></polyline>
         </svg>
       </button>
@@ -193,8 +193,8 @@
 
     <!-- Track application (signed-in users) -->
     @if (canTrackJobApplication()) {
-    <label class="flex items-center gap-3 cursor-pointer bg-indigo-50 rounded-xl px-4 py-3 border border-indigo-100">
-      <input type="checkbox" class="w-4 h-4 rounded accent-indigo-600" [ngModel]="trackChecked()"
+    <label class="flex items-center gap-3 cursor-pointer bg-primary-soft rounded-xl px-4 py-3 border border-primary-muted">
+      <input type="checkbox" class="w-4 h-4 rounded accent-primary" [ngModel]="trackChecked()"
         (ngModelChange)="trackChecked.set($event)" />
       <div class="text-left">
         <p class="text-sm font-semibold text-slate-800">Track this application</p>
@@ -205,7 +205,7 @@
 
     @if (canTrackJobApplication() && trackChecked()) {
     <button (click)="onDone()"
-      class="w-full py-2.5 rounded-xl text-sm font-semibold text-indigo-600 border border-indigo-200 hover:bg-indigo-50 transition-colors">
+      class="w-full py-2.5 rounded-xl text-sm font-semibold text-primary border border-primary-soft-border hover:bg-primary-soft transition-colors">
       Done &amp; track application
     </button>
     }

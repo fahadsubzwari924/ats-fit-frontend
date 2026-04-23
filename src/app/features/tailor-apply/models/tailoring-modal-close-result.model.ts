@@ -5,4 +5,6 @@
 export interface TailoringModalCloseResult {
   refreshDashboard?: boolean;
   scrollToQuestions?: boolean;
+  /** User completed a tailor (single or batch) worth showing an optional upgrade nudge. */
+  tailoringCompleted?: boolean;
 }

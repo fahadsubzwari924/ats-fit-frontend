@@ -1,11 +1,18 @@
 <div class="min-h-screen bg-[#F8FAFC]">
-  <app-dashboard-hero [userName]="user?.fullName" [resumeCount]="resumeHistory().length"
+  <app-dashboard-hero [userName]="userState.currentUser()?.fullName" [resumeCount]="resumeHistory().length"
     (tailorClicked)="openTailorModal()" (quickTailorClicked)="openBatchTailoringModal()"
     (resumeHistoryClicked)="openResumeHistoryModal()">
   </app-dashboard-hero>
 
   <app-questions-banner [visible]="showQuestionsBanner" (answerClicked)="onScrollToQuestions()">
   </app-questions-banner>
+
+  @if (showPostTailorUpgradeNudge()) {
+    <div class="max-w-[1280px] mx-auto px-6 pt-4">
+      <app-dashboard-post-tailor-upgrade-banner (dismissed)="onPostTailorUpgradeDismissed()">
+      </app-dashboard-post-tailor-upgrade-banner>
+    </div>
+  }
 
   <div class="max-w-[1280px] mx-auto px-6 py-7">
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
@@ -21,14 +28,13 @@
           (createFirstClicked)="openTailorModal()" (downloadItem)="downloadHistoryItem($event)">
         </app-resume-history-card>
 
-        @if (user?.isPremium) {
-        <app-tailore-resume-upload></app-tailore-resume-upload>
-        }
+        <app-tailore-resume-upload [mode]="userState.isPremiumUser() ? 'full' : 'preview'"></app-tailore-resume-upload>
       </div>
 
       <div class="space-y-5">
         <div id="dashboard-usage" class="app-dashboard-anchor">
-          <app-dashboard-usage-card [featureUsages]="featureUsage()"></app-dashboard-usage-card>
+          <app-dashboard-usage-card [featureUsages]="featureUsage()" [isPremium]="userState.isPremiumUser()">
+          </app-dashboard-usage-card>
         </div>
         <div id="dashboard-settings" class="app-dashboard-anchor">
           <app-dashboard-tips-card></app-dashboard-tips-card>

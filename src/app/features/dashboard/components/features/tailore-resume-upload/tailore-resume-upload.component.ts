@@ -1,4 +1,4 @@
-import { Component, effect, inject, signal, OnDestroy } from '@angular/core';
+import { Component, effect, inject, input, signal, OnDestroy } from '@angular/core';
 import { Messages } from '@core/enums/messages.enum';
 import { ResponseStatus } from '@core/enums/response-status.enum';
 import { IResumeUpload } from '@features/dashboard/enums/resume-upload.interface';
@@ -6,6 +6,8 @@ import { UploadedResume } from '@core/models/user/uploaded-resumes.model';
 import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { UserState } from '@core/states/user.state';
+import { BillingNavigationService } from '@shared/services/billing-navigation.service';
+import { UpgradePromptCopy } from '@core/constants/upgrade-prompt-copy';
 import { saveAs } from 'file-saver';
 import { Subscription } from 'rxjs';
 
@@ -13,14 +15,19 @@ import { Subscription } from 'rxjs';
   selector: 'app-tailore-resume-upload',
   imports: [],
   templateUrl: './tailore-resume-upload.component.html',
-  styleUrl: './tailore-resume-upload.component.scss'
+  styleUrl: './tailore-resume-upload.component.scss',
 })
 export class TailoreResumeUploadComponent implements OnDestroy {
+  /** `preview` shows locked upsell for freemium; `full` is interactive (premium). */
+  mode = input<'full' | 'preview'>('full');
 
   // Injections
   private resumeService = inject(ResumeService);
   private snackbarService = inject(SnackbarService);
   private userState = inject(UserState);
+  private billingNav = inject(BillingNavigationService);
+
+  readonly upgradeCopy = UpgradePromptCopy;
 
   // Internal state
   public isProcessing = signal<boolean>(false);
@@ -133,6 +140,10 @@ export class TailoreResumeUploadComponent implements OnDestroy {
     if (resume?.s3Url) {
       saveAs(resume.s3Url, resume.fileName);
     }
+  }
+
+  goToPlans(): void {
+    this.billingNav.goToPlansSection();
   }
 
   ngOnDestroy() {

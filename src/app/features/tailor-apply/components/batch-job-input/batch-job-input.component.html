@@ -1,14 +1,14 @@
 <form [formGroup]="form" (ngSubmit)="onSubmit()" class="space-y-4">
 
   <!-- Info banner -->
-  <div class="bg-indigo-50 border border-indigo-200 rounded-2xl p-4 flex gap-3">
+  <div class="bg-primary-soft border border-primary-soft-border rounded-2xl p-4 flex gap-3">
     <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2" class="text-indigo-600 shrink-0 mt-0.5">
+      stroke="currentColor" stroke-width="2" class="text-primary shrink-0 mt-0.5">
       <circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path>
     </svg>
     <div>
-      <p class="text-sm font-medium text-indigo-900">Bulk tailor up to <strong>3 resumes</strong> at once</p>
-      <p class="text-xs text-indigo-700 mt-1">Processing takes approximately <strong>2 minutes</strong> per batch</p>
+      <p class="text-sm font-medium text-primary-darkest">Bulk tailor up to <strong>3 resumes</strong> at once</p>
+      <p class="text-xs text-primary-hover mt-1">Processing takes approximately <strong>2 minutes</strong> per batch</p>
     </div>
   </div>
 
@@ -17,7 +17,7 @@
     @for (job of jobs.controls; track $index; let i = $index) {
       <div [formGroupName]="i"
         class="bg-white border rounded-2xl overflow-hidden transition-all duration-200"
-        [class.border-indigo-300]="expandedIndex() === i"
+        [class.border-primary-soft-border]="expandedIndex() === i"
         [class.shadow-sm]="expandedIndex() === i"
         [class.border-slate-200]="expandedIndex() !== i">
 
@@ -27,11 +27,11 @@
           (click)="toggleExpand(i)">
           <!-- Status dot -->
           <div class="w-5 h-5 rounded-full shrink-0 flex items-center justify-center"
-            [class.bg-emerald-100]="isJobValid(i)"
+            [class.bg-success-softer]="isJobValid(i)"
             [class.bg-slate-100]="!isJobValid(i)">
             @if (isJobValid(i)) {
               <svg xmlns="http://www.w3.org/2000/svg" width="10" height="10" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="3" class="text-emerald-600">
+                stroke="currentColor" stroke-width="3" class="text-success">
                 <polyline points="20 6 9 17 4 12"></polyline>
               </svg>
             } @else {
@@ -68,13 +68,13 @@
               <div>
                 <label class="block text-xs font-medium text-slate-600 mb-1" [attr.for]="'batch-job-position-' + i">Job Position *</label>
                 <input [id]="'batch-job-position-' + i" formControlName="jobPosition" type="text" placeholder="e.g. Senior Frontend Engineer"
-                  class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all placeholder:text-slate-400"
+                  class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all placeholder:text-slate-400"
                   [class.border-red-300]="jobs.at(i).get('jobPosition')?.invalid && jobs.at(i).get('jobPosition')?.touched" />
               </div>
               <div>
                 <label class="block text-xs font-medium text-slate-600 mb-1" [attr.for]="'batch-job-company-' + i">Company *</label>
                 <input [id]="'batch-job-company-' + i" formControlName="companyName" type="text" placeholder="e.g. Google"
-                  class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all placeholder:text-slate-400"
+                  class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all placeholder:text-slate-400"
                   [class.border-red-300]="jobs.at(i).get('companyName')?.invalid && jobs.at(i).get('companyName')?.touched" />
               </div>
             </div>
@@ -82,7 +82,7 @@
               <label class="block text-xs font-medium text-slate-600 mb-1" [attr.for]="'batch-job-description-' + i">Job Description *</label>
               <textarea [id]="'batch-job-description-' + i" formControlName="jobDescription" rows="4"
                 placeholder="Paste the full job description here..."
-                class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all placeholder:text-slate-400 resize-none"
+                class="w-full px-3 py-2.5 text-sm bg-slate-50 border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all placeholder:text-slate-400 resize-none"
                 [class.border-red-300]="jobs.at(i).get('jobDescription')?.invalid && jobs.at(i).get('jobDescription')?.touched">
               </textarea>
               @if (jobs.at(i).get('jobDescription')?.invalid && jobs.at(i).get('jobDescription')?.touched) {
@@ -98,7 +98,7 @@
   <!-- Add job button or limit reached message -->
   @if (canAddMore) {
     <button type="button" (click)="addJob()"
-      class="w-full py-3 border-2 border-dashed border-slate-200 rounded-2xl text-sm font-medium text-slate-400 hover:border-indigo-300 hover:text-indigo-500 hover:bg-indigo-50/40 transition-all duration-200 flex items-center justify-center gap-2">
+      class="w-full py-3 border-2 border-dashed border-slate-200 rounded-2xl text-sm font-medium text-slate-400 hover:border-primary-soft-border hover:text-primary hover:bg-primary-soft/40 transition-all duration-200 flex items-center justify-center gap-2">
       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2.5">
         <path d="M5 12h14"></path><path d="M12 5v14"></path>
@@ -120,7 +120,7 @@
   <div class="bg-slate-50 rounded-2xl p-4 border border-slate-200">
     <label class="block text-xs font-semibold text-slate-600 mb-2" for="batch-job-template-id">Resume Template</label>
     <select id="batch-job-template-id" formControlName="templateId"
-      class="w-full px-3 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-indigo-500/30 focus:border-indigo-400 transition-all text-slate-700"
+      class="w-full px-3 py-2.5 text-sm bg-white border border-slate-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-primary/30 focus:border-primary transition-all text-slate-700"
       [class.border-red-300]="form.get('templateId')?.invalid && form.get('templateId')?.touched">
       <option value="" disabled>Select a template</option>
       @for (template of templates(); track template.id) {
@@ -134,7 +134,7 @@
 
   <!-- Submit -->
   <button type="submit" [disabled]="form.invalid"
-    class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-indigo-600 to-violet-600 hover:from-indigo-700 hover:to-violet-700 disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md shadow-indigo-200 hover:shadow-indigo-300">
+    class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary to-accent-purple hover:from-primary-hover hover:to-accent-purple-strong disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md shadow-primary/20 hover:shadow-primary/30">
     <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
       stroke="currentColor" stroke-width="2">
       <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path>

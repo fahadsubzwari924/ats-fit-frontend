@@ -5,4 +5,5 @@ export class AppRoutes {
   static readonly DASHBOARD = '/dashboard';
   static readonly APPLICATIONS = '/applications';
   static readonly ONBOARDING = '/onboarding';
+  static readonly BILLING = '/billing';
 }

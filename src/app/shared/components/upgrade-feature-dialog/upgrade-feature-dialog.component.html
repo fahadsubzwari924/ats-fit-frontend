@@ -1,0 +1,8 @@
+<h2 mat-dialog-title class="!text-lg !font-semibold">{{ copy.quickTailorTitle }}</h2>
+<mat-dialog-content class="!text-sm text-slate-600">
+  <p>{{ copy.quickTailorBody }}</p>
+</mat-dialog-content>
+<mat-dialog-actions align="end" class="!px-6 !pb-4">
+  <button type="button" mat-button (click)="dismiss()">{{ copy.cancel }}</button>
+  <button type="button" mat-flat-button color="primary" (click)="viewPlans()">{{ copy.viewPlans }}</button>
+</mat-dialog-actions>

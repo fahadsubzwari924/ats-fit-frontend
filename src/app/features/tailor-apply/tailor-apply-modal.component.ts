@@ -137,7 +137,10 @@ export class TailorApplyModalComponent implements OnInit {
   }
 
   onTrackApplication(track: boolean): void {
-    const afterTailorClose: TailoringModalCloseResult = { refreshDashboard: true };
+    const afterTailorClose: TailoringModalCloseResult = {
+      refreshDashboard: true,
+      tailoringCompleted: true,
+    };
     if (!track) {
       this.dialogRef.close(afterTailorClose);
       return;
@@ -178,7 +181,7 @@ export class TailorApplyModalComponent implements OnInit {
   closeModal(): void {
     const hasTailored = this.currentStep() === 4 && this.tailoredResume() !== null;
     const result: TailoringModalCloseResult | undefined = hasTailored
-      ? { refreshDashboard: true }
+      ? { refreshDashboard: true, tailoringCompleted: true }
       : undefined;
     this.dialogRef.close(result);
   }

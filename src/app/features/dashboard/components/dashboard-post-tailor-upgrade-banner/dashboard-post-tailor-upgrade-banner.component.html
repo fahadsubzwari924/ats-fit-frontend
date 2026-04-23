@@ -1,0 +1,21 @@
+<div
+  role="region"
+  aria-label="Upgrade suggestion"
+  aria-live="polite"
+  class="rounded-xl border border-primary-soft-border bg-primary-soft px-4 py-3 flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
+  <div class="min-w-0">
+    <p class="text-sm font-semibold text-slate-900">{{ copy.postTailorTitle }}</p>
+    <p class="text-xs text-slate-600 mt-0.5">{{ copy.postTailorBody }}</p>
+  </div>
+  <div class="flex items-center gap-2 shrink-0">
+    <button
+      type="button"
+      class="px-3 py-1.5 rounded-lg text-xs font-semibold bg-primary text-primary-foreground hover:bg-primary-hover transition-colors"
+      (click)="onViewPlans()">
+      {{ copy.viewPlans }}
+    </button>
+    <button type="button" class="px-3 py-1.5 rounded-lg text-xs font-medium text-slate-600 hover:bg-slate-100" (click)="onDismiss()">
+      {{ copy.postTailorDismiss }}
+    </button>
+  </div>
+</div>

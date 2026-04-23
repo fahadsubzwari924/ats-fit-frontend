@@ -6,8 +6,8 @@
   [class.border-slate-200]="m === 'standard'"
   [class.bg-amber-50]="m === 'enhanced'"
   [class.border-amber-200]="m === 'enhanced'"
-  [class.bg-emerald-50]="m === 'precision'"
-  [class.border-emerald-200]="m === 'precision'">
+  [class.bg-success-soft]="m === 'precision'"
+  [class.border-success-border]="m === 'precision'">
   @switch (m) {
     @case ('standard') {
       <p class="font-medium text-slate-800 mb-1">Tailoring Mode: Standard</p>
@@ -28,8 +28,8 @@
       </app-button>
     }
     @case ('precision') {
-      <p class="font-medium text-emerald-800 mb-1">Tailoring Mode: Precision ✓</p>
-      <p class="text-emerald-700">All bullet points use your verified achievements. Zero AI guessing.</p>
+      <p class="font-medium text-success-strong mb-1">Tailoring Mode: Precision ✓</p>
+      <p class="text-success-strong">All bullet points use your verified achievements. Zero AI guessing.</p>
     }
     @default {
       <p class="font-medium text-slate-800">Tailoring Mode: Standard</p>
