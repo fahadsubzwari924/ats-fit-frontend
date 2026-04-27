@@ -1,22 +1,46 @@
-<div
-  class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-primary-muted flex items-center justify-center px-4 py-8"
->
-  <div class="w-full max-w-md">
-    <div class="text-center mb-8">
-      <a href="/">
-        <img src="/logos/transparent_blue_logo.svg" alt="ATS Fit" style="height:36px;width:auto;">
-      </a>
-    </div>
-    <div class="rounded-lg bg-card text-card-foreground shadow-xl border-0">
-      <div class="flex flex-col space-y-1.5 p-6 text-center">
-        <h3 class="tracking-tight text-2xl font-bold">Create Your Account</h3>
-        <p class="text-sm text-muted-foreground">
-          Join thousands of job seekers who've improved their success rate
-        </p>
-      </div>
-      <div class="p-6 pt-0 space-y-6">
-        <form [formGroup]="signupForm" (ngSubmit)="submit()" class="space-y-4">
-          <div class="space-y-2">
+<div class="auth-aurora-page">
+
+  <!-- Floating shapes — edges only -->
+  <!-- Left edge -->
+  <div class="float-shape float-shape--ring shape-1" aria-hidden="true"></div>
+  <div class="float-shape float-shape--dot shape-2" aria-hidden="true"></div>
+  <div class="float-shape float-shape--ring shape-3" aria-hidden="true"></div>
+  <div class="float-shape float-shape--plus shape-4" aria-hidden="true"></div>
+  <div class="float-shape float-shape--dot-soft shape-5" aria-hidden="true"></div>
+  <div class="float-shape float-shape--square-outline shape-6" aria-hidden="true"></div>
+  <div class="float-shape float-shape--ring shape-7" aria-hidden="true"></div>
+  <!-- Right edge -->
+  <div class="float-shape float-shape--ring float-shape--ring-bold shape-8" aria-hidden="true"></div>
+  <div class="float-shape float-shape--dot-soft shape-9" aria-hidden="true"></div>
+  <div class="float-shape float-shape--dot shape-10" aria-hidden="true"></div>
+  <div class="float-shape float-shape--plus shape-11" aria-hidden="true"></div>
+  <div class="float-shape float-shape--ring shape-12" aria-hidden="true"></div>
+  <div class="float-shape float-shape--square-outline shape-13" aria-hidden="true"></div>
+  <div class="float-shape float-shape--ring shape-14" aria-hidden="true"></div>
+
+  <!-- Page Logo (top-left) -->
+  <div class="auth-page-logo">
+    <a [routerLink]="'/'">
+      <img src="/logos/transparent_white_logo.svg" alt="ATS Fit" />
+    </a>
+  </div>
+
+  <!-- Content -->
+  <div class="auth-content">
+
+    <!-- Glass card -->
+    <div class="auth-glass-card">
+      <div class="auth-card-body">
+
+        <!-- Header -->
+        <div class="auth-card-header">
+          <h1 class="auth-card-title">Get started free</h1>
+        </div>
+
+        <!-- Form -->
+        <form [formGroup]="signupForm" (ngSubmit)="submit()" class="space-y-3">
+
+          <div>
             <app-input-field
               id="fullName"
               label="Full Name"
@@ -24,10 +48,10 @@
               placeholder="Enter your full name"
               formControlName="full_name"
               [required]="true"
-            >
-            </app-input-field>
+            ></app-input-field>
           </div>
-          <div class="space-y-2">
+
+          <div>
             <app-input-field
               id="email"
               label="Email"
@@ -35,11 +59,10 @@
               placeholder="Enter your email"
               formControlName="email"
               [required]="true"
-            >
-            </app-input-field>
-
+            ></app-input-field>
           </div>
-          <div class="space-y-2">
+
+          <div>
             <div class="relative">
               <app-input-field
                 id="password"
@@ -48,14 +71,21 @@
                 placeholder="Create a strong password"
                 formControlName="password"
                 [required]="true"
+              ></app-input-field>
+              <button
+                type="button"
+                class="absolute right-3 top-10 transform cursor-pointer"
+                (click)="togglePasswordVisibility()"
+                [attr.aria-label]="passwordFieldType() === InputType.PASSWORD ? 'Show password' : 'Hide password'"
               >
-              </app-input-field>
-              <button type="button" class="absolute right-3 top-10 transform cursor-pointer" (click)="togglePasswordVisibility()">
-                <mat-icon class="h-4 w-4 text-slate-400">{{passwordFieldType() === InputType.PASSWORD ? 'visibility' : 'visibility_off'}}</mat-icon>
+                <mat-icon class="h-4 w-4" style="color: rgba(71,85,105,0.55);">
+                  {{ passwordFieldType() === InputType.PASSWORD ? 'visibility' : 'visibility_off' }}
+                </mat-icon>
               </button>
             </div>
           </div>
-          <div class="space-y-2">
+
+          <div>
             <div class="relative">
               <app-input-field
                 id="confirmPassword"
@@ -65,61 +95,71 @@
                 formControlName="confirmPassword"
                 [required]="true"
               ></app-input-field>
-              <button type="button" class="absolute right-3 top-10 transform cursor-pointer" (click)="toggleConfirmPasswordVisibility()">
-                <mat-icon class="h-4 w-4 text-slate-400 material-icons">{{confirmPasswordFieldType() === InputType.PASSWORD ? 'visibility' : 'visibility_off'}}</mat-icon>
+              <button
+                type="button"
+                class="absolute right-3 top-10 transform cursor-pointer"
+                (click)="toggleConfirmPasswordVisibility()"
+                [attr.aria-label]="confirmPasswordFieldType() === InputType.PASSWORD ? 'Show confirm password' : 'Hide confirm password'"
+              >
+                <mat-icon class="h-4 w-4" style="color: rgba(71,85,105,0.55);">
+                  {{ confirmPasswordFieldType() === InputType.PASSWORD ? 'visibility' : 'visibility_off' }}
+                </mat-icon>
               </button>
             </div>
+
             @if (signupForm.hasError('passwordsMismatch') && (signupForm.get('password')?.touched || signupForm.get('confirmPassword')?.touched)) {
-              <div class="text-xs text-red-600 mt-1">
+              <div class="text-xs mt-1" style="color: #dc2626;" role="alert" aria-live="polite">
                 <span>Passwords do not match.</span>
               </div>
             }
           </div>
+
+          <!-- Terms checkbox -->
           <div class="flex items-center space-x-2">
-            <input type="checkbox" formControlName="terms" id="terms" class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground" />
-            <label class="font-medium peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-sm text-slate-600" for="terms">
+            <input
+              type="checkbox"
+              formControlName="terms"
+              id="terms"
+              class="peer h-4 w-4 shrink-0 rounded-sm border border-primary ring-offset-background focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 data-[state=checked]:bg-primary data-[state=checked]:text-primary-foreground"
+            />
+            <label class="auth-checkbox-label peer-disabled:cursor-not-allowed peer-disabled:opacity-70" for="terms">
               I agree to the
-              <a [routerLink]="'/terms'" class="text-blue-600 hover:text-blue-700 cursor-pointer">Terms of Service</a>
+              <a [routerLink]="'/terms'" class="auth-checkbox-link">Terms of Service</a>
               and
-              <a [routerLink]="'/privacy'" class="text-blue-600 hover:text-blue-700 cursor-pointer">Privacy Policy</a>
+              <a [routerLink]="'/privacy'" class="auth-checkbox-link">Privacy Policy</a>
             </label>
           </div>
-          @if(isTermsInvalid) {
-            <div class="text-xs text-red-600 mt-1">
+
+          @if (isTermsInvalid) {
+            <div class="text-xs mt-1" style="color: #dc2626;" role="alert" aria-live="polite">
               <span>You must agree to the Terms of Service and Privacy Policy.</span>
             </div>
           }
+
+          <app-inline-alert [message]="errorMessage()" type="error" />
+
           <app-button
             type="submit"
             text="Create Free Account"
             [fullWidth]="true"
             [disabled]="signupForm.invalid"
-          >
-          </app-button>
+          ></app-button>
+
         </form>
 
-        <div class="relative">
-          <app-google-auth-button></app-google-auth-button>
-        </div>
-
-        <div class="text-center">
-          <p class="text-sm text-slate-600">
+        <!-- Footer link -->
+        <div class="mt-5 text-center">
+          <p class="auth-link-text">
             Already have an account?
-            <a
-              class="text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
-              [routerLink]="'/signin'"
-              >Sign in</a
-            >
+            <a class="auth-link" [routerLink]="'/signin'">Sign in</a>
           </p>
         </div>
+
       </div>
     </div>
-    <div class="text-center mt-6">
-      <a
-        class="text-sm text-slate-600 hover:text-slate-800 transition-colors cursor-pointer"
-        [routerLink]="'/'"
-        >← Back to home</a
-      >
-    </div>
+
+    <!-- Back to home -->
+    <a class="auth-back-link" [routerLink]="'/'">← Back to home</a>
+
   </div>
 </div>
