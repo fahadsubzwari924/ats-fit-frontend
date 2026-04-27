@@ -1,0 +1,434 @@
+// ============================================================================
+// Auth Background — Saturated indigo canvas with edge-only floating shapes
+// ============================================================================
+// Layout principles:
+//   • Logo lives INSIDE the card (more prominent, saves vertical space)
+//   • Shapes are positioned only on the LEFT and RIGHT edges so the central
+//     column (where the card sits) stays uncluttered.
+//   • Card padding is tight to keep the signup screen above the fold.
+
+// ─── Page Canvas ─────────────────────────────────────────────────────────────
+.auth-aurora-page {
+  min-height: 100vh;
+  background: linear-gradient(135deg, #2563EB 0%, #4338CA 55%, #4F46E5 100%);
+  position: relative;
+  overflow: hidden;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 1.5rem 1rem;
+}
+
+// ─── Floating Shapes — base ──────────────────────────────────────────────────
+.float-shape {
+  position: absolute;
+  pointer-events: none;
+  z-index: 1;
+  will-change: transform;
+}
+
+// Outlined ring
+.float-shape--ring {
+  border-radius: 50%;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  background: transparent;
+}
+
+.float-shape--ring-bold {
+  border-width: 2px;
+  border-color: rgba(255, 255, 255, 0.32);
+}
+
+// Filled dot (small star-like)
+.float-shape--dot {
+  border-radius: 50%;
+  background: rgba(255, 255, 255, 0.55);
+}
+
+.float-shape--dot-soft {
+  background: rgba(255, 255, 255, 0.32);
+}
+
+// Plus sign (+)
+.float-shape--plus {
+  &::before,
+  &::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    background: rgba(255, 255, 255, 0.45);
+    border-radius: 1px;
+  }
+
+  &::before {
+    width: 100%;
+    height: 1.5px;
+    transform: translate(-50%, -50%);
+  }
+
+  &::after {
+    width: 1.5px;
+    height: 100%;
+    transform: translate(-50%, -50%);
+  }
+}
+
+// Outlined rounded square
+.float-shape--square-outline {
+  border-radius: 24%;
+  border: 1.5px solid rgba(255, 255, 255, 0.22);
+  background: transparent;
+}
+
+// ─── Shape Placement — edges only (left ≤ 22%, right ≥ 78%) ──────────────────
+// Numbered shapes left-to-right, top-to-bottom on each side.
+
+// LEFT EDGE
+.shape-1 {  // large ring, upper-left, partially off-screen
+  width: 200px;
+  height: 200px;
+  top: 6%;
+  left: -4%;
+  animation: float-up-slow 13s ease-in-out infinite;
+}
+
+.shape-2 {  // small dot, upper-left
+  width: 7px;
+  height: 7px;
+  top: 22%;
+  left: 14%;
+  animation: float-up-fast 6.5s ease-in-out infinite;
+}
+
+.shape-3 {  // medium ring, mid-left
+  width: 80px;
+  height: 80px;
+  top: 38%;
+  left: 6%;
+  animation: float-down-rotate 10s ease-in-out infinite;
+}
+
+.shape-4 {  // plus sign, mid-left
+  width: 18px;
+  height: 18px;
+  top: 30%;
+  left: 18%;
+  animation: float-up-medium 9s ease-in-out infinite;
+}
+
+.shape-5 {  // tiny dot, mid-left
+  width: 5px;
+  height: 5px;
+  top: 58%;
+  left: 12%;
+  animation: float-up-fast 7s ease-in-out infinite;
+}
+
+.shape-6 {  // outlined square, lower-left
+  width: 64px;
+  height: 64px;
+  top: 70%;
+  left: 8%;
+  animation: float-up-rotate 11s ease-in-out infinite;
+}
+
+.shape-7 {  // large ring, bottom-left, partially off-screen
+  width: 240px;
+  height: 240px;
+  bottom: -8%;
+  left: -5%;
+  animation: float-up-medium 16s ease-in-out infinite;
+}
+
+// RIGHT EDGE
+.shape-8 {  // large ring (bold), upper-right, partially off-screen
+  width: 220px;
+  height: 220px;
+  top: -4%;
+  right: -5%;
+  animation: float-down-medium 14s ease-in-out infinite;
+}
+
+.shape-9 {  // tiny dot, upper-right
+  width: 6px;
+  height: 6px;
+  top: 18%;
+  right: 14%;
+  animation: float-up-fast 6s ease-in-out infinite;
+}
+
+.shape-10 {  // small dot, mid-right
+  width: 9px;
+  height: 9px;
+  top: 32%;
+  right: 8%;
+  animation: float-down-fast 7.5s ease-in-out infinite;
+}
+
+.shape-11 {  // plus sign, mid-right
+  width: 20px;
+  height: 20px;
+  top: 50%;
+  right: 12%;
+  animation: float-up-slow 10s ease-in-out infinite;
+}
+
+.shape-12 {  // medium ring, mid-right
+  width: 100px;
+  height: 100px;
+  top: 60%;
+  right: 5%;
+  animation: float-down-rotate-slow 13s ease-in-out infinite;
+}
+
+.shape-13 {  // outlined square, bottom-right
+  width: 70px;
+  height: 70px;
+  bottom: 16%;
+  right: 18%;
+  animation: float-up-rotate-slow 12s ease-in-out infinite;
+}
+
+.shape-14 {  // large ring, bottom-right, partially off-screen
+  width: 180px;
+  height: 180px;
+  bottom: -6%;
+  right: -4%;
+  animation: float-down-medium 15s ease-in-out infinite;
+}
+
+// ─── Animation keyframes ─────────────────────────────────────────────────────
+@keyframes float-up-slow {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(0, -40px); }
+}
+
+@keyframes float-up-medium {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(0, -50px); }
+}
+
+@keyframes float-up-fast {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(0, -25px); }
+}
+
+@keyframes float-down-fast {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(0, 24px); }
+}
+
+@keyframes float-down-medium {
+  0%, 100% { transform: translate(0, 0); }
+  50%      { transform: translate(0, 38px); }
+}
+
+@keyframes float-up-rotate {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50%      { transform: translate(0, -30px) rotate(12deg); }
+}
+
+@keyframes float-up-rotate-slow {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50%      { transform: translate(0, -28px) rotate(8deg); }
+}
+
+@keyframes float-down-rotate {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50%      { transform: translate(0, 28px) rotate(-10deg); }
+}
+
+@keyframes float-down-rotate-slow {
+  0%, 100% { transform: translate(0, 0) rotate(0deg); }
+  50%      { transform: translate(0, 32px) rotate(-8deg); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .float-shape { animation: none; }
+
+  .auth-link,
+  .auth-forgot-link,
+  .auth-checkbox-link,
+  .auth-back-link { transition: none; }
+}
+
+// ─── Content Stack ───────────────────────────────────────────────────────────
+.auth-content {
+  position: relative;
+  z-index: 10;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  width: 100%;
+  max-width: 440px;
+  animation: auth-content-enter 700ms cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes auth-content-enter {
+  from { opacity: 0; transform: translateY(16px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .auth-content { animation: none; }
+}
+
+// ─── White Card ──────────────────────────────────────────────────────────────
+.auth-glass-card {
+  position: relative;
+  width: 100%;
+  background: #ffffff;
+  border-radius: 20px;
+  box-shadow:
+    0 4px 12px rgba(15, 23, 42, 0.06),
+    0 16px 40px rgba(15, 23, 42, 0.10),
+    0 32px 80px rgba(67, 56, 202, 0.22);
+  overflow: hidden;
+}
+
+// ─── Card Body ────────────────────────────────────────────────────────────────
+.auth-card-body {
+  padding: 1.75rem 1.75rem 1.5rem;
+}
+
+// ─── Page Logo (top-left) ────────────────────────────────────────────────────
+.auth-page-logo {
+  position: absolute;
+  top: 1.5rem;
+  left: 1.5rem;
+  z-index: 20;
+
+  a {
+    display: flex;
+    align-items: center;
+    text-decoration: none;
+    transition: opacity 150ms ease;
+
+    &:hover {
+      opacity: 0.85;
+    }
+  }
+
+  img {
+    height: 40px;
+    width: auto;
+    display: block;
+  }
+}
+
+// ─── Card Header ──────────────────────────────────────────────────────────────
+.auth-card-header {
+  text-align: center;
+  margin-bottom: 1rem;
+}
+
+.auth-card-title {
+  font-size: 1.5rem;
+  font-weight: 700;
+  color: #0f172a;
+  letter-spacing: -0.025em;
+  line-height: 1.2;
+  margin: 0 0 0.375rem;
+}
+
+.auth-card-subtitle {
+  font-size: 0.8125rem;
+  color: #64748b;
+  margin: 0;
+  line-height: 1.5;
+}
+
+// ─── Footer Links (inside card) ──────────────────────────────────────────────
+.auth-link-text {
+  font-size: 0.875rem;
+  color: #64748b;
+  text-align: center;
+}
+
+.auth-link {
+  color: #2563eb;
+  font-weight: 600;
+  text-decoration: none;
+  transition: color 150ms ease;
+
+  &:hover { color: #1d4ed8; }
+}
+
+.auth-forgot-link {
+  font-size: 0.8125rem;
+  color: #94a3b8;
+  text-decoration: none;
+  display: block;
+  text-align: center;
+  margin-top: 0.5rem;
+  transition: color 150ms ease;
+  font-weight: 500;
+
+  &:hover { color: #475569; }
+}
+
+// ─── Checkbox Row ─────────────────────────────────────────────────────────────
+.auth-checkbox-label {
+  font-size: 0.8125rem;
+  color: #475569;
+  line-height: 1.5;
+}
+
+.auth-checkbox-link {
+  color: #2563eb;
+  text-decoration: none;
+  font-weight: 600;
+  transition: color 150ms ease;
+
+  &:hover { color: #1d4ed8; }
+}
+
+// ─── Back Link (outside card, on indigo) ─────────────────────────────────────
+.auth-back-link {
+  display: block;
+  margin-top: 1rem;
+  font-size: 0.8125rem;
+  color: rgba(255, 255, 255, 0.65);
+  text-decoration: none;
+  text-align: center;
+  transition: color 150ms ease;
+  font-weight: 500;
+
+  &:hover { color: rgba(255, 255, 255, 0.95); }
+}
+
+// ─── Mobile ───────────────────────────────────────────────────────────────────
+@media (max-width: 640px) {
+  .auth-glass-card {
+    border-radius: 18px;
+  }
+
+  .auth-card-body {
+    padding: 1.5rem 1.25rem 1.25rem;
+  }
+
+  .auth-page-logo img {
+    height: 36px;
+  }
+
+  .auth-card-title {
+    font-size: 1.375rem;
+  }
+
+  // Scale shapes down on mobile
+  .shape-1  { width: 130px; height: 130px; }
+  .shape-2  { width: 5px;   height: 5px; }
+  .shape-3  { width: 56px;  height: 56px; }
+  .shape-4  { width: 14px;  height: 14px; }
+  .shape-5  { width: 4px;   height: 4px; }
+  .shape-6  { width: 44px;  height: 44px; }
+  .shape-7  { width: 150px; height: 150px; }
+  .shape-8  { width: 140px; height: 140px; }
+  .shape-9  { width: 4px;   height: 4px; }
+  .shape-10 { width: 6px;   height: 6px; }
+  .shape-11 { width: 14px;  height: 14px; }
+  .shape-12 { width: 70px;  height: 70px; }
+  .shape-13 { width: 48px;  height: 48px; }
+  .shape-14 { width: 110px; height: 110px; }
+}

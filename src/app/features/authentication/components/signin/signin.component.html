@@ -1,28 +1,65 @@
-<div
-  class="min-h-screen bg-gradient-to-br from-slate-50 via-blue-50 to-primary-muted flex items-center justify-center px-4"
->
-  <div class="w-full max-w-md">
-    <div class="text-center mb-8">
-      <a href="/">
-        <img src="/logos/transparent_blue_logo.svg" alt="ATS Fit" style="height:36px;width:auto;">
-      </a>
-    </div>
+<div class="auth-aurora-page">
+
+  <!-- Floating shapes — edges only -->
+  <!-- Left edge -->
+  <div class="float-shape float-shape--ring shape-1" aria-hidden="true"></div>
+  <div class="float-shape float-shape--dot shape-2" aria-hidden="true"></div>
+  <div class="float-shape float-shape--ring shape-3" aria-hidden="true"></div>
+  <div class="float-shape float-shape--plus shape-4" aria-hidden="true"></div>
+  <div class="float-shape float-shape--dot-soft shape-5" aria-hidden="true"></div>
+  <div class="float-shape float-shape--square-outline shape-6" aria-hidden="true"></div>
+  <div class="float-shape float-shape--ring shape-7" aria-hidden="true"></div>
+  <!-- Right edge -->
+  <div class="float-shape float-shape--ring float-shape--ring-bold shape-8" aria-hidden="true"></div>
+  <div class="float-shape float-shape--dot-soft shape-9" aria-hidden="true"></div>
+  <div class="float-shape float-shape--dot shape-10" aria-hidden="true"></div>
+  <div class="float-shape float-shape--plus shape-11" aria-hidden="true"></div>
+  <div class="float-shape float-shape--ring shape-12" aria-hidden="true"></div>
+  <div class="float-shape float-shape--square-outline shape-13" aria-hidden="true"></div>
+  <div class="float-shape float-shape--ring shape-14" aria-hidden="true"></div>
+
+  <!-- Page Logo (top-left) -->
+  <div class="auth-page-logo">
+    <a [routerLink]="'/'">
+      <img src="/logos/transparent_white_logo.svg" alt="ATS Fit" />
+    </a>
+  </div>
+
+  <!-- Content -->
+  <div class="auth-content">
+
+    <!-- Glass card -->
     <div
-      class="signin-card relative overflow-hidden rounded-lg bg-card text-card-foreground shadow-xl border-0"
+      class="auth-glass-card"
       [attr.aria-busy]="isSubmitting() ? true : null"
     >
+      <!-- Loading progress bar -->
       @if (isSubmitting()) {
-        <div class="signin-linear-progress" role="progressbar" aria-label="Signing in"></div>
+        <div class="signin-linear-progress" role="progressbar" aria-label="Signing in" aria-valuemin="0" aria-valuemax="100"></div>
       }
-      <div class="flex flex-col space-y-1.5 p-6 text-center">
-        <h3 class="tracking-tight text-2xl font-bold">Welcome Back</h3>
-        <p class="text-sm text-muted-foreground">
-          Sign in to your account to continue optimizing your resume
-        </p>
-      </div>
-      <div class="p-6 pt-0 space-y-6">
-        <form [formGroup]="signinForm" class="space-y-4" (ngSubmit)="login()">
-          <div class="space-y-2">
+
+      <!-- Registration success banner -->
+      @if (showRegistrationBanner()) {
+        <div class="auth-success-banner" role="status" aria-live="polite">
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="1.5" aria-hidden="true">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M9 12.75L11.25 15 15 9.75M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+          </svg>
+          <span>Account created — sign in to continue.</span>
+        </div>
+      }
+
+      <div class="auth-card-body">
+
+        <!-- Header -->
+        <div class="auth-card-header">
+          <h1 class="auth-card-title">Welcome back</h1>
+          <p class="auth-card-subtitle">Sign in to continue optimizing your resume</p>
+        </div>
+
+        <!-- Form -->
+        <form [formGroup]="signinForm" (ngSubmit)="login()" class="space-y-3">
+
+          <div>
             <app-input-field
               formControlName="email"
               id="email"
@@ -30,31 +67,34 @@
               type="email"
               placeholder="Enter your email"
               [required]="true"
-            >
-            </app-input-field>
+            ></app-input-field>
           </div>
-          <div class="space-y-2">
+
+          <div>
             <div class="relative">
               <app-input-field
-              formControlName="password"
-              id="password"
-              label="Password"
-              [type]="passwordFieldType()"
-              placeholder="Enter your password"
-              [required]="true"
-            >
-            </app-input-field>
-
+                formControlName="password"
+                id="password"
+                label="Password"
+                [type]="passwordFieldType()"
+                placeholder="Enter your password"
+                [required]="true"
+              ></app-input-field>
               <button
-                (click)="togglePasswordVisibility()"
                 type="button"
                 class="absolute right-3 top-10 transform cursor-pointer"
+                (click)="togglePasswordVisibility()"
                 [disabled]="isSubmitting()"
+                [attr.aria-label]="passwordFieldType() === InputType.PASSWORD ? 'Show password' : 'Hide password'"
               >
-                <mat-icon class="h-4 w-4 text-slate-400">{{passwordFieldType() === InputType.PASSWORD ? 'visibility' : 'visibility_off'}}</mat-icon>
+                <mat-icon class="h-4 w-4" style="color: rgba(71,85,105,0.55);">
+                  {{ passwordFieldType() === InputType.PASSWORD ? 'visibility' : 'visibility_off' }}
+                </mat-icon>
               </button>
             </div>
           </div>
+
+          <app-inline-alert [message]="errorMessage()" type="error" />
 
           <app-button
             [fullWidth]="true"
@@ -62,36 +102,24 @@
             type="submit"
             [loading]="isSubmitting()"
             loadingIndicator="dots"
-          >
-          </app-button>
+          ></app-button>
+
         </form>
-        <div class="relative">
-          <app-google-auth-button></app-google-auth-button>
+
+        <!-- Footer links -->
+        <div class="mt-5 space-y-2">
+          <p class="auth-link-text">
+            Don't have an account?
+            <a class="auth-link" [routerLink]="'/signup'">Sign up for free</a>
+          </p>
+          <a [routerLink]="'/forgot-password'" class="auth-forgot-link">Forgot your password?</a>
         </div>
 
-        <div class="text-center space-y-2">
-          <p class="text-sm text-slate-600">
-            Don't have an account?
-            <a
-              class="text-blue-600 hover:text-blue-700 font-medium cursor-pointer"
-              [routerLink]="'/signup'"
-              >Sign up for free</a
-            >
-          </p>
-          <p class="text-xs text-slate-500">
-            <a [routerLink]="'/forgot-password'" class="hover:text-slate-700 cursor-pointer"
-              >Forgot your password?</a
-            >
-          </p>
-        </div>
       </div>
     </div>
-    <div class="text-center mt-6">
-      <a
-        class="text-sm text-slate-600 hover:text-slate-800 transition-colors cursor-pointer"
-        href="/"
-        >← Back to home</a
-      >
-    </div>
+
+    <!-- Back to home -->
+    <a class="auth-back-link" [routerLink]="'/'">← Back to home</a>
+
   </div>
 </div>

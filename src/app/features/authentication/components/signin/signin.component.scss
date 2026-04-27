@@ -1,29 +1,17 @@
-.text-muted-foreground {
-  color: hsl(var(--muted-foreground));
-}
+@use '../../../../../scss/auth-aurora';
 
-
-.space-y-2>:not([hidden])~:not([hidden]) {
-  --tw-space-y-reverse: 0;
-  margin-top: calc(.5rem * calc(1 - var(--tw-space-y-reverse)));
-  margin-bottom: calc(.5rem * var(--tw-space-y-reverse));
-}
-
-
-.ring-offset-background {
-  --tw-ring-offset-color: hsl(var(--background));
-}
-
+// ─── Loading progress bar (top of glass card) ─────────────────────────────────
 .signin-linear-progress {
   position: absolute;
   top: 0;
   left: 0;
   right: 0;
-  height: 3px;
+  height: 2px;
   overflow: hidden;
-  z-index: 1;
+  z-index: 2;
   pointer-events: none;
-  background: rgb(226 232 240 / 0.6);
+  border-radius: 20px 20px 0 0;
+  background: rgba(37, 99, 235, 0.08);
 }
 
 .signin-linear-progress::after {
@@ -31,23 +19,44 @@
   position: absolute;
   inset: 0;
   width: 42%;
+  will-change: transform;
   background: linear-gradient(
     90deg,
     transparent,
-    hsl(221 83% 53% / 0.15),
-    hsl(239 84% 60%),
-    hsl(221 83% 53% / 0.15),
+    rgba(37, 99, 235, 0.3),
+    #2563eb,
+    rgba(37, 99, 235, 0.3),
     transparent
   );
   animation: signin-progress-slide 1.15s ease-in-out infinite;
 }
 
 @keyframes signin-progress-slide {
-  0% {
-    transform: translateX(-100%);
-  }
+  // 320% ensures the 42%-wide bar fully exits the right edge (100% / 0.42 ≈ 238% travel needed, 320% is a comfortable overshoot)
+  0%   { transform: translateX(-100%); }
+  100% { transform: translateX(320%); }
+}
 
-  100% {
-    transform: translateX(320%);
+// ─── Reduced-motion: freeze progress bar as a static indicator ────────────────
+@media (prefers-reduced-motion: reduce) {
+  .signin-linear-progress::after {
+    animation: none;
+    transform: translateX(0);
+    width: 100%;
+    opacity: 0.5;
   }
+}
+
+// ─── Registration success banner (light glass version) ────────────────────────
+.auth-success-banner {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  background: rgba(220, 252, 231, 0.75);
+  border-bottom: 1px solid rgba(134, 239, 172, 0.6);
+  padding: 0.75rem 1.5rem;
+  font-size: 0.875rem;
+  color: #15803d;
+  position: relative;
+  z-index: 1;
 }
