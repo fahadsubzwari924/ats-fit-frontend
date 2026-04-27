@@ -1,6 +1,7 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  computed,
   inject,
   signal,
 } from '@angular/core';
@@ -9,9 +10,9 @@ import { OnboardingStep } from './models/onboarding-step.type';
 import { OnboardingService } from './services/onboarding.service';
 import { UserState } from '@core/states/user.state';
 import { ResumeProfileState } from '@core/states/resume-profile.state';
+import { SnackbarService } from '@shared/services/snackbar.service';
 import { AppRoutes } from '@core/constants/app-routes.contant';
 import { OnboardingLeftPanelComponent } from './components/onboarding-left-panel/onboarding-left-panel.component';
-import { OnboardingChoicePanelComponent } from './components/onboarding-choice-panel/onboarding-choice-panel.component';
 import { OnboardingUploadPanelComponent } from './components/onboarding-upload-panel/onboarding-upload-panel.component';
 import { OnboardingSubmittedScreenComponent } from './components/onboarding-submitted-screen/onboarding-submitted-screen.component';
 
@@ -20,7 +21,6 @@ import { OnboardingSubmittedScreenComponent } from './components/onboarding-subm
   standalone: true,
   imports: [
     OnboardingLeftPanelComponent,
-    OnboardingChoicePanelComponent,
     OnboardingUploadPanelComponent,
     OnboardingSubmittedScreenComponent,
   ],
@@ -33,37 +33,22 @@ export class OnboardingComponent {
   private readonly onboardingService = inject(OnboardingService);
   private readonly userState = inject(UserState);
   private readonly profileState = inject(ResumeProfileState);
+  private readonly snackbar = inject(SnackbarService);
 
-  readonly step = signal<OnboardingStep>('choice');
+  readonly step = signal<OnboardingStep>('upload');
   readonly uploadedFile = signal<File | null>(null);
 
-  get uploadedFileName(): string | null {
-    return this.uploadedFile()?.name ?? null;
-  }
-
-  get uploadedFileSizeKb(): number | null {
+  readonly uploadedFileName = computed(() => this.uploadedFile()?.name ?? null);
+  readonly uploadedFileSizeKb = computed(() => {
     const file = this.uploadedFile();
     return file ? Math.round(file.size / 1024) : null;
-  }
+  });
 
-  /** Called when user picks "Upload resume first" in the choice step. */
-  onContinueWithUpload(): void {
-    this.step.set('upload');
-  }
-
-  /** Called when user skips to dashboard at the choice step or upload step. */
-  onSkipToDashboard(): void {
-    this.completeThenNavigate();
-  }
-
-  /** Called when user selects a valid file in the upload step. */
   onFileSelected(file: File): void {
     this.uploadedFile.set(file);
 
     this.onboardingService.uploadResume(file).subscribe({
       next: () => {
-        // Pre-seed the shared state so the dashboard card renders "Processing"
-        // immediately on navigation, without waiting for the first API poll.
         this.profileState.setProfileStatus({
           hasResume: true,
           processingStatus: 'processing',
@@ -75,20 +60,13 @@ export class OnboardingComponent {
         });
         this.step.set('submitted');
       },
-      error: () => {
-        // Even if upload fails, show the submitted screen and
-        // let onboarding complete so the user isn't stuck.
-        this.step.set('submitted');
+      error: (err) => {
+        this.uploadedFile.set(null);
+        this.snackbar.showError(err?.error?.message ?? 'Upload failed. Please try again.');
       },
     });
   }
 
-  /** Called when user presses back from upload step. */
-  onBackToChoice(): void {
-    this.step.set('choice');
-  }
-
-  /** Called when submitted screen auto-redirects or user clicks "Go to Dashboard". */
   onGoToDashboard(): void {
     this.completeThenNavigate();
   }
@@ -100,7 +78,6 @@ export class OnboardingComponent {
         this.router.navigateByUrl(AppRoutes.DASHBOARD);
       },
       error: () => {
-        // Even on API failure, update local state so the guard doesn't loop.
         this.userState.markOnboardingComplete();
         this.router.navigateByUrl(AppRoutes.DASHBOARD);
       },

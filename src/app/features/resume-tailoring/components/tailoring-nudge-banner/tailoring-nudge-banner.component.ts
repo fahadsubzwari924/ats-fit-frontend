@@ -27,13 +27,21 @@ export class TailoringNudgeBannerComponent {
 
   readonly visible = computed(() => {
     if (!this.showForm()) return false;
-    if (this.profileState.profileCompleteness() >= 1) return false;
+    const ps = this.profileState.profileState();
+    const needsPrecisionSetup =
+      ps === 'questions_pending' ||
+      ps === 'questions_partial' ||
+      ps === 'awaiting_precision_questions';
+    if (!needsPrecisionSetup) return false;
     return !this.storage.getItem(StorageKeys.TAILORING_NUDGE_DISMISSED);
   });
 
-  readonly completenessPercent = computed(() =>
-    Math.round(this.profileState.profileCompleteness() * 100)
-  );
+  readonly completenessPercent = computed(() => {
+    if (this.profileState.profileState() === 'awaiting_precision_questions') {
+      return 33;
+    }
+    return Math.round(this.profileState.profileCompleteness() * 100);
+  });
 
   dismiss(): void {
     this.storage.setItem(StorageKeys.TAILORING_NUDGE_DISMISSED, 'true');

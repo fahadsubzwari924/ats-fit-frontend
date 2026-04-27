@@ -8,7 +8,7 @@ import {
   viewChild,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { catchError, forkJoin, of } from 'rxjs';
+import { catchError, finalize, forkJoin, of } from 'rxjs';
 import { JobService } from '@features/apply-new-job/services/job.service';
 import { AppliedJob } from '@features/apply-new-job/models/applied-job.model';
 import { JobApplicationStats } from '@features/dashboard/models/job-stats.model';
@@ -73,6 +73,7 @@ export class ApplicationsPageComponent implements OnInit {
   readonly offset = signal(0);
 
   readonly selectedJobId = signal<string | null>(null);
+  readonly statusUpdatingJobId = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadPageData();
@@ -133,6 +134,32 @@ export class ApplicationsPageComponent implements OnInit {
     queueMicrotask(() => {
       document.getElementById('applications-search')?.focus();
     });
+  }
+
+  onStatusChange(event: { jobId: string; status: string }): void {
+    const { jobId, status } = event;
+    const current = this.listResult()?.applications.find((a) => a.id === jobId)?.status;
+    if (current === status) {
+      return;
+    }
+    this.statusUpdatingJobId.set(jobId);
+    this.jobService
+      .editJob(jobId, { status })
+      .pipe(
+        catchError((err: unknown) => {
+          this.snackbar.showError(
+            readHttpApiError(err) ?? 'Could not update status. Please try again.',
+          );
+          return of(null);
+        }),
+        finalize(() => this.statusUpdatingJobId.set(null)),
+        takeUntilDestroyed(this.destroyRef),
+      )
+      .subscribe((updated) => {
+        if (updated) {
+          this.loadPageData();
+        }
+      });
   }
 
   onDeleteJob(id: string): void {

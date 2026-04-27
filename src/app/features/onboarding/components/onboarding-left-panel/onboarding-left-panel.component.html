@@ -2,102 +2,44 @@
 
   <!-- Logo -->
   <div class="onboarding-left__logo">
-    <svg width="34" height="34" viewBox="0 0 32 32" fill="none" aria-hidden="true">
-      <rect width="32" height="32" rx="8" fill="rgba(255,255,255,0.15)" />
-      <path d="M8 22L12 10L16 18L20 10L24 22" stroke="white" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" />
-      <circle cx="16" cy="18" r="1.5" fill="white" />
-    </svg>
-    <span class="onboarding-left__logo-text">ATS Fit</span>
+    <img src="/logos/transparent_white_logo.svg" alt="ATS Fit" style="height:44px;width:auto;">
   </div>
 
-  <!-- Choice state -->
-  @if (screen === 'choice') {
-    <section class="onboarding-left__body">
-      <p class="onboarding-left__eyebrow">Your career, accelerated</p>
-      <h2 class="onboarding-left__headline">
-        Land your<br />
-        dream job<br />
-        faster.
-      </h2>
-      <p class="onboarding-left__copy">
-        Upload your resume once — ATS Fit uses it to perfectly align every application.
+  <section class="onboarding-left__body">
+    <p class="onboarding-left__eyebrow">One-time setup</p>
+    <h2 class="onboarding-left__headline">
+      Your resume, analyzed to perfection.
+    </h2>
+    <p class="onboarding-left__copy">
+      Upload once, use forever. Our analysis engine extracts everything needed for precision tailoring.
+    </p>
+
+    <div class="onboarding-left__list">
+      <p class="onboarding-left__list-label">What we extract</p>
+      <div class="onboarding-left__list-item">
+        <span class="onboarding-left__check-icon" aria-hidden="true">&#10003;</span>
+        Work experience structure
+      </div>
+      <div class="onboarding-left__list-item">
+        <span class="onboarding-left__check-icon" aria-hidden="true">&#10003;</span>
+        Quantifiable achievements
+      </div>
+      <div class="onboarding-left__list-item">
+        <span class="onboarding-left__check-icon" aria-hidden="true">&#10003;</span>
+        Skills &amp; keyword density
+      </div>
+      <div class="onboarding-left__list-item">
+        <span class="onboarding-left__check-icon" aria-hidden="true">&#10003;</span>
+        Impact metrics &amp; outcomes
+      </div>
+    </div>
+
+    <div class="onboarding-left__note">
+      <p class="onboarding-left__note-title">&#9889; Runs in the background</p>
+      <p class="onboarding-left__note-copy">
+        Takes ~40–50 seconds. You go straight to your dashboard — we'll notify you when it's done.
       </p>
+    </div>
+  </section>
 
-      <div class="onboarding-left__stats">
-        <div class="onboarding-left__stat">
-          <p class="onboarding-left__stat-value">3&times;</p>
-          <p class="onboarding-left__stat-label">Higher ATS match rate</p>
-        </div>
-        <div class="onboarding-left__stat">
-          <p class="onboarding-left__stat-value">92%</p>
-          <p class="onboarding-left__stat-label">Avg. tailoring score</p>
-        </div>
-        <div class="onboarding-left__stat">
-          <p class="onboarding-left__stat-value">40s</p>
-          <p class="onboarding-left__stat-label">Analysis time</p>
-        </div>
-      </div>
-
-      <div class="onboarding-left__social-proof">
-        <p class="onboarding-left__social-copy">
-          <span class="onboarding-left__social-strong">94% of users</span>
-          who upload their resume first get significantly better ATS scores.
-        </p>
-      </div>
-    </section>
-  }
-
-  <!-- Upload state -->
-  @if (screen === 'upload') {
-    <section class="onboarding-left__body">
-      <p class="onboarding-left__eyebrow">One-time setup</p>
-      <h2 class="onboarding-left__headline">
-        Your resume,<br />
-        analyzed to<br />
-        perfection.
-      </h2>
-      <p class="onboarding-left__copy">
-        Upload once, use forever. Our analysis engine extracts everything needed for precision tailoring.
-      </p>
-
-      <div class="onboarding-left__list">
-        <p class="onboarding-left__list-label">What we extract</p>
-        <div class="onboarding-left__list-item">
-          <span class="onboarding-left__check-icon">&#10003;</span>
-          Work experience structure
-        </div>
-        <div class="onboarding-left__list-item">
-          <span class="onboarding-left__check-icon">&#10003;</span>
-          Quantifiable achievements
-        </div>
-        <div class="onboarding-left__list-item">
-          <span class="onboarding-left__check-icon">&#10003;</span>
-          Skills &amp; keyword density
-        </div>
-        <div class="onboarding-left__list-item">
-          <span class="onboarding-left__check-icon">&#10003;</span>
-          Impact metrics &amp; outcomes
-        </div>
-      </div>
-
-      <div class="onboarding-left__note">
-        <p class="onboarding-left__note-title">&#9889; Runs in the background</p>
-        <p class="onboarding-left__note-copy">
-          Takes ~40–50 seconds. You go straight to your dashboard — we'll notify you when it's done.
-        </p>
-      </div>
-    </section>
-  }
-
-  <!-- Step indicator -->
-  <footer class="onboarding-left__footer">
-    <span class="onboarding-left__step-pill onboarding-left__step-pill--active"></span>
-    <span
-      class="onboarding-left__step-pill"
-      [class.onboarding-left__step-pill--active]="screen === 'upload'"
-    ></span>
-    <span class="onboarding-left__step-label">
-      {{ screen === 'choice' ? 'Step 1 of 2' : 'Step 2 of 2' }}
-    </span>
-  </footer>
 </div>

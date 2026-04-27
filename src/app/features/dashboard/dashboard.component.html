@@ -15,8 +15,17 @@
   }
 
   <div class="max-w-[1280px] mx-auto px-6 py-7">
+    @if (!hasResume()) {
+      <div class="flex items-center gap-3 rounded-lg border border-amber-200 bg-amber-50 px-4 py-3 mb-4 text-sm text-amber-800">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" class="flex-shrink-0">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+          <path d="M12 9v4"/><path d="M12 17h.01"/>
+        </svg>
+        <span>Upload your resume to unlock Resume Tailoring and ATS Scoring — <button type="button" class="font-semibold underline underline-offset-2 hover:text-amber-900 transition-colors" (click)="scrollToResumeManager()">upload now</button>.</span>
+      </div>
+    }
     <div class="grid grid-cols-1 lg:grid-cols-[1fr_320px] gap-6">
-      <div class="space-y-5">
+      <div id="resume-manager" class="space-y-5">
         <div id="dashboard-profile" class="app-dashboard-anchor">
           <app-resume-profile-card (uploadRequested)="onProfileUploadRequested($event)"
             (scrollToQuestions)="onScrollToQuestions()" (retryRequested)="onRetryProcessing()">

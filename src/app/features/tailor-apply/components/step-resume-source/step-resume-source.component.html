@@ -1,7 +1,7 @@
 <div class="space-y-4">
 
   <!-- Saved resume chip -->
-  @if (hasSavedResume() && !useUpload()) {
+  @if (hasSavedResume()) {
     <div class="bg-success-soft border border-success-border rounded-xl p-4">
       <div class="flex items-center gap-3">
         <div class="w-9 h-9 bg-success rounded-lg flex items-center justify-center flex-shrink-0">
@@ -21,63 +21,6 @@
           <span class="text-xs font-medium px-2 py-0.5 bg-primary-muted text-primary-hover rounded-full">Premium</span>
         }
       </div>
-    </div>
-
-    <button
-      (click)="showUploadArea()"
-      class="w-full py-2 text-sm text-slate-500 hover:text-primary transition-colors underline underline-offset-2"
-    >
-      Use a different resume
-    </button>
-  }
-
-  <!-- Uploaded file chip -->
-  @if (resumeFile() && !hasSavedResume()) {
-    <div class="bg-primary-soft border border-primary-soft-border rounded-xl p-4">
-      <div class="flex items-center gap-3">
-        <div class="w-9 h-9 bg-primary rounded-lg flex items-center justify-center flex-shrink-0">
-          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" class="text-white">
-            <path d="M15 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-          </svg>
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-sm font-semibold text-primary-darkest truncate">{{ resumeFile()?.name }}</p>
-          <p class="text-xs text-primary">Ready to use</p>
-        </div>
-      </div>
-    </div>
-
-    <button
-      (click)="showUploadArea()"
-      class="w-full py-2 text-sm text-slate-500 hover:text-primary transition-colors underline underline-offset-2"
-    >
-      Upload a different file
-    </button>
-  }
-
-  <!-- Upload area (shown when no saved resume, no file, or explicitly requested) -->
-  @if (!hasSavedResume() && !resumeFile() || useUpload()) {
-    <div class="relative">
-      <input type="file" accept=".pdf" (change)="handleFileUpload($event)" class="hidden" id="ta-resume-input">
-      <label for="ta-resume-input"
-        class="group cursor-pointer block border-2 border-dashed rounded-xl p-8 text-center transition-all duration-200 border-slate-200 hover:border-primary-soft-border hover:bg-primary-soft/40">
-        <div class="flex flex-col items-center gap-2">
-          <div class="w-12 h-12 rounded-xl flex items-center justify-center transition-all duration-200 bg-slate-100 group-hover:bg-primary-muted">
-            <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" class="text-slate-400 group-hover:text-primary transition-colors">
-              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
-              <polyline points="17 8 12 3 7 8"></polyline>
-              <line x1="12" x2="12" y1="3" y2="15"></line>
-            </svg>
-          </div>
-          <p class="font-semibold text-sm text-slate-700 group-hover:text-primary-hover transition-colors">
-            Drop your resume here
-          </p>
-          <p class="text-xs text-slate-400">Click to browse · PDF only</p>
-        </div>
-      </label>
     </div>
   }
 

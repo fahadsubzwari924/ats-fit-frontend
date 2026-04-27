@@ -1,2 +1,1 @@
-export type OnboardingStep = 'choice' | 'upload' | 'submitted';
-
+export type OnboardingStep = 'upload' | 'submitted';

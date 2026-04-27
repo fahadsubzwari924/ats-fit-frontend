@@ -1,27 +1,16 @@
 @if (step() === 'submitted') {
   <app-onboarding-submitted-screen
-    [fileName]="uploadedFileName"
-    [fileSizeKb]="uploadedFileSizeKb"
+    [fileName]="uploadedFileName()"
+    [fileSizeKb]="uploadedFileSizeKb()"
     (goToDashboard)="onGoToDashboard()"
   />
 } @else {
   <div class="onboarding-layout">
-    <app-onboarding-left-panel [screen]="step() === 'choice' ? 'choice' : 'upload'" />
-
+    <app-onboarding-left-panel />
     <main class="onboarding-layout__right">
-      @if (step() === 'choice') {
-        <app-onboarding-choice-panel
-          (continueWithUpload)="onContinueWithUpload()"
-          (skipToDashboard)="onSkipToDashboard()"
-        />
-      }
-      @if (step() === 'upload') {
-        <app-onboarding-upload-panel
-          (fileSelected)="onFileSelected($event)"
-          (skip)="onSkipToDashboard()"
-          (back)="onBackToChoice()"
-        />
-      }
+      <app-onboarding-upload-panel
+        (fileSelected)="onFileSelected($event)"
+      />
     </main>
   </div>
 }

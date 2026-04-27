@@ -8,8 +8,11 @@ import {
   ViewChild,
 } from '@angular/core';
 
-const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024; // 5 MB
-const ALLOWED_MIME_TYPES = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'];
+const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
+const ALLOWED_MIME_TYPES = [
+  'application/pdf',
+  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+];
 
 @Component({
   selector: 'app-onboarding-upload-panel',
@@ -22,8 +25,6 @@ export class OnboardingUploadPanelComponent {
   @ViewChild('fileInput') fileInputRef!: ElementRef<HTMLInputElement>;
 
   @Output() readonly fileSelected = new EventEmitter<File>();
-  @Output() readonly skip = new EventEmitter<void>();
-  @Output() readonly back = new EventEmitter<void>();
 
   readonly isDragging = signal(false);
   readonly validationError = signal<string | null>(null);
@@ -40,19 +41,14 @@ export class OnboardingUploadPanelComponent {
   onDrop(event: DragEvent): void {
     event.preventDefault();
     this.isDragging.set(false);
-
     const file = event.dataTransfer?.files[0];
-    if (file) {
-      this.processFile(file);
-    }
+    if (file) this.processFile(file);
   }
 
   onFileInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (file) {
-      this.processFile(file);
-    }
+    if (file) this.processFile(file);
     input.value = '';
   }
 
@@ -62,20 +58,16 @@ export class OnboardingUploadPanelComponent {
 
   private processFile(file: File): void {
     this.validationError.set(null);
-
     const isValidType =
       ALLOWED_MIME_TYPES.includes(file.type) || file.name.endsWith('.docx');
-
     if (!isValidType) {
       this.validationError.set('Only PDF and DOCX files are supported.');
       return;
     }
-
     if (file.size > MAX_FILE_SIZE_BYTES) {
       this.validationError.set('File exceeds the 5 MB limit.');
       return;
     }
-
     this.fileSelected.emit(file);
   }
 }
