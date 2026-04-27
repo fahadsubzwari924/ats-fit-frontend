@@ -35,6 +35,8 @@ export type ProfileState =
   | 'questions_pending'
   | 'questions_partial'
   | 'enriching'
+  /** Resume parsed but precision questions are not available yet (e.g. none generated, or still standard mode). */
+  | 'awaiting_precision_questions'
   | 'complete';
 
 /** Const map for use in templates (e.g. @switch @case) */
@@ -45,5 +47,6 @@ export const ProfileStateEnum = {
   QUESTIONS_PENDING: 'questions_pending',
   QUESTIONS_PARTIAL: 'questions_partial',
   ENRICHING: 'enriching',
+  AWAITING_PRECISION_QUESTIONS: 'awaiting_precision_questions',
   COMPLETE: 'complete',
 } as const satisfies Record<string, ProfileState>;

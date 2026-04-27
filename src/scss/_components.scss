@@ -183,3 +183,12 @@
   border-color: #A7F3D0;
   color: #059669;
 }
+
+// ============================================================================
+// Applications — inline status dropdown (CDK overlay pane)
+// ============================================================================
+
+.cdk-overlay-pane.app-status-dropdown-pane {
+  /* Let inner card own radius/shadow so it matches filters / table chrome */
+  overflow: visible;
+}

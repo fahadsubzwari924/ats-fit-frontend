@@ -1,3 +1,11 @@
+/** Human-readable label for API status values (snake_case). */
+export function formatApplicationStatusLabel(status: string | undefined): string {
+  if (!status) {
+    return '—';
+  }
+  return status.replace(/_/g, ' ');
+}
+
 /** Tailwind badge classes aligned with `JobHistoryCardComponent.getStatusColor`. */
 export function applicationStatusBadgeClasses(status: string | undefined | null): string {
   switch (status) {

@@ -41,7 +41,8 @@ export class ResumeProfileCardComponent {
     effect(() => {
       const currentState = this.profileState();
       const transitionedToQuestions =
-        prevState === ProfileStateEnum.PROCESSING &&
+        (prevState === ProfileStateEnum.PROCESSING ||
+          prevState === ProfileStateEnum.AWAITING_PRECISION_QUESTIONS) &&
         (currentState === ProfileStateEnum.QUESTIONS_PENDING ||
           currentState === ProfileStateEnum.QUESTIONS_PARTIAL);
 
@@ -68,8 +69,18 @@ export class ResumeProfileCardComponent {
   }
 
   getSteps(): { label: string; done: boolean; inProgress?: boolean }[] {
-    const allDone = this.profileState() === ProfileStateEnum.COMPLETE;
+    const state = this.profileState();
+    const allDone = state === ProfileStateEnum.COMPLETE;
     const hasAnswers = this.questionsAnswered() > 0;
+
+    if (state === ProfileStateEnum.AWAITING_PRECISION_QUESTIONS) {
+      return [
+        { label: 'Resume uploaded', done: true },
+        { label: 'Questions answered', done: false },
+        { label: 'Precision ready', done: false },
+      ];
+    }
+
     return [
       { label: 'Resume uploaded', done: true },
       { label: 'Questions answered', done: allDone, inProgress: hasAnswers && !allDone },

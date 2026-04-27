@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { StorageService } from '@shared/services/storage.service';
 import { StorageKeys } from '@core/enums/storage-keys.enum';
 import { catchError, forkJoin, interval, of, switchMap, takeWhile, timer } from 'rxjs';
@@ -60,6 +60,7 @@ const POLL_MAX_ATTEMPTS = 24;
 })
 export class DashboardComponent implements OnInit {
   readonly userState = inject(UserState);
+  readonly hasResume = computed(() => (this.userState.uploadedResumes()?.length ?? 0) > 0);
   private profileStateService = inject(ResumeProfileState);
   private destroyRef = inject(DestroyRef);
   private modalService = inject(ModalService);
@@ -293,7 +294,17 @@ export class DashboardComponent implements OnInit {
       });
   }
 
+  scrollToResumeManager(): void {
+    document.getElementById('resume-manager')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }
+
   public openTailorModal(): void {
+    if (!this.hasResume()) {
+      this.snackbarService.showError('Please upload your resume first to use Resume Tailoring.');
+      this.scrollToResumeManager();
+      return;
+    }
+
     this.modalService
       .openModal(TailorApplyModalComponent, undefined, { width: '620px', maxWidth: '95vw', panelClass: 'tailor-modal-panel' })
       .afterClosed()
@@ -303,6 +314,12 @@ export class DashboardComponent implements OnInit {
   }
 
   public openBatchTailoringModal(): void {
+    if (!this.hasResume()) {
+      this.snackbarService.showError('Please upload your resume first to use Resume Tailoring.');
+      this.scrollToResumeManager();
+      return;
+    }
+
     if (!this.userState.isPremiumUser()) {
       this.modalService
         .openModal(UpgradeFeatureDialogComponent, undefined, {

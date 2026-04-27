@@ -1,13 +1,13 @@
-import { DatePipe, NgClass, TitleCasePipe } from '@angular/common';
+import { DatePipe } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { JobApplication } from '@features/apply-new-job/models/job-application.model';
 import { JobApplicationListSortField } from '@features/applications/models/job-application-list-params.model';
-import { applicationStatusBadgeClasses } from '@features/applications/lib/application-status-badge-classes';
+import { ApplicationStatusSelectComponent } from '@features/applications/components/application-status-select.component';
 
 @Component({
   selector: 'app-applications-table',
   standalone: true,
-  imports: [DatePipe, NgClass, TitleCasePipe],
+  imports: [DatePipe, ApplicationStatusSelectComponent],
   templateUrl: './applications-table.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -19,6 +19,8 @@ export class ApplicationsTableComponent {
   readonly limit = input(20);
   readonly sortBy = input<JobApplicationListSortField>('updated_at');
   readonly sortOrder = input<'ASC' | 'DESC'>('DESC');
+  /** When set, the status control for that row is disabled (PATCH in flight). */
+  readonly statusUpdatingJobId = input<string | null>(null);
 
   readonly sortCompany = output<void>();
   readonly sortUpdated = output<void>();
@@ -27,17 +29,7 @@ export class ApplicationsTableComponent {
   readonly viewJob = output<string>();
   readonly deleteJob = output<string>();
   readonly adjustFilters = output<void>();
-
-  badgeClasses(status: string): string {
-    return applicationStatusBadgeClasses(status);
-  }
-
-  formatStatusLabel(status: string | undefined): string {
-    if (!status) {
-      return '—';
-    }
-    return status.replace(/_/g, ' ');
-  }
+  readonly statusChange = output<{ jobId: string; status: string }>();
 
   isDateValid(d: Date | undefined | null): boolean {
     return d != null && !Number.isNaN(d.getTime());

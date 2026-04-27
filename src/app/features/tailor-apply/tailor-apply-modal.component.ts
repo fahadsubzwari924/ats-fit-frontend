@@ -4,7 +4,6 @@ import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
 import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
-import { UserState } from '@core/states/user.state';
 import { JobService } from '@features/apply-new-job/services/job.service';
 import { JobApplicationCreatePayload } from '@features/apply-new-job/models/job-application-create-payload.model';
 import { TailoredResume } from '@features/resume-tailoring/models/tailored-resume.model';
@@ -34,14 +33,10 @@ export class TailorApplyModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly resumeService = inject(ResumeService);
   private readonly snackbar = inject(SnackbarService);
-  private readonly userState = inject(UserState);
   private readonly jobService = inject(JobService);
   readonly dialogRef = inject(MatDialogRef<TailorApplyModalComponent>);
 
-  readonly uploadedResumes = this.userState.uploadedResumes;
-
   form!: FormGroup;
-  resumeFile = signal<File | null>(null);
   currentStep = signal<TailorApplyStep>(1);
   isProcessing = signal(false);
   progress = signal(0);
@@ -71,10 +66,6 @@ export class TailorApplyModalComponent implements OnInit {
     if (next <= 4) this.currentStep.set(next);
   }
 
-  onFileSelected(file: File): void {
-    this.resumeFile.set(file);
-  }
-
   async onGenerate(): Promise<void> {
     this.isProcessing.set(true);
     this.progress.set(0);
@@ -86,7 +77,6 @@ export class TailorApplyModalComponent implements OnInit {
         this.isProcessing.set(false);
         this.tailoredResume.set(resume);
         this.currentStep.set(4);
-        this.snackbar.showSuccess(Messages.RESUME_UPLOADED_SUCCESSFULLY);
       },
       error: (err) => {
         this.isProcessing.set(false);
@@ -103,11 +93,6 @@ export class TailorApplyModalComponent implements OnInit {
     fd.append('companyName', v.companyName);
     fd.append('jobDescription', v.jobDescription);
     fd.append('templateId', v.selectedTemplate);
-
-    const hasStoredResumes = this.uploadedResumes()?.length > 0;
-    if (!hasStoredResumes && this.resumeFile()) {
-      fd.append('resumeFile', this.resumeFile()!);
-    }
     return fd;
   }
 
@@ -124,7 +109,6 @@ export class TailorApplyModalComponent implements OnInit {
 
   onCreateAnother(): void {
     this.form.reset();
-    this.resumeFile.set(null);
     this.tailoredResume.set(null);
     this.isProcessing.set(false);
     this.progress.set(0);

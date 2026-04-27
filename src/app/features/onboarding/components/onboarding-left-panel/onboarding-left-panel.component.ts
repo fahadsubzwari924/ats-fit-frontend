@@ -1,4 +1,4 @@
-import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
+import { ChangeDetectionStrategy, Component } from '@angular/core';
 
 @Component({
   selector: 'app-onboarding-left-panel',
@@ -7,7 +7,4 @@ import { ChangeDetectionStrategy, Component, Input } from '@angular/core';
   styleUrls: ['./onboarding-left-panel.component.scss'],
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
-export class OnboardingLeftPanelComponent {
-  @Input({ required: true }) screen: 'choice' | 'upload' = 'choice';
-}
-
+export class OnboardingLeftPanelComponent {}

@@ -22,12 +22,30 @@ export class ResumeProfileState {
       return 'processing';
     }
     if (s.processingStatus === 'failed') return 'failed';
-    if (s.questionsTotal === 0) return 'complete';
-    if (s.profileCompleteness >= 1.0 && s.enrichedProfileId) return 'complete';
-    if (s.profileCompleteness >= 1.0 && !s.enrichedProfileId) return 'enriching';
-    if (s.questionsAnswered === 0) return 'questions_pending';
-    if (s.questionsAnswered < s.questionsTotal) return 'questions_partial';
-    return 'enriching';
+
+    // Precision-ready only when the API says precision AND an enriched profile exists.
+    // Do not treat "zero questions" as complete — that means generation/pipeline not done yet.
+    const precisionProfileReady =
+      s.tailoringMode === 'precision' &&
+      s.enrichedProfileId != null &&
+      s.processingStatus === 'completed';
+
+    if (precisionProfileReady) return 'complete';
+
+    const allQuestionSlotsAnswered =
+      s.questionsTotal > 0 && s.questionsAnswered >= s.questionsTotal;
+
+    if (allQuestionSlotsAnswered && !s.enrichedProfileId) return 'enriching';
+
+    if (s.questionsTotal > 0 && s.questionsAnswered === 0) return 'questions_pending';
+    if (s.questionsTotal > 0 && s.questionsAnswered < s.questionsTotal) {
+      return 'questions_partial';
+    }
+
+    // Extraction finished but no question rows yet, or still on standard tailoring only.
+    if (s.processingStatus === 'completed') return 'awaiting_precision_questions';
+
+    return 'no_resume';
   });
 
   readonly profileCompleteness = computed(() => {

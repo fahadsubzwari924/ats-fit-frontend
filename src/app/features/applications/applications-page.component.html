@@ -40,6 +40,7 @@
         [limit]="20"
         [sortBy]="sortBy()"
         [sortOrder]="sortOrder()"
+        [statusUpdatingJobId]="statusUpdatingJobId()"
         (sortCompany)="onSortCompany()"
         (sortUpdated)="onSortUpdated()"
         (pagePrev)="onPagePrev()"
@@ -47,6 +48,7 @@
         (viewJob)="onViewJob($event)"
         (deleteJob)="onDeleteJob($event)"
         (adjustFilters)="onAdjustFilters()"
+        (statusChange)="onStatusChange($event)"
       />
     </div>
   </div>
