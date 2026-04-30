@@ -56,3 +56,5 @@
 @if (drawerMounted()) {
   <app-questions-drawer [open]="drawerOpen()" (closed)="onDrawerClosed()"></app-questions-drawer>
 }
+
+<app-beta-expiry-modal [visible]="displayModal()" (closed)="onModalClosed()"></app-beta-expiry-modal>

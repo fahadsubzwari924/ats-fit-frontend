@@ -1,6 +1,7 @@
 import { Routes } from '@angular/router';
 import { applicationsAccessGuard } from '@core/guards/applications-access.guard';
 import { authGuard } from '@core/guards/auth.guard';
+import { betaRedemptionGuard } from '@core/guards/beta-redemption.guard';
 import { onboardingGuard } from '@core/guards/onboarding.guard';
 import { publicGuard } from '@core/guards/public.guard';
 import { LayoutComponent } from '@root/layout/layout.component';
@@ -11,7 +12,7 @@ export const routes: Routes = [
   {
     path: '',
     component: LayoutComponent,
-    canActivate: [authGuard, onboardingGuard],
+    canActivate: [authGuard, onboardingGuard, betaRedemptionGuard],
     children: [
       {
         path: 'dashboard',
@@ -45,6 +46,27 @@ export const routes: Routes = [
     path: 'signup',
     canActivate: [publicGuard],
     loadComponent: () => import('@features/authentication/components/signup/signup.component').then(m => m.SignupComponent)
+  },
+  {
+    path: 'forgot-password',
+    canActivate: [publicGuard],
+    loadComponent: () =>
+      import('@features/authentication/components/forgot-password/forgot-password.component').then(
+        (m) => m.ForgotPasswordComponent,
+      ),
+  },
+  {
+    path: 'reset-password',
+    canActivate: [publicGuard],
+    loadComponent: () =>
+      import('@features/authentication/components/reset-password/reset-password.component').then(
+        (m) => m.ResetPasswordComponent,
+      ),
+  },
+  {
+    path: 'beta/redeem',
+    canActivate: [authGuard],
+    loadComponent: () => import('@features/beta-access/beta-redeem/beta-redeem.component').then(m => m.BetaRedeemComponent)
   },
   { path: '**', redirectTo: 'dashboard' },
 ];

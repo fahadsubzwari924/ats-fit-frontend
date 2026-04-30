@@ -10,8 +10,10 @@ import { InlineAlertComponent } from '@shared/components/ui/inline-alert/inline-
 // Services
 import { AuthService } from '@features/authentication/services/auth.service';
 import { StorageService } from '@shared/services/storage.service';
+import { BetaApiService } from '@shared/services/beta-api.service';
 // States
 import { UserState } from '@core/states/user.state';
+import { BetaState } from '@core/states/beta.state';
 // Enums
 import { Messages } from '@core/enums/messages.enum';
 import { InputType } from '@shared/components/ui/input-field/enum/input-type.enum';
@@ -32,6 +34,8 @@ export class SigninComponent implements OnInit, OnDestroy {
   private authService = inject(AuthService);
   private storageService = inject(StorageService);
   private userState = inject(UserState);
+  private betaApiService = inject(BetaApiService);
+  private betaState = inject(BetaState);
 
   public signinForm!: FormGroup;
   public passwordFieldType = signal<string>(InputType.PASSWORD);
@@ -106,7 +110,30 @@ export class SigninComponent implements OnInit, OnDestroy {
           }
           this.storageService.setToken(response.accessToken);
           this.userState.setUser(response.user);
-          this.router.navigateByUrl(AppRoutes.DASHBOARD);
+          const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
+          const code = this.route.snapshot.queryParamMap.get('code');
+          this.betaApiService.getStatus().subscribe({
+            next: (status) => {
+              this.betaState.setStatus(status);
+              if (code) {
+                this.router.navigateByUrl(`/beta/redeem?code=${encodeURIComponent(code)}`);
+              } else if (returnUrl && returnUrl.startsWith('/')) {
+                this.router.navigateByUrl(returnUrl);
+              } else if (status.status === 'pending') {
+                this.router.navigateByUrl(AppRoutes.BETA_REDEEM);
+              } else {
+                this.router.navigateByUrl(AppRoutes.DASHBOARD);
+              }
+            },
+            error: () => {
+              if (code) {
+                this.router.navigateByUrl(`/beta/redeem?code=${encodeURIComponent(code)}`);
+              } else {
+                const fallback = returnUrl && returnUrl.startsWith('/') ? returnUrl : AppRoutes.DASHBOARD;
+                this.router.navigateByUrl(fallback);
+              }
+            },
+          });
         },
         error: (error) => {
           this.errorMessage.set(

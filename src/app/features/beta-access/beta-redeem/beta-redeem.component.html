@@ -1,0 +1,128 @@
+<div class="auth-aurora-page">
+
+  <!-- Floating shapes — edges only -->
+  <!-- Left edge -->
+  <div class="float-shape float-shape--ring shape-1" aria-hidden="true"></div>
+  <div class="float-shape float-shape--dot shape-2" aria-hidden="true"></div>
+  <div class="float-shape float-shape--ring shape-3" aria-hidden="true"></div>
+  <div class="float-shape float-shape--plus shape-4" aria-hidden="true"></div>
+  <div class="float-shape float-shape--dot-soft shape-5" aria-hidden="true"></div>
+  <div class="float-shape float-shape--square-outline shape-6" aria-hidden="true"></div>
+  <div class="float-shape float-shape--ring shape-7" aria-hidden="true"></div>
+  <!-- Right edge -->
+  <div class="float-shape float-shape--ring float-shape--ring-bold shape-8" aria-hidden="true"></div>
+  <div class="float-shape float-shape--dot-soft shape-9" aria-hidden="true"></div>
+  <div class="float-shape float-shape--dot shape-10" aria-hidden="true"></div>
+  <div class="float-shape float-shape--plus shape-11" aria-hidden="true"></div>
+  <div class="float-shape float-shape--ring shape-12" aria-hidden="true"></div>
+  <div class="float-shape float-shape--square-outline shape-13" aria-hidden="true"></div>
+  <div class="float-shape float-shape--ring shape-14" aria-hidden="true"></div>
+
+  <!-- Page Logo (top-left) -->
+  <div class="auth-page-logo">
+    <a [routerLink]="'/'">
+      <img src="/logos/transparent_white_logo.svg" alt="ATS Fit" />
+    </a>
+  </div>
+
+  <!-- Content -->
+  <div class="auth-content">
+
+    <!-- Glass card -->
+    <div
+      class="auth-glass-card"
+      [attr.aria-busy]="isSubmitting() ? true : null"
+    >
+      <!-- Loading progress bar -->
+      @if (isSubmitting()) {
+        <div class="beta-redeem-progress" role="progressbar" aria-label="Redeeming beta code" aria-valuemin="0" aria-valuemax="100"></div>
+      }
+
+      <div class="auth-card-body">
+
+        <!-- Header -->
+        <div class="auth-card-header">
+          <!-- Beta badge -->
+          <div class="beta-badge" aria-hidden="true">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+              <path d="m12 3-1.912 5.813a2 2 0 0 1-1.275 1.275L3 12l5.813 1.912a2 2 0 0 1 1.275 1.275L12 21l1.912-5.813a2 2 0 0 1 1.275-1.275L21 12l-5.813-1.912a2 2 0 0 1-1.275-1.275L12 3Z"/>
+            </svg>
+            <span>Beta Access</span>
+          </div>
+          <h1 class="auth-card-title">Redeem Your Beta Invite</h1>
+          <p class="auth-card-subtitle">
+            Enter the code from your invite email to activate 30 days of Pro access.
+          </p>
+        </div>
+
+        <!-- Email context hint -->
+        @if (currentUser()?.email) {
+          <div class="beta-email-hint" role="note" aria-label="Your invite email">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <rect width="20" height="16" x="2" y="4" rx="2"/>
+              <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            </svg>
+            <span>Check <strong>{{ currentUser()?.email }}</strong> for your invite code</span>
+          </div>
+        }
+
+        <!-- Form -->
+        <form [formGroup]="redeemForm" (ngSubmit)="submit()" class="space-y-4" novalidate>
+
+          <div>
+            <label for="beta-code" class="beta-code-label">
+              Beta Invite Code
+              <span class="beta-code-required" aria-hidden="true">*</span>
+            </label>
+            <input
+              id="beta-code"
+              formControlName="code"
+              type="text"
+              autocomplete="off"
+              spellcheck="false"
+              autocapitalize="characters"
+              placeholder="BETA-XXXXXXXX"
+              class="beta-code-input"
+              [class.beta-code-input--error]="redeemForm.get('code')?.invalid && redeemForm.get('code')?.touched"
+              (input)="onCodeInput($event)"
+              aria-describedby="beta-code-error"
+              [attr.aria-invalid]="redeemForm.get('code')?.invalid && redeemForm.get('code')?.touched ? true : null"
+            />
+            @if (redeemForm.get('code')?.invalid && redeemForm.get('code')?.touched) {
+              <p id="beta-code-error" class="beta-code-field-error" role="alert" aria-live="polite">
+                @if (redeemForm.get('code')?.hasError('required')) {
+                  Please enter your beta invite code.
+                } @else if (redeemForm.get('code')?.hasError('minlength')) {
+                  Code is too short. Double-check your invite email.
+                }
+              </p>
+            }
+          </div>
+
+          <!-- API error inline alert -->
+          <app-inline-alert [message]="errorMessage()" type="error" />
+
+          <app-button
+            [fullWidth]="true"
+            [text]="isSubmitting() ? 'Activating…' : 'Activate Beta Access'"
+            type="submit"
+            [loading]="isSubmitting()"
+            loadingIndicator="dots"
+          ></app-button>
+
+        </form>
+
+        <!-- Footer -->
+        <p class="beta-redeem-footer-note">
+          Don't have an invite code?
+          <a href="mailto:support@atsfit.io" class="auth-link">Contact support</a>
+        </p>
+
+      </div>
+    </div>
+
+    <!-- Back to dashboard -->
+    <a class="auth-back-link" [routerLink]="'/dashboard'">← Back to dashboard</a>
+
+  </div>
+</div>

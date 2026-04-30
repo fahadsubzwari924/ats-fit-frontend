@@ -1,0 +1,40 @@
+@if (show()) {
+  <div
+    role="status"
+    aria-live="polite"
+    [class]="
+      'py-2 px-4 flex items-center justify-between border-b text-sm ' +
+      (isUrgent()
+        ? 'bg-amber-50 border-amber-200 text-amber-800'
+        : 'bg-blue-50 border-blue-200 text-blue-800')
+    "
+  >
+    <!-- Left: beta label + countdown -->
+    <span class="flex items-center gap-2">
+      <span>🧪 Beta Access</span>
+      @if (daysRemaining() !== null) {
+        <span class="font-medium">— {{ daysRemaining() }} day{{ daysRemaining() === 1 ? '' : 's' }} remaining</span>
+      }
+    </span>
+
+    <!-- Right: upgrade link + dismiss -->
+    <span class="flex items-center gap-3">
+      <a
+        [routerLink]="billingRoute"
+        class="font-semibold underline underline-offset-2 hover:opacity-80 transition-opacity"
+        aria-label="Upgrade to Pro plan"
+      >
+        Upgrade to Pro &rarr;
+      </a>
+
+      <button
+        type="button"
+        (click)="dismiss()"
+        aria-label="Dismiss beta access banner"
+        class="ml-1 flex items-center justify-center w-5 h-5 rounded hover:opacity-60 transition-opacity focus:outline-none focus:ring-2 focus:ring-current"
+      >
+        &times;
+      </button>
+    </span>
+  </div>
+}

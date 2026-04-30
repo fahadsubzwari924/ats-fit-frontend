@@ -1,6 +1,8 @@
 import { Component, computed, DestroyRef, inject, OnInit, signal } from '@angular/core';
 import { StorageService } from '@shared/services/storage.service';
 import { StorageKeys } from '@core/enums/storage-keys.enum';
+import { BetaState } from '@core/states/beta.state';
+import { BetaExpiryModalComponent } from '@shared/components/beta-expiry-modal/beta-expiry-modal.component';
 import { catchError, forkJoin, interval, of, switchMap, takeWhile, timer } from 'rxjs';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { DashboardUsageCardComponent } from '@features/dashboard/components/ui/dashboard-usage-card/dashboard-usage-card.component';
@@ -54,6 +56,7 @@ const POLL_MAX_ATTEMPTS = 24;
     QuestionsBannerComponent,
     ResumeHistoryCardComponent,
     DashboardPostTailorUpgradeBannerComponent,
+    BetaExpiryModalComponent,
   ],
   templateUrl: './dashboard.component.html',
   styleUrl: './dashboard.component.scss',
@@ -69,6 +72,11 @@ export class DashboardComponent implements OnInit {
   private snackbarService = inject(SnackbarService);
   private profileQuestionsService = inject(ProfileQuestionsService);
   private storageService = inject(StorageService);
+  private readonly betaState = inject(BetaState);
+
+  private readonly showExpiryModal = computed(() => this.betaState.isExpiredBeta() && this.betaState.hasPostExpiryOffer());
+  readonly modalDismissed = signal(false);
+  readonly displayModal = computed(() => this.showExpiryModal() && !this.modalDismissed());
 
   public featureUsage = signal<FeatureUsage[]>([]);
   public jobHistory = signal<AppliedJob | null>(null);
@@ -281,6 +289,10 @@ export class DashboardComponent implements OnInit {
   onPostTailorUpgradeDismissed(): void {
     this.storageService.setItem(StorageKeys.POST_TAILOR_UPGRADE_DISMISSED_AT, new Date().toISOString());
     this.showPostTailorUpgradeNudge.set(false);
+  }
+
+  onModalClosed(): void {
+    this.modalDismissed.set(true);
   }
 
   private loadResumeHistory(): void {

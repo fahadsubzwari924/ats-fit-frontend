@@ -4,6 +4,7 @@ import { UploadedResume } from '@core/models/user/uploaded-resumes.model';
 import { User } from '@core/models/user/user.model';
 import { StorageService } from '@shared/services/storage.service';
 import { UserApiService } from '@shared/services/user-api.service';
+import { BetaState } from '@core/states/beta.state';
 
 @Injectable({
   providedIn: 'root'
@@ -112,9 +113,20 @@ export class UserState {
       next: (user) => {
         this._currentUser.set(user);
         this.saveToStorage();
+        // Lazily inject BetaState to avoid any potential circular dependency
+        inject(BetaState).loadStatus();
       },
-      error: () => {
-        // Silently keep stale localStorage data if API fails
+      error: (err: { status?: number }) => {
+        // 401/403/404 = session invalid or user deleted.
+        // The authInterceptor handles the sign-in redirect;
+        // we reset in-memory state here so signals don't stay stale.
+        const status = err?.status;
+        if (status === 401 || status === 403 || status === 404) {
+          this.storageService.clear();
+          this.resetState();
+        }
+        // For network errors / 5xx: keep stale localStorage data to avoid
+        // false logouts when the server is temporarily unreachable.
       },
     });
   }

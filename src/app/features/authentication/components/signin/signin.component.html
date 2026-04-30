@@ -110,7 +110,7 @@
         <div class="mt-5 space-y-2">
           <p class="auth-link-text">
             Don't have an account?
-            <a class="auth-link" [routerLink]="'/signup'">Sign up for free</a>
+            <a class="auth-link" [routerLink]="'/signup'" queryParamsHandling="preserve">Sign up for free</a>
           </p>
           <a [routerLink]="'/forgot-password'" class="auth-forgot-link">Forgot your password?</a>
         </div>
