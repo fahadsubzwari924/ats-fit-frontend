@@ -20,4 +20,8 @@ export enum Messages {
   RESUME_IS_NOT_VALID = 'Resume is not valid',
 
   GOOGLE_AUTH_FAILED = 'Google authentication failed',
+  FORGOT_PASSWORD_SUCCESS = 'Check your inbox — a reset link is on its way.',
+  RESET_PASSWORD_SUCCESS = 'Password updated! You can now sign in with your new password.',
+  RESET_PASSWORD_FAILED = 'This reset link is invalid or has expired. Please request a new one.',
+  FORGOT_PASSWORD_FAILED = 'Something went wrong. Please try again.',
 }

@@ -4,7 +4,7 @@ import { StorageService } from '@shared/services/storage.service';
 import { AppRoutes } from '@core/constants/app-routes.contant';
 import { Platform } from '@angular/cdk/platform';
 
-export const authGuard: CanActivateFn = (_route, _state) => {
+export const authGuard: CanActivateFn = (_route, state) => {
   const platform = new Platform();
 
   if (!platform.isBrowser) {
@@ -21,6 +21,6 @@ export const authGuard: CanActivateFn = (_route, _state) => {
   }
 
   storageService.clear();
-  router.navigateByUrl(AppRoutes.SIGNIN);
+  router.navigate([AppRoutes.SIGNIN], { queryParams: { returnUrl: state.url } });
   return false;
 };

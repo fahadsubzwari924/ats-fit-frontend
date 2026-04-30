@@ -1,4 +1,4 @@
-import { Component, forwardRef, input, output, computed, effect, OnDestroy } from '@angular/core';
+import { Component, forwardRef, input, output, computed, effect, signal, OnDestroy } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -100,8 +100,10 @@ export class InputFieldComponent implements OnDestroy {
     });
   }
 
+  public readonly isDisabled = signal(false);
+
   setDisabledState(isDisabled: boolean): void {
-    void isDisabled;
+    this.isDisabled.set(isDisabled);
   }
 
   validate(control: AbstractControl): ValidationErrors | null {

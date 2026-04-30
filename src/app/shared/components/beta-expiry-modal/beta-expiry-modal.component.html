@@ -1,0 +1,50 @@
+@if (visible) {
+  <div
+    class="fixed inset-0 bg-black/50 flex items-center justify-center z-50"
+    role="dialog"
+    aria-modal="true"
+    aria-labelledby="beta-expiry-title"
+    aria-describedby="beta-expiry-body"
+    (click)="onBackdropClick($event)"
+    (keydown.escape)="onDismiss()">
+    <div class="bg-white rounded-2xl p-8 max-w-md w-full mx-4 shadow-xl">
+      <div class="flex flex-col items-center text-center gap-4">
+        <div class="w-12 h-12 rounded-full bg-primary/10 flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+            class="text-primary" aria-hidden="true">
+            <path d="M12 2L2 7l10 5 10-5-10-5z"/>
+            <path d="M2 17l10 5 10-5"/>
+            <path d="M2 12l10 5 10-5"/>
+          </svg>
+        </div>
+
+        <div class="space-y-2">
+          <h2 id="beta-expiry-title" class="text-xl font-semibold text-slate-900">
+            Your Beta Access Has Ended
+          </h2>
+          <p id="beta-expiry-body" class="text-sm text-slate-600 leading-relaxed">
+            Thank you for being an early tester! As a beta participant, you've unlocked our founding rate —
+            <strong class="font-semibold text-slate-900">$7.20/mo for life</strong>
+            (normally $12/mo). Lock it in before it expires.
+          </p>
+        </div>
+
+        <div class="flex flex-col gap-3 w-full pt-2">
+          <button
+            type="button"
+            class="w-full px-5 py-3 rounded-xl text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary-hover transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2"
+            (click)="onGetFoundingRate()">
+            Get Founding Rate &mdash; $7.20/mo
+          </button>
+          <button
+            type="button"
+            class="w-full px-5 py-2.5 rounded-xl text-sm font-medium text-slate-500 hover:text-slate-700 hover:bg-slate-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-slate-300 focus-visible:ring-offset-2"
+            (click)="onDismiss()">
+            Maybe later
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+}

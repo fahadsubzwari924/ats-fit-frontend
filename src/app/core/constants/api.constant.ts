@@ -5,6 +5,9 @@ export const API_ROUTES = {
     SIGNIN: 'auth/signin',
     SIGNUP: 'auth/signup',
     GOOGLE_LOGIN: 'auth/google/login',
+    FORGOT_PASSWORD: 'auth/forgot-password',
+    RESET_PASSWORD: 'auth/reset-password',
+    VALIDATE_RESET_TOKEN: 'auth/reset-password/validate',
   },
   RESUME: {
     GENERATE: 'resume-tailoring/generate',
@@ -39,6 +42,11 @@ export const API_ROUTES = {
     PAYMENT_HISTORY: 'subscriptions/payment-history',
     CANCEL_SUBSCRIPTION: 'subscriptions',
     // BILLING_INFO: 'subscriptions/billing-info',
+  },
+
+  BETA: {
+    REDEEM: 'beta/redeem',
+    STATUS: 'beta/status',
   },
 
   createAPIRoute: (api: string) => {

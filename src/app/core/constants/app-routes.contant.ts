@@ -6,4 +6,7 @@ export class AppRoutes {
   static readonly APPLICATIONS = '/applications';
   static readonly ONBOARDING = '/onboarding';
   static readonly BILLING = '/billing';
+  static readonly BETA_REDEEM = '/beta/redeem';
+  static readonly FORGOT_PASSWORD = '/forgot-password';
+  static readonly RESET_PASSWORD = '/reset-password';
 }

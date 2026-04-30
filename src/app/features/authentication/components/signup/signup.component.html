@@ -140,9 +140,11 @@
 
           <app-button
             type="submit"
-            text="Create Free Account"
+            [text]="isSubmitting() ? 'Creating account…' : 'Create Free Account'"
             [fullWidth]="true"
             [disabled]="signupForm.invalid"
+            [loading]="isSubmitting()"
+            loadingIndicator="dots"
           ></app-button>
 
         </form>
@@ -151,7 +153,7 @@
         <div class="mt-5 text-center">
           <p class="auth-link-text">
             Already have an account?
-            <a class="auth-link" [routerLink]="'/signin'">Sign in</a>
+            <a class="auth-link" [routerLink]="'/signin'" queryParamsHandling="preserve">Sign in</a>
           </p>
         </div>
 

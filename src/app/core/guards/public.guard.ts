@@ -3,11 +3,10 @@ import { CanActivateFn, Router } from '@angular/router';
 import { AppRoutes } from '@core/constants/app-routes.contant';
 import { StorageService } from '@shared/services/storage.service';
 
-export const publicGuard: CanActivateFn = (_route, _state) => {
+export const publicGuard: CanActivateFn = (route, _state) => {
   const router = inject(Router);
   const storageService = inject(StorageService);
 
-  // Check if user is already logged in
   const token = storageService.getToken();
 
   if (!token) {
@@ -15,7 +14,15 @@ export const publicGuard: CanActivateFn = (_route, _state) => {
     return true;
   }
 
-  // If already logged in, redirect to dashboard
-  router.navigateByUrl(AppRoutes.DASHBOARD);
+  const code = route.queryParamMap.get('code');
+  const returnUrl = route.queryParamMap.get('returnUrl');
+
+  let destination = AppRoutes.DASHBOARD;
+  if (code) {
+    destination = `/beta/redeem?code=${encodeURIComponent(code)}`;
+  } else if (returnUrl && returnUrl.startsWith('/')) {
+    destination = returnUrl;
+  }
+  router.navigateByUrl(destination);
   return false;
 };
