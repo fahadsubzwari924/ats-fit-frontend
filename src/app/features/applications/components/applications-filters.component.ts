@@ -48,6 +48,9 @@ export class ApplicationsFiltersComponent {
   readonly selectedStatuses = model<string[]>([]);
   readonly appliedFrom = model('');
   readonly appliedTo = model('');
+  readonly filterPriority = model('');
+  readonly filterWorkMode = model('');
+  readonly filterEmploymentType = model('');
 
   readonly pipelineStatuses = APPLICATION_PIPELINE_STATUSES;
   readonly outcomeStatuses = APPLICATION_OUTCOME_STATUSES;
@@ -81,6 +84,9 @@ export class ApplicationsFiltersComponent {
     if (this.appliedFrom().trim() !== '' || this.appliedTo().trim() !== '') {
       return true;
     }
+    if (this.filterPriority().trim() !== '') return true;
+    if (this.filterWorkMode().trim() !== '') return true;
+    if (this.filterEmploymentType().trim() !== '') return true;
     return false;
   });
 
@@ -134,6 +140,9 @@ export class ApplicationsFiltersComponent {
     this.selectedStatuses.set([]);
     this.appliedFrom.set('');
     this.appliedTo.set('');
+    this.filterPriority.set('');
+    this.filterWorkMode.set('');
+    this.filterEmploymentType.set('');
     this.statusPanelOpen.set(false);
   }
 

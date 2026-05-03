@@ -87,6 +87,51 @@
         />
       </div>
 
+      <div class="min-w-0">
+        <label class="mb-1 block text-xs font-medium text-slate-700" for="filter-priority">Priority</label>
+        <select
+          id="filter-priority"
+          class="apps-field h-10 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-slate-900 focus:border-[var(--ats-primary-lightest)] focus:outline-none focus:ring-2 focus:ring-[var(--ats-primary)]"
+          [(ngModel)]="filterPriority"
+        >
+          <option value="">All priorities</option>
+          <option value="top_choice">Top choice</option>
+          <option value="high">High</option>
+          <option value="medium">Medium</option>
+          <option value="low">Low</option>
+        </select>
+      </div>
+
+      <div class="min-w-0">
+        <label class="mb-1 block text-xs font-medium text-slate-700" for="filter-work-mode">Work mode</label>
+        <select
+          id="filter-work-mode"
+          class="apps-field h-10 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-slate-900 focus:border-[var(--ats-primary-lightest)] focus:outline-none focus:ring-2 focus:ring-[var(--ats-primary)]"
+          [(ngModel)]="filterWorkMode"
+        >
+          <option value="">All modes</option>
+          <option value="remote">Remote</option>
+          <option value="hybrid">Hybrid</option>
+          <option value="on_site">On-site</option>
+        </select>
+      </div>
+
+      <div class="min-w-0">
+        <label class="mb-1 block text-xs font-medium text-slate-700" for="filter-employment-type">Type</label>
+        <select
+          id="filter-employment-type"
+          class="apps-field h-10 w-full rounded-xl border border-[#E2E8F0] bg-white px-3 py-2 text-sm text-slate-900 focus:border-[var(--ats-primary-lightest)] focus:outline-none focus:ring-2 focus:ring-[var(--ats-primary)]"
+          [(ngModel)]="filterEmploymentType"
+        >
+          <option value="">All types</option>
+          <option value="full_time">Full-time</option>
+          <option value="part_time">Part-time</option>
+          <option value="contract">Contract</option>
+          <option value="freelance">Freelance</option>
+          <option value="internship">Internship</option>
+        </select>
+      </div>
+
       <div #statusDropdown class="relative min-w-0 sm:col-span-2 lg:col-span-1">
         <label class="mb-1 block text-xs font-medium text-slate-700" for="applications-status-trigger">Status</label>
         <button

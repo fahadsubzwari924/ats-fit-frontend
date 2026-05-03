@@ -110,7 +110,20 @@ export class JobService {
     if (p.fields?.length) {
       params = params.set('fields', p.fields.join(','));
     }
+    setScalar('job_board_source', p.job_board_source);
+    setScalar('work_mode', p.work_mode);
+    setScalar('employment_type', p.employment_type);
+    setScalar('priority', p.priority);
+    setScalar('tag', p.tag);
+    setScalar('decision_deadline_from', p.decision_deadline_from);
+    setScalar('decision_deadline_to', p.decision_deadline_to);
 
     return params;
+  }
+
+  getTags(): Observable<string[]> {
+    return this.http
+      .get<ApiResponse<{ tags: string[] }>>(API_ROUTES.createAPIRoute(API_ROUTES.JOBS.TAGS))
+      .pipe(map((response) => (response?.data as { tags: string[] })?.tags ?? []));
   }
 }

@@ -21,6 +21,11 @@ export const API_ROUTES = {
   JOBS: {
     APPLICATIONS: 'job-applications',
     STATS: 'job-applications/stats',
+    TAGS: 'job-applications/tags',
+    INTERVIEWS: (jobApplicationId: string) =>
+      `job-applications/${jobApplicationId}/interviews`,
+    INTERVIEW: (jobApplicationId: string, interviewId: string) =>
+      `job-applications/${jobApplicationId}/interviews/${interviewId}`,
   },
   USER: {
     ME: 'users/me',

@@ -1,0 +1,157 @@
+<app-accordion-section title="Job details" [expanded]="true">
+  <div class="jd-fields" [formGroup]="group">
+
+    <!-- Company -->
+    <div class="jd-field">
+      <label class="jd-label jd-label--required" for="jd-company-name">
+        Company
+      </label>
+      <input
+        id="jd-company-name"
+        type="text"
+        class="jd-input"
+        [class.jd-input--error]="companyNameInvalid"
+        formControlName="company_name"
+        placeholder="e.g. Acme Corp"
+        autocomplete="organization"
+        aria-required="true"
+        [attr.aria-describedby]="companyNameInvalid ? 'jd-company-name-error' : null"
+      />
+      @if (companyNameInvalid) {
+        <p id="jd-company-name-error" class="jd-error" role="alert">
+          Company is required
+        </p>
+      }
+    </div>
+
+    <!-- Position -->
+    <div class="jd-field">
+      <label class="jd-label jd-label--required" for="jd-job-position">
+        Position
+      </label>
+      <input
+        id="jd-job-position"
+        type="text"
+        class="jd-input"
+        [class.jd-input--error]="jobPositionInvalid"
+        formControlName="job_position"
+        placeholder="e.g. Senior Engineer"
+        aria-required="true"
+        [attr.aria-describedby]="jobPositionInvalid ? 'jd-job-position-error' : null"
+      />
+      @if (jobPositionInvalid) {
+        <p id="jd-job-position-error" class="jd-error" role="alert">
+          Position is required
+        </p>
+      }
+    </div>
+
+    <!-- Job URL -->
+    <div class="jd-field">
+      <div class="jd-label-row">
+        <label class="jd-label" for="jd-job-url">Job URL</label>
+        @if (jobUrlValue) {
+          <a
+            class="jd-url-link"
+            [href]="jobUrlValue"
+            target="_blank"
+            rel="noopener noreferrer"
+            aria-label="View job posting (opens in new tab)"
+          >
+            View posting &#8599;
+          </a>
+        }
+      </div>
+      <input
+        id="jd-job-url"
+        type="url"
+        class="jd-input"
+        formControlName="job_url"
+        placeholder="https://..."
+        autocomplete="url"
+      />
+    </div>
+
+    <!-- Location -->
+    <div class="jd-field">
+      <label class="jd-label" for="jd-job-location">Location</label>
+      <input
+        id="jd-job-location"
+        type="text"
+        class="jd-input"
+        formControlName="job_location"
+        placeholder="e.g. New York, NY"
+      />
+    </div>
+
+    <!-- Employment type -->
+    <div class="jd-field">
+      <label class="jd-label" for="jd-employment-type">Employment type</label>
+      <select
+        id="jd-employment-type"
+        class="jd-input jd-select"
+        formControlName="employment_type"
+      >
+        @for (opt of employmentTypeOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Work mode -->
+    <div class="jd-field">
+      <span class="jd-label" id="jd-work-mode-label">Work mode</span>
+      <app-segmented-control
+        formControlName="work_mode"
+        [options]="workModeOptions"
+        ariaLabel="Work mode"
+      />
+    </div>
+
+    <!-- Source -->
+    <div class="jd-field">
+      <label class="jd-label" for="jd-job-board-source">Source</label>
+      <select
+        id="jd-job-board-source"
+        class="jd-input jd-select"
+        formControlName="job_board_source"
+      >
+        @for (opt of jobBoardSourceOptions; track opt.value) {
+          <option [value]="opt.value">{{ opt.label }}</option>
+        }
+      </select>
+    </div>
+
+    <!-- Description (collapsed by default) -->
+    <div class="jd-field jd-field--full">
+      <div class="jd-label-row">
+        <span class="jd-label" id="jd-description-label">Description</span>
+        <button
+          type="button"
+          class="jd-toggle-btn"
+          (click)="toggleDescription()"
+          [attr.aria-expanded]="descriptionExpanded()"
+          aria-controls="jd-description-panel"
+        >
+          {{ descriptionExpanded() ? 'Hide description' : 'Show description' }}
+        </button>
+      </div>
+      <div
+        id="jd-description-panel"
+        class="jd-description-panel"
+        [class.jd-description-panel--open]="descriptionExpanded()"
+        role="region"
+        aria-labelledby="jd-description-label"
+      >
+        <textarea
+          class="jd-input jd-textarea"
+          formControlName="job_description"
+          placeholder="Paste the job description here…"
+          rows="6"
+          aria-labelledby="jd-description-label"
+        ></textarea>
+      </div>
+    </div>
+
+  </div>
+</app-accordion-section>

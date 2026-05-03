@@ -52,6 +52,9 @@ export class ApplicationsPageComponent implements OnInit {
       this.filterStatuses,
       this.filterAppliedFrom,
       this.filterAppliedTo,
+      this.filterPriority,
+      this.filterWorkMode,
+      this.filterEmploymentType,
       () => {
         this.offset.set(0);
         this.loadListOnly();
@@ -67,6 +70,9 @@ export class ApplicationsPageComponent implements OnInit {
   readonly filterStatuses = signal<string[]>([]);
   readonly filterAppliedFrom = signal('');
   readonly filterAppliedTo = signal('');
+  readonly filterPriority = signal('');
+  readonly filterWorkMode = signal('');
+  readonly filterEmploymentType = signal('');
 
   readonly sortBy = signal<JobApplicationListSortField>('updated_at');
   readonly sortOrder = signal<'ASC' | 'DESC'>('DESC');
@@ -199,6 +205,9 @@ export class ApplicationsPageComponent implements OnInit {
       statuses: statuses.length ? statuses : undefined,
       applied_at_from: this.filterAppliedFrom() || undefined,
       applied_at_to: this.filterAppliedTo() || undefined,
+      priority: this.filterPriority() || undefined,
+      work_mode: this.filterWorkMode() || undefined,
+      employment_type: this.filterEmploymentType() || undefined,
       limit: PAGE_SIZE,
       offset: this.offset(),
       sort_by: this.sortBy(),
