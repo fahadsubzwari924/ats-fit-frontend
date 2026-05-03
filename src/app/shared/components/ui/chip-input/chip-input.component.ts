@@ -7,13 +7,13 @@ import {
   OnDestroy,
 } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NgClass, NgFor, NgIf } from '@angular/common';
+import { NgClass } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
 @Component({
   selector: 'app-chip-input',
   standalone: true,
-  imports: [NgClass, NgFor, NgIf, FormsModule],
+  imports: [NgClass, FormsModule],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -24,23 +24,22 @@ import { FormsModule } from '@angular/forms';
   template: `
     <div class="chip-input-wrapper" [ngClass]="{ 'chip-input-wrapper--focused': isFocused, 'chip-input-wrapper--disabled': isDisabled }">
       <!-- Chips -->
-      <span
-        *ngFor="let chip of chips; let i = index"
-        class="chip"
-      >
-        <span class="chip__label">{{ chip }}</span>
-        <button
-          type="button"
-          class="chip__remove"
-          [disabled]="isDisabled"
-          (click)="removeChip(i)"
-          [attr.aria-label]="'Remove ' + chip"
-        >
-          <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
-            <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
-          </svg>
-        </button>
-      </span>
+      @for (chip of chips; track chip; let i = $index) {
+        <span class="chip">
+          <span class="chip__label">{{ chip }}</span>
+          <button
+            type="button"
+            class="chip__remove"
+            [disabled]="isDisabled"
+            (click)="removeChip(i)"
+            [attr.aria-label]="'Remove ' + chip"
+          >
+            <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M18 6 6 18"/><path d="m6 6 12 12"/>
+            </svg>
+          </button>
+        </span>
+      }
 
       <!-- Text input -->
       <input
@@ -61,18 +60,22 @@ import { FormsModule } from '@angular/forms';
     </div>
 
     <!-- Autocomplete dropdown -->
-    <div *ngIf="showDropdown && filteredSuggestions.length > 0" class="chip-input-dropdown" role="listbox">
-      <button
-        *ngFor="let suggestion of filteredSuggestions; let i = index"
-        type="button"
-        role="option"
-        class="chip-input-dropdown__item"
-        [ngClass]="{ 'chip-input-dropdown__item--active': i === activeIndex }"
-        (mousedown)="selectSuggestion(suggestion)"
-      >
-        {{ suggestion }}
-      </button>
-    </div>
+    @if (showDropdown && filteredSuggestions.length > 0) {
+      <div class="chip-input-dropdown" role="listbox">
+        @for (suggestion of filteredSuggestions; track suggestion; let i = $index) {
+          <button
+            type="button"
+            role="option"
+            class="chip-input-dropdown__item"
+            [attr.aria-selected]="i === activeIndex"
+            [ngClass]="{ 'chip-input-dropdown__item--active': i === activeIndex }"
+            (mousedown)="selectSuggestion(suggestion)"
+          >
+            {{ suggestion }}
+          </button>
+        }
+      </div>
+    }
   `,
   styles: [`
     @use 'design-tokens' as *;

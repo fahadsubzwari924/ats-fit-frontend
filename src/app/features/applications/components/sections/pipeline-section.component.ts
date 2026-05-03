@@ -256,7 +256,7 @@ export class PipelineSectionComponent implements OnInit {
 
   @Input({ required: true }) group!: FormGroup;
 
-  readonly statusOptions: ReadonlyArray<{ value: string; label: string }> = [
+  readonly statusOptions: readonly { value: string; label: string }[] = [
     { value: ApplicationStatus.WISHLIST, label: 'Wishlist' },
     { value: ApplicationStatus.INTERESTED, label: 'Interested' },
     { value: ApplicationStatus.APPLIED, label: 'Applied' },
@@ -277,7 +277,7 @@ export class PipelineSectionComponent implements OnInit {
     { value: ApplicationPriority.LOW, label: 'Low' },
   ];
 
-  readonly appliedViaOptions: ReadonlyArray<{ value: string; label: string }> = [
+  readonly appliedViaOptions: readonly { value: string; label: string }[] = [
     { value: AppliedVia.EASY_APPLY, label: 'Easy Apply' },
     { value: AppliedVia.COMPANY_PORTAL, label: 'Company portal' },
     { value: AppliedVia.EMAIL, label: 'Email' },

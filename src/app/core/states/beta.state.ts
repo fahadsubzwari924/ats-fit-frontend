@@ -1,5 +1,5 @@
 import { computed, inject, Injectable, signal } from '@angular/core';
-import { Observable, shareReplay, tap } from 'rxjs';
+import { Observable, tap } from 'rxjs';
 import { BetaStatus } from '@core/models/beta/beta-status.model';
 import { BetaApiService } from '@shared/services/beta-api.service';
 

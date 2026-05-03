@@ -24,7 +24,7 @@ import { catchError, of } from 'rxjs';
 
         <!-- Tags field -->
         <div class="notes-tags-section__field">
-          <label class="notes-tags-section__label">Tags</label>
+          <div class="notes-tags-section__label">Tags</div>
           <app-chip-input
             [formControl]="tagsControl"
             [suggestions]="tagSuggestions()"

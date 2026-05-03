@@ -1,6 +1,6 @@
 import { Component, Input, forwardRef, ElementRef, ViewChildren, QueryList } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NgClass, NgFor } from '@angular/common';
+import { NgClass } from '@angular/common';
 
 export interface SegmentedOption {
   value: string;
@@ -10,7 +10,7 @@ export interface SegmentedOption {
 @Component({
   selector: 'app-segmented-control',
   standalone: true,
-  imports: [NgClass, NgFor],
+  imports: [NgClass],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -26,20 +26,21 @@ export interface SegmentedOption {
       [class.segmented-control--disabled]="isDisabled"
       (keydown)="onKeyDown($event)"
     >
-      <button
-        *ngFor="let option of options"
-        #optionBtn
-        type="button"
-        role="radio"
-        class="segmented-control__option"
-        [ngClass]="{ 'segmented-control__option--active': option.value === selected }"
-        [attr.aria-checked]="option.value === selected"
-        [attr.tabindex]="option.value === selected ? 0 : -1"
-        [disabled]="isDisabled"
-        (click)="select(option.value)"
-      >
-        {{ option.label }}
-      </button>
+      @for (option of options; track option.value) {
+        <button
+          #optionBtn
+          type="button"
+          role="radio"
+          class="segmented-control__option"
+          [ngClass]="{ 'segmented-control__option--active': option.value === selected }"
+          [attr.aria-checked]="option.value === selected"
+          [attr.tabindex]="option.value === selected ? 0 : -1"
+          [disabled]="isDisabled"
+          (click)="select(option.value)"
+        >
+          {{ option.label }}
+        </button>
+      }
     </div>
   `,
   styles: [`

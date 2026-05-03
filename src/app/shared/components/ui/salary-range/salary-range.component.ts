@@ -1,6 +1,5 @@
 import { Component, Input, forwardRef } from '@angular/core';
 import { ControlValueAccessor, NG_VALUE_ACCESSOR } from '@angular/forms';
-import { NgIf } from '@angular/common';
 
 export interface SalaryRangeValue {
   min: number | null;
@@ -10,7 +9,7 @@ export interface SalaryRangeValue {
 @Component({
   selector: 'app-salary-range',
   standalone: true,
-  imports: [NgIf],
+  imports: [],
   providers: [
     {
       provide: NG_VALUE_ACCESSOR,
@@ -22,9 +21,13 @@ export interface SalaryRangeValue {
     <div class="salary-range">
       <!-- Min input -->
       <div class="salary-range__field">
-        <label *ngIf="showLabels" class="salary-range__label" [attr.for]="minId">Min</label>
+        @if (showLabels) {
+          <label class="salary-range__label" [attr.for]="minId">Min</label>
+        }
         <div class="salary-range__input-wrap" [class.salary-range__input-wrap--focused]="minFocused">
-          <span *ngIf="currency" class="salary-range__prefix">{{ currency }}</span>
+          @if (currency) {
+            <span class="salary-range__prefix">{{ currency }}</span>
+          }
           <input
             [id]="minId"
             type="number"
@@ -47,9 +50,13 @@ export interface SalaryRangeValue {
 
       <!-- Max input -->
       <div class="salary-range__field">
-        <label *ngIf="showLabels" class="salary-range__label" [attr.for]="maxId">Max</label>
+        @if (showLabels) {
+          <label class="salary-range__label" [attr.for]="maxId">Max</label>
+        }
         <div class="salary-range__input-wrap" [class.salary-range__input-wrap--focused]="maxFocused">
-          <span *ngIf="currency" class="salary-range__prefix">{{ currency }}</span>
+          @if (currency) {
+            <span class="salary-range__prefix">{{ currency }}</span>
+          }
           <input
             [id]="maxId"
             type="number"

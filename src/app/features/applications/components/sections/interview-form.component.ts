@@ -2,6 +2,7 @@ import {
   ChangeDetectionStrategy,
   Component,
   EventEmitter,
+  inject,
   Input,
   OnChanges,
   Output,
@@ -352,20 +353,18 @@ export class InterviewFormComponent implements OnChanges {
   readonly InterviewFormat = InterviewFormat;
   readonly InterviewOutcome = InterviewOutcome;
 
-  readonly form: FormGroup;
+  private readonly fb = inject(FormBuilder);
 
-  constructor(private readonly fb: FormBuilder) {
-    this.form = this.fb.group({
-      stage: ['', Validators.required],
-      format: [''],
-      outcome: [''],
-      scheduled_at: [null as string | null],
-      interviewer_name: [''],
-      interviewer_email: ['', [Validators.email]],
-      location_or_link: [''],
-      notes: [''],
-    });
-  }
+  readonly form: FormGroup = this.fb.group({
+    stage: ['', Validators.required],
+    format: [''],
+    outcome: [''],
+    scheduled_at: [null as string | null],
+    interviewer_name: [''],
+    interviewer_email: ['', [Validators.email]],
+    location_or_link: [''],
+    notes: [''],
+  });
 
   ngOnChanges(changes: SimpleChanges): void {
     if (changes['initial']) {
