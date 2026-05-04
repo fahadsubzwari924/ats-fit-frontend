@@ -1,11 +1,15 @@
+@if (visible()) {
 <div
+  @backdropFade
   class="app-detail-drawer__overlay"
   (click)="onBackdropClick()"
   (keydown)="onBackdropOverlayKeydown($event)"
   tabindex="-1"
   role="presentation"
+  (@backdropFade.done)="onAnimationDone($event)"
 >
   <aside
+    @drawerPanel
     class="app-detail-drawer__panel"
     role="dialog"
     aria-modal="true"
@@ -89,14 +93,32 @@
           <!-- Scrollable sections area -->
           <div class="app-detail-drawer__scroll">
             <div class="drawer-sections">
-              <app-job-details-section [group]="form.controls.jobDetails" />
-              <app-pipeline-section [group]="form.controls.pipeline" />
-              <app-compensation-section [group]="form.controls.compensation" />
+              <app-job-details-section
+                [group]="form.controls.jobDetails"
+                [expanded]="openSection() === 'jobDetails'"
+                (expandedChange)="setOpen('jobDetails', $event)"
+              />
+              <app-pipeline-section
+                [group]="form.controls.pipeline"
+                [expanded]="openSection() === 'pipeline'"
+                (expandedChange)="setOpen('pipeline', $event)"
+              />
+              <app-compensation-section
+                [group]="form.controls.compensation"
+                [expanded]="openSection() === 'compensation'"
+                (expandedChange)="setOpen('compensation', $event)"
+              />
               <app-contacts-section [group]="form.controls.contacts" />
-              <app-interviews-section [jobApplicationId]="jobId()" />
+              <app-interviews-section
+                [jobApplicationId]="jobId()"
+                [expanded]="openSection() === 'interviews'"
+                (expandedChange)="setOpen('interviews', $event)"
+              />
               <app-notes-tags-section
                 [notesControl]="form.controls.notes"
                 [tagsControl]="form.controls.tags"
+                [expanded]="openSection() === 'notes'"
+                (expandedChange)="setOpen('notes', $event)"
               />
               @if (currentStatus() === 'rejected') {
                 <app-rejection-section [group]="form.controls.rejection" />
@@ -104,7 +126,11 @@
               @if (currentStatus() === 'offer' || currentStatus() === 'offer_accepted' || currentStatus() === 'offer_declined') {
                 <app-offer-section [group]="form.controls.offer" />
               }
-              <app-activity-timeline [history]="job()?.statusHistory ?? []" />
+              <app-activity-timeline
+                [history]="job()?.statusHistory ?? []"
+                [expanded]="openSection() === 'activity'"
+                (expandedChange)="setOpen('activity', $event)"
+              />
             </div>
           </div>
 
@@ -147,3 +173,4 @@
     </div>
   </aside>
 </div>
+}

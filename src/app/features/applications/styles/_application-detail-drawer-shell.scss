@@ -19,6 +19,7 @@ $r-lg: 16px;
   justify-content: flex-end;
   background: rgb(15 23 42 / 40%);
   backdrop-filter: blur(2px);
+  will-change: opacity;
 }
 
 // ── Panel ─────────────────────────────────────────────────────────────────────
@@ -28,6 +29,7 @@ $r-lg: 16px;
   height: 100%;
   background: $drawer-bg;
   box-shadow: -12px 0 40px rgb(15 23 42 / 12%);
+  will-change: transform;
 
   @media (min-width: 768px) {
     width: 560px;
@@ -191,6 +193,12 @@ $r-lg: 16px;
   padding: 1rem 1.25rem 1.5rem;
   overflow-y: auto;
   -webkit-overflow-scrolling: touch;
+}
+
+.drawer-sections {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
 }
 
 // ── Sections placeholder ──────────────────────────────────────────────────────

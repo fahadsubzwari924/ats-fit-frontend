@@ -1,6 +1,13 @@
 import { NgClass } from '@angular/common';
 import { CdkTrapFocus } from '@angular/cdk/a11y';
 import {
+  animate,
+  AnimationTriggerMetadata,
+  style,
+  transition,
+  trigger,
+} from '@angular/animations';
+import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
@@ -39,6 +46,27 @@ import { RejectionSectionComponent } from '@features/applications/components/sec
 import { OfferSectionComponent } from '@features/applications/components/sections/offer-section.component';
 import { ActivityTimelineComponent } from '@features/applications/components/sections/activity-timeline.component';
 
+const drawerAnimations: AnimationTriggerMetadata[] = [
+  trigger('backdropFade', [
+    transition(':enter', [
+      style({ opacity: 0 }),
+      animate('300ms ease-out', style({ opacity: 1 })),
+    ]),
+    transition(':leave', [
+      animate('250ms ease-in', style({ opacity: 0 })),
+    ]),
+  ]),
+  trigger('drawerPanel', [
+    transition(':enter', [
+      style({ transform: 'translateX(100%)' }),
+      animate('300ms cubic-bezier(0.4, 0, 0.2, 1)', style({ transform: 'translateX(0)' })),
+    ]),
+    transition(':leave', [
+      animate('250ms cubic-bezier(0.4, 0, 1, 1)', style({ transform: 'translateX(100%)' })),
+    ]),
+  ]),
+];
+
 @Component({
   selector: 'app-application-detail-drawer',
   standalone: true,
@@ -50,16 +78,17 @@ import { ActivityTimelineComponent } from '@features/applications/components/sec
     JobDetailsSectionComponent,
     PipelineSectionComponent,
     CompensationSectionComponent,
-    ContactsSectionComponent,
     InterviewsSectionComponent,
     NoteTagsSectionComponent,
     RejectionSectionComponent,
     OfferSectionComponent,
     ActivityTimelineComponent,
+    ContactsSectionComponent,
   ],
   templateUrl: './application-detail-drawer.component.html',
   styleUrl: './application-detail-drawer.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
+  animations: drawerAnimations,
 })
 export class ApplicationDetailDrawerComponent implements OnDestroy {
   private readonly jobService = inject(JobService);
@@ -72,7 +101,9 @@ export class ApplicationDetailDrawerComponent implements OnDestroy {
   readonly closed = output<void>();
   readonly saved = output<void>();
 
+  readonly visible = signal(true);
   readonly job = signal<JobApplication | null>(null);
+  readonly openSection = signal<string>('jobDetails');
   readonly isLoading = signal(false);
   readonly saving = signal(false);
   readonly savedAt = signal<Date | null>(null);
@@ -145,15 +176,14 @@ export class ApplicationDetailDrawerComponent implements OnDestroy {
           catchError((err: unknown) => {
             this.isLoading.set(false);
             this.snackbar.showError(this.httpErrorMessage(err, 'Could not load application.'));
-            this.closed.emit();
+            this.beginClose();
             return of(null);
           }),
         )
         .subscribe((raw) => {
           this.isLoading.set(false);
           if (raw) {
-            // Re-construct with the expanded model so all new fields are available.
-            const j = new JobApplication(raw as unknown as Record<string, unknown>);
+            const j = new JobApplication(raw);
             this.job.set(j);
             this.lastLoaded = j;
             this.patchForm(j);
@@ -248,6 +278,14 @@ export class ApplicationDetailDrawerComponent implements OnDestroy {
 
   // ── Status change from header pill ───────────────────────────────────────
 
+  setOpen(section: string, isOpen: boolean): void {
+    if (isOpen) {
+      this.openSection.set(section);
+    } else if (this.openSection() === section) {
+      this.openSection.set('');
+    }
+  }
+
   onStatusChange(newStatus: string): void {
     this.form.controls.pipeline.controls.status.setValue(newStatus);
     this.form.controls.pipeline.controls.status.markAsDirty();
@@ -289,12 +327,12 @@ export class ApplicationDetailDrawerComponent implements OnDestroy {
 
   private tryClose(): void {
     if (this.form.pristine) {
-      this.closed.emit();
+      this.beginClose();
       return;
     }
     this.openDiscardDialog(() => {
       this.resetForm();
-      this.closed.emit();
+      this.beginClose();
     });
   }
 
@@ -302,7 +340,7 @@ export class ApplicationDetailDrawerComponent implements OnDestroy {
 
   onCancel(): void {
     if (this.form.pristine) {
-      this.closed.emit();
+      this.beginClose();
       return;
     }
     this.openDiscardDialog(() => {
@@ -324,7 +362,7 @@ export class ApplicationDetailDrawerComponent implements OnDestroy {
     this.saving.set(true);
     // Cast payload to the legacy Record-based type accepted by JobService until service is updated.
     this.jobService
-      .editJob(id, payload as unknown as Parameters<typeof this.jobService.editJob>[1])
+      .editJob(id, payload as Record<string, unknown>)
       .pipe(
         catchError((err: unknown) => {
           this.saving.set(false);
@@ -338,7 +376,7 @@ export class ApplicationDetailDrawerComponent implements OnDestroy {
         if (!raw) {
           return;
         }
-        const updated = new JobApplication(raw as unknown as Record<string, unknown>);
+        const updated = new JobApplication(raw);
         this.job.set(updated);
         this.lastLoaded = updated;
         this.patchForm(updated);
@@ -349,6 +387,18 @@ export class ApplicationDetailDrawerComponent implements OnDestroy {
         this.snackbar.showSuccess('Application updated.');
         this.saved.emit();
       });
+  }
+
+  // ── Animation ─────────────────────────────────────────────────────────────
+
+  private beginClose(): void {
+    this.visible.set(false);
+  }
+
+  onAnimationDone(event: { toState: string }): void {
+    if (event.toState === 'void') {
+      this.closed.emit();
+    }
   }
 
   // ── Helpers ───────────────────────────────────────────────────────────────
