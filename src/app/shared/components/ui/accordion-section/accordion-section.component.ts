@@ -4,11 +4,13 @@ import {
   Output,
   EventEmitter,
   HostBinding,
+  ChangeDetectionStrategy,
 } from '@angular/core';
 @Component({
   selector: 'app-accordion-section',
   standalone: true,
   imports: [],
+  changeDetection: ChangeDetectionStrategy.OnPush,
   template: `
     <div class="accordion" [class.accordion--expanded]="expanded">
       <!-- Header -->
@@ -44,6 +46,7 @@ import {
         [attr.aria-labelledby]="headerId"
         class="accordion__panel"
         [class.accordion__panel--open]="expanded"
+        [attr.inert]="expanded ? null : ''"
       >
         <div class="accordion__body">
           <ng-content />
@@ -110,39 +113,49 @@ import {
         color: $color-muted-foreground;
         transform: rotate(0deg);
         transition: transform $transition-normal $easing-ease-in-out;
-        will-change: transform;
       }
 
       &--expanded .accordion__chevron {
         transform: rotate(180deg);
       }
 
-      /* Animate height with grid trick — no JS height measurement required */
       &__panel {
         display: grid;
         grid-template-rows: 0fr;
-        transition: grid-template-rows $transition-normal $easing-ease-in-out;
+        border-top: 1px solid transparent;
+        transition: grid-template-rows $transition-normal $easing-ease-in-out,
+                    border-top-color 0s $transition-normal;
 
         &--open {
           grid-template-rows: 1fr;
-        }
-
-        /* Inner wrapper is required for the grid animation trick */
-        > .accordion__body {
-          overflow: hidden;
+          border-top-color: $color-border;
+          transition: grid-template-rows $transition-normal $easing-ease-in-out,
+                      border-top-color 0s linear;
         }
       }
 
       &__body {
+        overflow: hidden;
+        min-height: 0;
         padding: 0 $spacing-lg $spacing-lg;
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        &__panel {
+          transition: none;
+        }
+        &__chevron {
+          transition: none;
+        }
       }
     }
   `],
 })
 export class AccordionSectionComponent {
   private static nextId = 0;
-  readonly panelId = `accordion-panel-${AccordionSectionComponent.nextId++}`;
-  readonly headerId = `accordion-header-${AccordionSectionComponent.nextId}`;
+  private readonly _id = AccordionSectionComponent.nextId++;
+  readonly panelId  = `accordion-panel-${this._id}`;
+  readonly headerId = `accordion-header-${this._id}`;
 
   @Input() title = '';
   @Input() expanded = false;
