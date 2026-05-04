@@ -39,7 +39,6 @@ import { ModalService } from '@shared/services/modal.service';
 import { DiscardChangesDialogComponent } from '@features/applications/components/discard-changes-dialog.component';
 import { JobDetailsSectionComponent } from '@features/applications/components/sections/job-details-section.component';
 import { CompensationSectionComponent } from '@features/applications/components/sections/compensation-section.component';
-import { ContactsSectionComponent } from '@features/applications/components/sections/contacts-section.component';
 import { InterviewsSectionComponent } from '@features/applications/components/sections/interviews-section.component';
 import { NoteTagsSectionComponent } from '@features/applications/components/sections/notes-tags-section.component';
 import { RejectionSectionComponent } from '@features/applications/components/sections/rejection-section.component';
@@ -83,7 +82,6 @@ const drawerAnimations: AnimationTriggerMetadata[] = [
     RejectionSectionComponent,
     OfferSectionComponent,
     ActivityTimelineComponent,
-    ContactsSectionComponent,
   ],
   templateUrl: './application-detail-drawer.component.html',
   styleUrl: './application-detail-drawer.component.scss',

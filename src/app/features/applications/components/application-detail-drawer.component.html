@@ -108,7 +108,6 @@
                 [expanded]="openSection() === 'compensation'"
                 (expandedChange)="setOpen('compensation', $event)"
               />
-              <app-contacts-section [group]="form.controls.contacts" />
               <app-interviews-section
                 [jobApplicationId]="jobId()"
                 [expanded]="openSection() === 'interviews'"

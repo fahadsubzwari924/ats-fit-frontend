@@ -49,7 +49,9 @@ import {
         [attr.inert]="expanded ? null : ''"
       >
         <div class="accordion__body">
-          <ng-content />
+          <div class="accordion__content">
+            <ng-content />
+          </div>
         </div>
       </div>
     </div>
@@ -137,7 +139,10 @@ import {
       &__body {
         overflow: hidden;
         min-height: 0;
-        padding: 0 $spacing-lg $spacing-lg;
+      }
+
+      &__content {
+        padding: $spacing-md $spacing-lg $spacing-lg;
       }
 
       @media (prefers-reduced-motion: reduce) {
