@@ -25,7 +25,10 @@
       <button
         type="button"
         (click)="tailorClicked.emit()"
-        class="group flex items-center gap-3 rounded-xl px-5 py-4 text-left transition-all duration-200 hero-cta-btn">
+        class="group flex items-center gap-3 rounded-xl px-5 py-4 text-left transition-all duration-200 hero-cta-btn relative">
+        <span class="absolute top-2 right-2 z-10">
+          <app-quota-tile-badge [feature]="TAILOR_FEATURE" />
+        </span>
         <div
           class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-white"
           style="background: rgba(255,255,255,0.15)">
@@ -68,7 +71,10 @@
       <button
         type="button"
         (click)="quickTailorClicked.emit()"
-        class="group flex items-center gap-3 rounded-xl px-5 py-4 text-left transition-all duration-200 hero-cta-btn">
+        class="group flex items-center gap-3 rounded-xl px-5 py-4 text-left transition-all duration-200 hero-cta-btn relative">
+        <span class="absolute top-2 right-2 z-10">
+          <app-quota-tile-badge [feature]="BATCH_FEATURE" />
+        </span>
         <div
           class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-white"
           style="background: rgba(255,255,255,0.15)">
