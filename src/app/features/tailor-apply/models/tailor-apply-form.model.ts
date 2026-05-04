@@ -1,6 +1,6 @@
 import { TailoredResume } from '@features/resume-tailoring/models/tailored-resume.model';
 
-export type TailorApplyStep = 1 | 2 | 3 | 4;
+export type TailorApplyStep = 1 | 2 | 3;
 
 export interface TailorApplyFormValues {
   jobPosition: string;

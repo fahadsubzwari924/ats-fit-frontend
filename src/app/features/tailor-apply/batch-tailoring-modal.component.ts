@@ -1,4 +1,4 @@
-import { Component, DestroyRef, inject, OnInit, signal } from '@angular/core';
+import { Component, DestroyRef, inject, OnInit, signal, viewChild } from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BatchJobInputComponent } from './components/batch-job-input/batch-job-input.component';
@@ -7,6 +7,9 @@ import { BatchTailoringService } from './services/batch-tailoring.service';
 import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { ResumeTemplate } from '@features/resume-tailoring/models/resume-template.model';
+import { QuotaAlertBannerComponent } from '@shared/components/quota-alert-banner/quota-alert-banner.component';
+import { FeatureType } from '@core/enums/feature-type.enum';
+import { QuotaState } from '@core/states/quota.state';
 import {
   BatchGenerateRequest,
   BatchGenerateResponse,
@@ -20,7 +23,7 @@ const ESTIMATED_SECONDS_PER_JOB = 40; // ~2 minutes for 3 jobs (120 seconds tota
 @Component({
   selector: 'app-batch-tailoring-modal',
   standalone: true,
-  imports: [BatchJobInputComponent, BatchResultsComponent],
+  imports: [BatchJobInputComponent, BatchResultsComponent, QuotaAlertBannerComponent],
   templateUrl: './batch-tailoring-modal.component.html',
 })
 export class BatchTailoringModalComponent implements OnInit {
@@ -28,6 +31,7 @@ export class BatchTailoringModalComponent implements OnInit {
   private readonly resumeService = inject(ResumeService);
   private readonly snackbar = inject(SnackbarService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly quotaState = inject(QuotaState);
   readonly dialogRef = inject(MatDialogRef<BatchTailoringModalComponent>);
 
   step = signal<BatchTailoringStep>('input');
@@ -37,6 +41,9 @@ export class BatchTailoringModalComponent implements OnInit {
   estimatedSeconds = signal(0);
   elapsedSeconds = signal(0);
   private timerInterval: ReturnType<typeof setInterval> | null = null;
+
+  protected readonly BATCH_FEATURES: FeatureType[] = [FeatureType.RESUME_BATCH_GENERATION];
+  protected readonly quotaBanner = viewChild(QuotaAlertBannerComponent);
 
   ngOnInit(): void {
     this.resumeService.getResumeTemplates().pipe(
@@ -58,6 +65,7 @@ export class BatchTailoringModalComponent implements OnInit {
         this.stopTimer();
         this.batchResponse.set(this.attachJobDescriptions(response, payload.jobs));
         this.step.set('results');
+        this.quotaState.notifyFeatureConsumed(FeatureType.RESUME_BATCH_GENERATION);
       },
       error: (err) => {
         this.stopTimer();

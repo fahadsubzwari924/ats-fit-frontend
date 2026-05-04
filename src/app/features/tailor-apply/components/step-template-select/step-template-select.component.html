@@ -156,19 +156,22 @@
       <p class="text-xs text-red-500">Please select a template.</p>
     }
 
-    <button
-      (click)="onGenerate()"
-      [disabled]="!canGenerate"
-      class="w-full py-3 px-6 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary/40"
-      [ngClass]="canGenerate
-        ? 'bg-gradient-to-r from-primary to-accent-purple hover:from-primary-hover hover:to-accent-purple-strong text-white shadow-lg shadow-primary/20 hover:shadow-primary/30'
-        : 'bg-slate-100 text-slate-400 cursor-not-allowed'"
-    >
-      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
-        stroke="currentColor" stroke-width="2" class="shrink-0">
-        <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path>
-      </svg>
-      Generate Tailored Resume
-    </button>
+    <ng-container *appQuotaGate="TAILOR_FEATURE">
+      <button
+        (click)="onGenerate()"
+        [disabled]="!canGenerate"
+        class="w-full py-3 px-6 rounded-xl font-semibold text-sm transition-all duration-200 flex items-center justify-center gap-2 focus:outline-none focus:ring-2 focus:ring-primary/40"
+        [ngClass]="canGenerate
+          ? 'bg-gradient-to-r from-primary to-accent-purple hover:from-primary-hover hover:to-accent-purple-strong text-white shadow-lg shadow-primary/20 hover:shadow-primary/30'
+          : 'bg-slate-100 text-slate-400 cursor-not-allowed'"
+      >
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
+          stroke="currentColor" stroke-width="2" class="shrink-0">
+          <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path>
+        </svg>
+        Generate Tailored Resume
+      </button>
+      <app-feature-usage-chip [feature]="TAILOR_FEATURE" />
+    </ng-container>
   </div>
 }

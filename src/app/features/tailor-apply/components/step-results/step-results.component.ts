@@ -1,5 +1,4 @@
 import { Component, computed, inject, input, output, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
 import {
   animate,
   group,
@@ -12,13 +11,15 @@ import { TailoredResume } from '@features/resume-tailoring/models/tailored-resum
 import { TailoringModeBadgeComponent } from '@features/resume-tailoring/components/tailoring-mode-badge/tailoring-mode-badge.component';
 import { ResumeComparisonComponent } from '../resume-comparison/resume-comparison.component';
 import { CoverLetterPreviewComponent } from '../cover-letter-preview/cover-letter-preview.component';
-import { UserState } from '@core/states/user.state';
 import { CoverLetterService } from '@shared/services/cover-letter.service';
 import { CoverLetterResult } from '@features/resume-tailoring/models/cover-letter.model';
 import { saveAs } from 'file-saver';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { Messages } from '@core/enums/messages.enum';
 import { DownloadFileName } from '@core/enums/download-file-name.enum';
+import { QuotaLockedButtonComponent } from '@shared/components/quota-locked-button/quota-locked-button.component';
+import { QuotaState } from '@core/states/quota.state';
+import { FeatureType } from '@core/enums/feature-type.enum';
 
 type ActivePanel = 'none' | 'comparison' | 'coverLetter';
 
@@ -26,10 +27,10 @@ type ActivePanel = 'none' | 'comparison' | 'coverLetter';
   selector: 'app-step-results',
   standalone: true,
   imports: [
-    FormsModule,
     TailoringModeBadgeComponent,
     ResumeComparisonComponent,
     CoverLetterPreviewComponent,
+    QuotaLockedButtonComponent,
   ],
   templateUrl: './step-results.component.html',
   animations: [
@@ -54,9 +55,9 @@ type ActivePanel = 'none' | 'comparison' | 'coverLetter';
   ],
 })
 export class StepResultsComponent {
-  private readonly userState = inject(UserState);
   private readonly snackbar = inject(SnackbarService);
   private readonly coverLetterService = inject(CoverLetterService);
+  private readonly quotaState = inject(QuotaState);
 
   tailoredResume = input.required<TailoredResume>();
 
@@ -65,14 +66,11 @@ export class StepResultsComponent {
   answerQuestionsFirst = output<void>();
   trackApplication = output<boolean>();
 
-  /** Any signed-in account (freemium or premium) may save to job tracker. */
-  readonly canTrackJobApplication = computed(() => {
-    const id = this.userState.currentUser()?.id;
-    return typeof id === 'string' && id.trim().length > 0;
-  });
+  protected readonly COVER_LETTER_FEATURE = FeatureType.COVER_LETTER;
+  protected readonly isCoverLetterExhausted = computed(
+    () => this.quotaState.quotaFor(this.COVER_LETTER_FEATURE)()?.status === 'exhausted',
+  );
 
-  /** Default on: save to Job Applications unless the user opts out. */
-  readonly trackChecked = signal(true);
   activePanel = signal<ActivePanel>('none');
   isGeneratingCoverLetter = signal(false);
   coverLetterResult = signal<CoverLetterResult | null>(null);
@@ -88,7 +86,7 @@ export class StepResultsComponent {
   }
 
   onDone(): void {
-    this.trackApplication.emit(this.trackChecked());
+    this.trackApplication.emit(true);
   }
 
   openComparison(): void {
@@ -117,6 +115,7 @@ export class StepResultsComponent {
         this.coverLetterResult.set(result);
         this.isGeneratingCoverLetter.set(false);
         this.activePanel.set('coverLetter');
+        this.quotaState.notifyFeatureConsumed(FeatureType.COVER_LETTER);
       },
       error: (err) => {
         this.isGeneratingCoverLetter.set(false);
