@@ -8,10 +8,18 @@
 
 **Architecture:** Signal-based `QuotaService` derives state from existing `UserState` + `BetaState`. A functional `QuotaInterceptor` catches `403 ERR_RATE_LIMIT_EXCEEDED`, refreshes local quota, and wraps as a sentinel `QuotaExceededError` so the existing `readHttpApiError` helper auto-suppresses toasts. Two visual components (`<app-feature-usage-chip>`, `<app-quota-reached-card>`) and an `appQuotaGate` directive provide the UI surface. Integration is one-line at each call site.
 
-**Tech Stack:** Angular 19 (standalone, signals, OnPush), TypeScript, SCSS with design tokens, Jasmine/Karma for unit tests.
+**Tech Stack:** Angular 19 (standalone, signals, OnPush), TypeScript, SCSS with design tokens.
 
 **Repo:** `/Users/fahadsubzwari924/Documents/sideProjects/ATS_FIT/ats-fit-frontend`
 **Branch:** `feat/job-application-frontend-redesign` (continue current branch)
+
+---
+
+## Conventions for this plan
+
+- **No unit tests.** Verification is build-clean + manual exercising of the UI states.
+- **No per-task commits.** Stage changes locally, but **do not run `git commit` between tasks.** All work lands in a single review-and-commit pass at the end (Task 15) once the user has reviewed.
+- **Build check after every task.** `npm run build` must produce zero errors before moving on.
 
 ---
 
@@ -24,10 +32,8 @@
 | `src/app/core/models/quota/feature-quota-state.model.ts` | **Create** | `FeatureQuotaState` interface + status helpers |
 | `src/app/core/errors/quota-exceeded.error.ts` | **Create** | `QuotaExceededError` sentinel class |
 | `src/app/core/states/quota.state.ts` | **Create** | `QuotaState` (derived signals: `userTier`, `quotaFor()`, `betaDaysRemaining`) |
-| `src/app/core/states/quota.state.spec.ts` | **Create** | Unit tests for tier classification + quota lookup |
 | `src/app/core/interceptors/quota.interceptor.ts` | **Create** | Functional HTTP interceptor for 403 quota errors |
-| `src/app/core/interceptors/quota.interceptor.spec.ts` | **Create** | Unit tests for interceptor (suppress vs pass-through) |
-| `src/app/features/applications/lib/read-http-api-error.ts` | **Modify** | Recognize `QuotaExceededError` → return `null` |
+| `src/app/features/applications/lib/read-http-api-error.ts` | **Modify** | Recognize `QuotaExceededError` → return `undefined` |
 | `src/app/app.config.ts` | **Modify** | Register `quotaInterceptor` in interceptor chain |
 | `src/app/shared/constants/quota-copy.constant.ts` | **Create** | Tier × feature copy matrix |
 | `src/app/shared/components/feature-usage-chip/feature-usage-chip.component.ts` | **Create** | Quiet status pill, hidden < 80% |
@@ -79,14 +85,6 @@ npm run build 2>&1 | tail -5
 ```
 Expected: `Application bundle generation complete.` with no `ERROR` lines.
 
-- [ ] **Step 3: Commit**
-
-```bash
-cd /Users/fahadsubzwari924/Documents/sideProjects/ATS_FIT/ats-fit-frontend
-git add src/app/core/enums/feature-type.enum.ts
-git commit -m "feat(quota): add FeatureType enum mirroring backend rate-limit features"
-```
-
 ---
 
 ## Task 2 — `UserTier` type + `FeatureQuotaState` interface
@@ -95,7 +93,7 @@ git commit -m "feat(quota): add FeatureType enum mirroring backend rate-limit fe
 - `src/app/core/models/quota/user-tier.type.ts`
 - `src/app/core/models/quota/feature-quota-state.model.ts`
 
-**intent:** Define the four tier classifications and the per-feature quota snapshot shape that `QuotaService` will return to consumers.
+**intent:** Define the four tier classifications and the per-feature quota snapshot shape that `QuotaState` will return to consumers.
 
 **verify:** `npm run build 2>&1 | grep -E "ERROR|error TS"` → no output.
 
@@ -155,7 +153,7 @@ export interface FeatureQuotaState {
 }
 
 /**
- * Pure status classifier. Exposed so unit tests (and edge-case branches
+ * Pure status classifier. Exposed so consumers (and edge-case branches
  * like `allowed === 0`) can call it directly.
  */
 export function classifyQuotaStatus(
@@ -175,20 +173,13 @@ npm run build 2>&1 | tail -5
 ```
 Expected: zero errors.
 
-- [ ] **Step 4: Commit**
-
-```bash
-git add src/app/core/models/quota/
-git commit -m "feat(quota): add UserTier type and FeatureQuotaState model with classifier"
-```
-
 ---
 
 ## Task 3 — `QuotaExceededError` sentinel class
 
 **path:** `src/app/core/errors/quota-exceeded.error.ts`
 
-**intent:** A typed sentinel error that the interceptor wraps quota-exhaustion responses in. Existence of this class is what `readHttpApiError` (Task 6) checks to suppress the toast — no string-matching, no error-code grepping in callers.
+**intent:** A typed sentinel error that the interceptor wraps quota-exhaustion responses in. Existence of this class is what `readHttpApiError` (Task 5) checks to suppress the toast — no string-matching, no error-code grepping in callers.
 
 **verify:** `npm run build 2>&1 | grep -E "ERROR|error TS"` → no output.
 
@@ -244,24 +235,15 @@ npm run build 2>&1 | tail -5
 ```
 Expected: zero errors.
 
-- [ ] **Step 3: Commit**
-
-```bash
-git add src/app/core/errors/quota-exceeded.error.ts
-git commit -m "feat(quota): add QuotaExceededError sentinel + isQuotaExceededError guard"
-```
-
 ---
 
-## Task 4 — `QuotaState` service (signal-based, unit-tested)
+## Task 4 — `QuotaState` service (signal-based)
 
-**path:**
-- `src/app/core/states/quota.state.ts`
-- `src/app/core/states/quota.state.spec.ts`
+**path:** `src/app/core/states/quota.state.ts`
 
-**intent:** Single signal-based source of truth for tier classification and per-feature quota lookups. Pure derivation from `UserState` + `BetaState` — no HTTP, no side effects. The interceptor will mutate it via a small `markFeatureExhausted(feature, used, allowed, resetDate)` method.
+**intent:** Single signal-based source of truth for tier classification and per-feature quota lookups. Pure derivation from `UserState` + `BetaState` — no HTTP, no side effects except the explicit `markFeatureExhausted(feature, used, allowed, resetDate)` method invoked by the interceptor.
 
-**verify:** `npm test -- --include='**/quota.state.spec.ts' --watch=false --browsers=ChromeHeadless` → all tests pass.
+**verify:** `npm run build 2>&1 | grep -E "ERROR|error TS"` → no output.
 
 **agency:** `Frontend Developer` · `@agency-frontend-developer.mdc`
 
@@ -274,157 +256,7 @@ git commit -m "feat(quota): add QuotaExceededError sentinel + isQuotaExceededErr
 
 ---
 
-- [ ] **Step 1: Write the failing tests first**
-
-```typescript
-// src/app/core/states/quota.state.spec.ts
-import { TestBed } from '@angular/core/testing';
-import { signal } from '@angular/core';
-import { QuotaState } from './quota.state';
-import { UserState } from './user.state';
-import { BetaState } from './beta.state';
-import { FeatureType } from '@core/enums/feature-type.enum';
-import { FeatureUsage } from '@core/models/user/feature-usage.model';
-import { BetaStatus } from '@core/models/beta/beta-status.model';
-
-class MockUserState {
-  isPremiumUser = signal(false);
-  featureUsage = signal<FeatureUsage[] | undefined>(undefined);
-}
-
-class MockBetaState {
-  isBetaUser = signal(false);
-  betaStatus = signal<BetaStatus | null>(null);
-}
-
-function makeUsage(feature: string, used: number, allowed: number, resetDate: string): FeatureUsage {
-  return new FeatureUsage({
-    feature, used, allowed, remaining: allowed - used,
-    usagePercentage: `${Math.round((used / allowed) * 100)}`,
-    resetDate, cycleStart: '2026-05-01T00:00:00Z',
-    daysRemaining: Math.ceil((new Date(resetDate).getTime() - Date.now()) / 86_400_000),
-  });
-}
-
-describe('QuotaState', () => {
-  let user: MockUserState;
-  let beta: MockBetaState;
-  let svc: QuotaState;
-
-  beforeEach(() => {
-    user = new MockUserState();
-    beta = new MockBetaState();
-    TestBed.configureTestingModule({
-      providers: [
-        QuotaState,
-        { provide: UserState, useValue: user },
-        { provide: BetaState, useValue: beta },
-      ],
-    });
-    svc = TestBed.inject(QuotaState);
-  });
-
-  describe('userTier()', () => {
-    it('returns freemium when not premium and not beta', () => {
-      expect(svc.userTier()).toBe('freemium');
-    });
-
-    it('returns premium_paid when premium and not beta', () => {
-      user.isPremiumUser.set(true);
-      expect(svc.userTier()).toBe('premium_paid');
-    });
-
-    it('returns beta_active when beta and > 7 days remain', () => {
-      const future = new Date(Date.now() + 14 * 86_400_000);
-      beta.isBetaUser.set(true);
-      beta.betaStatus.set({ isBetaUser: true, betaAccessUntil: future } as BetaStatus);
-      expect(svc.userTier()).toBe('beta_active');
-    });
-
-    it('returns beta_expiring_soon when beta and ≤ 7 days remain', () => {
-      const future = new Date(Date.now() + 3 * 86_400_000);
-      beta.isBetaUser.set(true);
-      beta.betaStatus.set({ isBetaUser: true, betaAccessUntil: future } as BetaStatus);
-      expect(svc.userTier()).toBe('beta_expiring_soon');
-    });
-
-    it('returns freemium when beta flag set but betaAccessUntil is in the past', () => {
-      const past = new Date(Date.now() - 86_400_000);
-      beta.isBetaUser.set(true);
-      beta.betaStatus.set({ isBetaUser: true, betaAccessUntil: past } as BetaStatus);
-      expect(svc.userTier()).toBe('freemium');
-    });
-
-    it('returns freemium when beta flag set but betaAccessUntil is null', () => {
-      beta.isBetaUser.set(true);
-      beta.betaStatus.set({ isBetaUser: true, betaAccessUntil: null } as BetaStatus);
-      expect(svc.userTier()).toBe('freemium');
-    });
-  });
-
-  describe('quotaFor(feature)', () => {
-    const reset = new Date(Date.now() + 10 * 86_400_000).toISOString();
-
-    it('returns null when featureUsage is undefined', () => {
-      expect(svc.quotaFor(FeatureType.RESUME_GENERATION)()).toBeNull();
-    });
-
-    it('returns null when feature not present in list', () => {
-      user.featureUsage.set([makeUsage('cover_letter', 1, 5, reset)]);
-      expect(svc.quotaFor(FeatureType.RESUME_GENERATION)()).toBeNull();
-    });
-
-    it('returns healthy when usage < 80%', () => {
-      user.featureUsage.set([makeUsage('resume_generation', 3, 5, reset)]);
-      const q = svc.quotaFor(FeatureType.RESUME_GENERATION)()!;
-      expect(q.status).toBe('healthy');
-      expect(q.used).toBe(3);
-      expect(q.allowed).toBe(5);
-      expect(q.remaining).toBe(2);
-      expect(q.percentage).toBe(60);
-    });
-
-    it('returns approaching at exactly 80%', () => {
-      user.featureUsage.set([makeUsage('resume_generation', 4, 5, reset)]);
-      expect(svc.quotaFor(FeatureType.RESUME_GENERATION)()!.status).toBe('approaching');
-    });
-
-    it('returns exhausted when remaining is 0', () => {
-      user.featureUsage.set([makeUsage('resume_generation', 5, 5, reset)]);
-      expect(svc.quotaFor(FeatureType.RESUME_GENERATION)()!.status).toBe('exhausted');
-    });
-
-    it('treats allowed === 0 as exhausted', () => {
-      user.featureUsage.set([makeUsage('resume_generation', 0, 0, reset)]);
-      expect(svc.quotaFor(FeatureType.RESUME_GENERATION)()!.status).toBe('exhausted');
-    });
-  });
-
-  describe('markFeatureExhausted', () => {
-    it('forces status to exhausted with backend numbers', () => {
-      const reset = new Date(Date.now() + 5 * 86_400_000);
-      user.featureUsage.set([makeUsage('resume_generation', 3, 5, reset.toISOString())]);
-
-      svc.markFeatureExhausted(FeatureType.RESUME_GENERATION, 5, 5, reset);
-
-      const q = svc.quotaFor(FeatureType.RESUME_GENERATION)()!;
-      expect(q.status).toBe('exhausted');
-      expect(q.used).toBe(5);
-      expect(q.remaining).toBe(0);
-    });
-  });
-});
-```
-
-- [ ] **Step 2: Run tests to verify they fail**
-
-```bash
-cd /Users/fahadsubzwari924/Documents/sideProjects/ATS_FIT/ats-fit-frontend
-npm test -- --include='**/quota.state.spec.ts' --watch=false --browsers=ChromeHeadless 2>&1 | tail -20
-```
-Expected: All tests fail with "Cannot find module './quota.state'" or similar.
-
-- [ ] **Step 3: Implement the service**
+- [ ] **Step 1: Create the service**
 
 ```typescript
 // src/app/core/states/quota.state.ts
@@ -558,19 +390,12 @@ export class QuotaState {
 }
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [ ] **Step 2: Build check**
 
 ```bash
-npm test -- --include='**/quota.state.spec.ts' --watch=false --browsers=ChromeHeadless 2>&1 | tail -10
+npm run build 2>&1 | tail -5
 ```
-Expected: `13 specs, 0 failures` (or similar — all passing).
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/app/core/states/quota.state.ts src/app/core/states/quota.state.spec.ts
-git commit -m "feat(quota): add QuotaState signal service with tier classification + per-feature lookup"
-```
+Expected: zero errors.
 
 ---
 
@@ -578,9 +403,9 @@ git commit -m "feat(quota): add QuotaState signal service with tier classificati
 
 **path:** `src/app/features/applications/lib/read-http-api-error.ts`
 
-**intent:** Existing toast call sites use `snackbar.showError(readHttpApiError(err) ?? 'fallback')`. By making `readHttpApiError` return `null` for `QuotaExceededError`, every existing toast call automatically becomes a no-op for quota errors — zero changes in 12+ caller components. This is the keystone that makes the rest of the migration cheap.
+**intent:** Existing toast call sites use `snackbar.showError(readHttpApiError(err) ?? 'fallback')`. By making `readHttpApiError` return `undefined` for `QuotaExceededError`, every existing toast call automatically becomes a no-op for quota errors — zero changes in 12+ caller components. This is the keystone that makes the rest of the migration cheap.
 
-**verify:** `npm run build 2>&1 | grep -E "ERROR|error TS"` → no output. Manually re-grep call sites: `grep -rn "readHttpApiError" src/app --include='*.ts' | grep -v spec | wc -l` should match the count before this change (no callers refactored).
+**verify:** `npm run build 2>&1 | grep -E "ERROR|error TS"` → no output. Caller count unchanged: `grep -rn "readHttpApiError" src/app --include='*.ts' | grep -v spec | wc -l` should match the count before this change.
 
 **agency:** `Frontend Developer` · `@agency-frontend-developer.mdc`
 
@@ -636,24 +461,15 @@ grep -rn "readHttpApiError" /Users/fahadsubzwari924/Documents/sideProjects/ATS_F
 ```
 Expected: same count as before (≥ 5; we have not touched any caller).
 
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/app/features/applications/lib/read-http-api-error.ts
-git commit -m "feat(quota): readHttpApiError returns undefined for QuotaExceededError to suppress toasts"
-```
-
 ---
 
 ## Task 6 — `QuotaInterceptor` (functional HTTP interceptor)
 
-**path:**
-- `src/app/core/interceptors/quota.interceptor.ts`
-- `src/app/core/interceptors/quota.interceptor.spec.ts`
+**path:** `src/app/core/interceptors/quota.interceptor.ts`
 
 **intent:** Catch backend `403 ERR_RATE_LIMIT_EXCEEDED` responses, update `QuotaState` with authoritative numbers, and rewrap the error as `QuotaExceededError`. Pass everything else through untouched (no regression for unrelated error paths).
 
-**verify:** `npm test -- --include='**/quota.interceptor.spec.ts' --watch=false --browsers=ChromeHeadless` → all tests pass.
+**verify:** `npm run build 2>&1 | grep -E "ERROR|error TS"` → no output. Manual smoke check (Task 15) confirms interceptor wires correctly.
 
 **agency:** `Frontend Developer` · `@agency-frontend-developer.mdc`
 
@@ -663,163 +479,7 @@ git commit -m "feat(quota): readHttpApiError returns undefined for QuotaExceeded
 
 ---
 
-- [ ] **Step 1: Write the failing tests**
-
-```typescript
-// src/app/core/interceptors/quota.interceptor.spec.ts
-import { TestBed } from '@angular/core/testing';
-import {
-  HttpClient,
-  HttpErrorResponse,
-  provideHttpClient,
-  withInterceptors,
-} from '@angular/common/http';
-import {
-  HttpTestingController,
-  provideHttpClientTesting,
-} from '@angular/common/http/testing';
-import { quotaInterceptor } from './quota.interceptor';
-import { QuotaState } from '@core/states/quota.state';
-import { isQuotaExceededError } from '@core/errors/quota-exceeded.error';
-import { FeatureType } from '@core/enums/feature-type.enum';
-
-describe('quotaInterceptor', () => {
-  let http: HttpClient;
-  let httpMock: HttpTestingController;
-  let quotaState: jasmine.SpyObj<QuotaState>;
-
-  beforeEach(() => {
-    quotaState = jasmine.createSpyObj<QuotaState>('QuotaState', [
-      'markFeatureExhausted',
-      'userTier',
-    ]);
-    quotaState.userTier.and.returnValue('freemium');
-
-    TestBed.configureTestingModule({
-      providers: [
-        provideHttpClient(withInterceptors([quotaInterceptor])),
-        provideHttpClientTesting(),
-        { provide: QuotaState, useValue: quotaState },
-      ],
-    });
-    http = TestBed.inject(HttpClient);
-    httpMock = TestBed.inject(HttpTestingController);
-  });
-
-  afterEach(() => httpMock.verify());
-
-  it('wraps 403 ERR_RATE_LIMIT_EXCEEDED into QuotaExceededError and updates state', (done) => {
-    http.post('/api/test', {}).subscribe({
-      next: () => fail('expected error'),
-      error: (err) => {
-        expect(isQuotaExceededError(err)).toBe(true);
-        expect(err.feature).toBe(FeatureType.RESUME_GENERATION);
-        expect(err.used).toBe(5);
-        expect(err.allowed).toBe(5);
-        expect(quotaState.markFeatureExhausted).toHaveBeenCalledWith(
-          FeatureType.RESUME_GENERATION,
-          5,
-          5,
-          jasmine.any(Date),
-        );
-        done();
-      },
-    });
-
-    httpMock.expectOne('/api/test').flush(
-      {
-        errorCode: 'ERR_RATE_LIMIT_EXCEEDED',
-        message: 'Rate limit exceeded for resume_generation',
-        details: {
-          feature: 'resume_generation',
-          currentUsage: 5,
-          limit: 5,
-          remaining: 0,
-          resetDate: '2026-05-31T00:00:00.000Z',
-          plan: 'freemium',
-          userType: 'registered',
-        },
-      },
-      { status: 403, statusText: 'Forbidden' },
-    );
-  });
-
-  it('passes through 403 with a different errorCode unchanged', (done) => {
-    http.get('/api/forbidden').subscribe({
-      next: () => fail('expected error'),
-      error: (err) => {
-        expect(isQuotaExceededError(err)).toBe(false);
-        expect(err instanceof HttpErrorResponse).toBe(true);
-        expect(quotaState.markFeatureExhausted).not.toHaveBeenCalled();
-        done();
-      },
-    });
-
-    httpMock.expectOne('/api/forbidden').flush(
-      { errorCode: 'ERR_FORBIDDEN', message: 'Access denied' },
-      { status: 403, statusText: 'Forbidden' },
-    );
-  });
-
-  it('passes through non-403 errors unchanged', (done) => {
-    http.get('/api/server-error').subscribe({
-      next: () => fail('expected error'),
-      error: (err) => {
-        expect(isQuotaExceededError(err)).toBe(false);
-        expect(quotaState.markFeatureExhausted).not.toHaveBeenCalled();
-        done();
-      },
-    });
-
-    httpMock.expectOne('/api/server-error').flush(
-      { message: 'Server died' },
-      { status: 500, statusText: 'Internal Server Error' },
-    );
-  });
-
-  it('passes through 403 quota error for an unknown feature unchanged', (done) => {
-    http.get('/api/unknown-feature').subscribe({
-      next: () => fail('expected error'),
-      error: (err) => {
-        // Unknown feature string → no QuotaExceededError, no state mutation
-        expect(isQuotaExceededError(err)).toBe(false);
-        expect(quotaState.markFeatureExhausted).not.toHaveBeenCalled();
-        done();
-      },
-    });
-
-    httpMock.expectOne('/api/unknown-feature').flush(
-      {
-        errorCode: 'ERR_RATE_LIMIT_EXCEEDED',
-        details: { feature: 'mystery_feature_we_dont_know', currentUsage: 1, limit: 1 },
-      },
-      { status: 403, statusText: 'Forbidden' },
-    );
-  });
-
-  it('passes successful responses through unchanged', (done) => {
-    http.get<{ ok: true }>('/api/ok').subscribe({
-      next: (body) => {
-        expect(body.ok).toBe(true);
-        expect(quotaState.markFeatureExhausted).not.toHaveBeenCalled();
-        done();
-      },
-      error: () => fail('expected success'),
-    });
-
-    httpMock.expectOne('/api/ok').flush({ ok: true });
-  });
-});
-```
-
-- [ ] **Step 2: Run tests to verify they fail**
-
-```bash
-npm test -- --include='**/quota.interceptor.spec.ts' --watch=false --browsers=ChromeHeadless 2>&1 | tail -10
-```
-Expected: failure to import './quota.interceptor'.
-
-- [ ] **Step 3: Implement the interceptor**
+- [ ] **Step 1: Implement the interceptor**
 
 ```typescript
 // src/app/core/interceptors/quota.interceptor.ts
@@ -898,19 +558,12 @@ export const quotaInterceptor: HttpInterceptorFn = (req, next) => {
 };
 ```
 
-- [ ] **Step 4: Run tests to verify they pass**
+- [ ] **Step 2: Build check**
 
 ```bash
-npm test -- --include='**/quota.interceptor.spec.ts' --watch=false --browsers=ChromeHeadless 2>&1 | tail -10
+npm run build 2>&1 | tail -5
 ```
-Expected: `5 specs, 0 failures`.
-
-- [ ] **Step 5: Commit**
-
-```bash
-git add src/app/core/interceptors/quota.interceptor.ts src/app/core/interceptors/quota.interceptor.spec.ts
-git commit -m "feat(quota): add QuotaInterceptor that wraps 403 quota errors as QuotaExceededError"
-```
+Expected: zero errors.
 
 ---
 
@@ -920,7 +573,7 @@ git commit -m "feat(quota): add QuotaInterceptor that wraps 403 quota errors as 
 
 **intent:** Register the new interceptor in the chain. Order matters: `quotaInterceptor` must run **after** `tokenInterceptorFn` and `authInterceptor` so it sees authenticated, normalized errors.
 
-**verify:** `npm run build 2>&1 | grep -E "ERROR|error TS"` → no output. Run a smoke check by booting the dev server and confirming the app loads (no console errors).
+**verify:** `npm run build 2>&1 | grep -E "ERROR|error TS"` → no output.
 
 **agency:** `Frontend Developer` · `@agency-frontend-developer.mdc`
 
@@ -980,13 +633,6 @@ export const appConfig: ApplicationConfig = {
 npm run build 2>&1 | tail -5
 ```
 Expected: zero errors.
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add src/app/app.config.ts
-git commit -m "feat(quota): register quotaInterceptor in HTTP interceptor chain"
-```
 
 ---
 
@@ -1092,13 +738,6 @@ npm run build 2>&1 | tail -5
 ```
 Expected: zero errors.
 
-- [ ] **Step 3: Commit**
-
-```bash
-git add src/app/shared/constants/quota-copy.constant.ts
-git commit -m "feat(quota): add QUOTA_COPY tier × feature matrix and substituteCopy helper"
-```
-
 ---
 
 ## Task 9 — `<app-feature-usage-chip>` component
@@ -1107,7 +746,7 @@ git commit -m "feat(quota): add QUOTA_COPY tier × feature matrix and substitute
 
 **intent:** Quiet status pill rendered next to AI action buttons. Hidden until usage ≥ 80%. Amber tint approaching, red tint exhausted. Pure presentational — reads `QuotaState.quotaFor(feature)`.
 
-**verify:** `npm run build 2>&1 | grep -E "ERROR|error TS"` → no output. Manual visual check via dev server (validated in Task 14).
+**verify:** `npm run build 2>&1 | grep -E "ERROR|error TS"` → no output. Manual visual check via dev server (validated in Task 15).
 
 **agency:** `Frontend Developer` · `@agency-frontend-developer.mdc`
 
@@ -1203,13 +842,6 @@ npm run build 2>&1 | tail -5
 ```
 Expected: zero errors.
 
-- [ ] **Step 3: Commit**
-
-```bash
-git add src/app/shared/components/feature-usage-chip/feature-usage-chip.component.ts
-git commit -m "feat(quota): add FeatureUsageChipComponent — proactive ≥80% usage indicator"
-```
-
 ---
 
 ## Task 10 — `<app-quota-reached-card>` component
@@ -1218,7 +850,7 @@ git commit -m "feat(quota): add FeatureUsageChipComponent — proactive ≥80% u
 
 **intent:** Inline empty-state card that replaces the action area when a feature's quota is exhausted. Tier-aware copy + CTA via `QUOTA_COPY`. Renders bold spans for `**text**` markers.
 
-**verify:** `npm run build 2>&1 | grep -E "ERROR|error TS"` → no output. Visual verified in Task 14.
+**verify:** `npm run build 2>&1 | grep -E "ERROR|error TS"` → no output. Visual verified in Task 15.
 
 **agency:** `Frontend Developer` · `@agency-frontend-developer.mdc`
 
@@ -1479,13 +1111,6 @@ npm run build 2>&1 | tail -5
 ```
 Expected: zero errors.
 
-- [ ] **Step 3: Commit**
-
-```bash
-git add src/app/shared/components/quota-reached-card/
-git commit -m "feat(quota): add QuotaReachedCardComponent — tier-aware inline empty state"
-```
-
 ---
 
 ## Task 11 — `appQuotaGate` directive
@@ -1583,13 +1208,6 @@ npm run build 2>&1 | tail -5
 ```
 Expected: zero errors.
 
-- [ ] **Step 3: Commit**
-
-```bash
-git add src/app/shared/directives/quota-gate.directive.ts
-git commit -m "feat(quota): add appQuotaGate structural directive — auto-swap card on exhaustion"
-```
-
 ---
 
 ## Task 12 — Integrate into Tailor Resume modal
@@ -1600,7 +1218,7 @@ git commit -m "feat(quota): add appQuotaGate structural directive — auto-swap 
 
 **intent:** Wrap the "Tailor resume" action button so the quota gate replaces it on exhaustion. Add the usage chip near the button for ≥80% visibility.
 
-**verify:** `npm run build 2>&1 | grep -E "ERROR|error TS"` → no output. Manual smoke test: open modal — button should still render normally when not exhausted.
+**verify:** `npm run build 2>&1 | grep -E "ERROR|error TS"` → no output. Manual smoke test (Task 15): open modal — button should still render normally when not exhausted.
 
 **agency:** `Frontend Developer` · `@agency-frontend-developer.mdc`
 
@@ -1652,13 +1270,6 @@ In the template, wrap the action area where the Tailor button lives:
 npm run build 2>&1 | tail -5
 ```
 Expected: zero errors.
-
-- [ ] **Step 4: Commit**
-
-```bash
-git add src/app/features/tailor-apply/tailor-apply-modal.component.*
-git commit -m "feat(quota): integrate quota gate + usage chip into Tailor Resume modal"
-```
 
 ---
 
@@ -1717,13 +1328,6 @@ npm run build 2>&1 | tail -5
 ```
 Expected: zero errors.
 
-- [ ] **Step 4: Commit**
-
-```bash
-git add src/app/features/tailor-apply/components/cover-letter-preview/cover-letter-preview.component.*
-git commit -m "feat(quota): integrate quota gate + usage chip into Cover Letter preview"
-```
-
 ---
 
 ## Task 14 — Integrate into Batch Tailoring modal
@@ -1777,22 +1381,15 @@ npm run build 2>&1 | tail -5
 ```
 Expected: zero errors.
 
-- [ ] **Step 4: Commit**
-
-```bash
-git add src/app/features/tailor-apply/batch-tailoring-modal.component.*
-git commit -m "feat(quota): integrate quota gate + usage chip into Batch Tailoring modal"
-```
-
 ---
 
-## Task 15 — End-to-end manual verification + final polish
+## Task 15 — End-to-end manual verification
 
-**path:** None (verification only).
+**path:** None (verification only — no code changes).
 
-**intent:** Boot the dev server, exercise each tier × feature combination with seeded backend data, confirm UX is correct end-to-end and no toast appears for any quota path.
+**intent:** Boot the dev server, exercise each tier × feature combination with seeded backend data or temporary state overrides, confirm UX is correct end-to-end and no toast appears for any quota path. Hand off to user for review and final commit decision.
 
-**verify:** All 12 manual checks below pass; full unit-test suite green; production build clean.
+**verify:** All checks below pass; production build clean.
 
 **agency:** `Reality Checker` · `@agency-reality-checker.mdc`
 
@@ -1801,60 +1398,48 @@ git commit -m "feat(quota): integrate quota gate + usage chip into Batch Tailori
 
 ---
 
-- [ ] **Step 1: Run the full unit-test suite**
+- [ ] **Step 1: Production build (final)**
 
 ```bash
 cd /Users/fahadsubzwari924/Documents/sideProjects/ATS_FIT/ats-fit-frontend
-npm test -- --watch=false --browsers=ChromeHeadless 2>&1 | tail -10
-```
-Expected: zero failures across the entire suite.
-
-- [ ] **Step 2: Production build**
-
-```bash
 npm run build 2>&1 | tail -5
 ```
 Expected: `Application bundle generation complete.` with no errors.
 
-- [ ] **Step 3: Boot the dev server**
+- [ ] **Step 2: Boot the dev server**
 
 ```bash
 npm start
 ```
 Open the printed local URL in a browser.
 
-- [ ] **Step 4: Run the 12-check verification matrix**
+- [ ] **Step 3: Run the verification matrix**
 
 For each of the three features (Tailor Resume, Cover Letter, Batch Tailoring), test these four states by manipulating seeded backend data or temporarily overriding `featureUsage`/`betaStatus` in the dev console:
 
-  1. **Healthy state:** `remaining === 5/5`. Action button renders normally. **Chip is hidden.**
-  2. **Approaching:** `used: 4, allowed: 5` (80%). Chip appears in amber tint reading `4 / 5 used · resets in Xd`. Button still works.
-  3. **Exhausted (freemium):** `used: 5, allowed: 5`. Card replaces button. Headline "You're out of free [feature] credits". Primary CTA "Upgrade to Premium" navigates to `/billing#billing-plans`. Secondary "View plans" same target.
-  4. **Exhausted (premium_paid):** Same data, user is `plan: PREMIUM`, `is_beta_user: false`. Card shows "You've reached this month's limit". **No primary upgrade CTA.** Secondary "Need more? Contact us" opens `mailto:`.
+  1. **Healthy state** — `remaining === 5/5`. Action button renders normally. **Chip is hidden.**
+  2. **Approaching** — `used: 4, allowed: 5` (80%). Chip appears in amber tint reading `4 / 5 used · resets in Xd`. Button still works.
+  3. **Exhausted (freemium)** — `used: 5, allowed: 5`. Card replaces button. Headline "You're out of free [feature] credits". Primary CTA "Upgrade to Premium" navigates to `/billing#billing-plans`. Secondary "View plans" same target.
+  4. **Exhausted (premium_paid)** — Same data, user is `plan: PREMIUM`, `is_beta_user: false`. Card shows "You've reached this month's limit". **No primary upgrade CTA.** Secondary "Need more? Contact us" opens `mailto:`.
 
 For Tailor Resume only, also exercise:
 
-  5. **Exhausted (beta_active, > 7 days remaining):** Card headline "Premium quota reached", body mentions beta expiry date. Primary CTA "Upgrade plan".
-  6. **Exhausted (beta_expiring_soon, ≤ 7 days):** Card has amber left-border accent. Headline "Your beta ends in N days". Primary CTA amber-styled "Upgrade now".
+  5. **Exhausted (beta_active, > 7 days remaining)** — Card headline "Premium quota reached", body mentions beta expiry date. Primary CTA "Upgrade plan".
+  6. **Exhausted (beta_expiring_soon, ≤ 7 days)** — Card has amber left-border accent. Headline "Your beta ends in N days". Primary CTA amber-styled "Upgrade now".
 
 Record screenshots of each verified state.
 
-- [ ] **Step 5: Toast suppression check**
+- [ ] **Step 4: Toast suppression check**
 
 While in the exhausted state, click the action button (if visible) or trigger the same backend call via dev tools to force a 403. **Confirm: no toast appears.** The card renders/refreshes only.
 
-- [ ] **Step 6: Toast regression check**
+- [ ] **Step 5: Toast regression check**
 
-Trigger a non-quota error (e.g., 500 server error or 403 with a different errorCode) on any other endpoint. **Confirm: the existing toast still appears as before.** This validates we did not break the unrelated error path.
+Trigger a non-quota error (e.g., 500 server error or 403 with a different errorCode) on any other endpoint. **Confirm: the existing toast still appears as before.** This validates the unrelated error path is not broken.
 
-- [ ] **Step 7: Final commit (if any polish was needed during verification)**
+- [ ] **Step 6: Hand off to user for review**
 
-```bash
-git add -A
-git diff --cached --stat
-# only commit if there are real fixes; otherwise skip
-git commit -m "chore(quota): verification polish from manual e2e pass"
-```
+Summarize verification results to the user. **Do NOT commit.** Wait for the user to review the implementation and explicitly request the commit. The user will issue the final commit message based on what they observed.
 
 ---
 
@@ -1866,8 +1451,10 @@ git commit -m "chore(quota): verification polish from manual e2e pass"
 - [x] Type names consistent across tasks: `FeatureType`, `UserTier`, `FeatureQuotaState`, `QuotaExceededError`, `QuotaState`
 - [x] `userTier` returns the same string literals everywhere (`freemium`, `beta_active`, `beta_expiring_soon`, `premium_paid`)
 - [x] `markFeatureExhausted` signature matches between Task 4 (definition) and Task 6 (caller)
+- [x] **No unit tests requested by user — removed from all tasks.**
+- [x] **No per-task commits — all work staged locally; user reviews and triggers single final commit.**
 - [x] Spec coverage:
-  - §3 tier model → Task 4 (`userTier` signal + tests)
+  - §3 tier model → Task 4 (`userTier` signal)
   - §4 architecture → Tasks 1–11 collectively
   - §5 data model → Tasks 1–3
   - §6 copy matrix → Task 8
@@ -1875,11 +1462,9 @@ git commit -m "chore(quota): verification polish from manual e2e pass"
   - §7.2 card → Task 10
   - §7.3 directive → Task 11
   - §8 reactive + pre-emptive → Tasks 4 (pre-emptive via signal) + 6 (reactive via interceptor)
-  - §9 edge cases → Task 4 unit tests cover most; Task 6 covers unknown-feature pass-through
+  - §9 edge cases → Task 4 implements (allowed=0, missing data, expired beta), Task 6 implements (unknown feature pass-through)
   - §10 integrations → Tasks 12–14
-  - §11 testing → Tasks 4, 6 (unit), 15 (manual)
+  - §11 testing → Task 15 (manual)
   - §12 rollout → no feature flag; single PR; rollback safe (additive only)
 - [x] Tasks build top-down: types → state → interceptor → wiring → UI → integrations → verify
 - [x] No task references a function/type that hasn't been defined yet
-- [x] Frequent commits — every task ends in a commit
-- [x] No mid-task commits in the same task (one logical change = one commit)
