@@ -22,6 +22,7 @@
             </button>
           </th>
           <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold text-slate-600">Role</th>
+          <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold text-slate-600">Priority</th>
           <th scope="col" class="min-w-[9.5rem] px-4 py-3.5 text-left text-xs font-semibold text-slate-600">Status</th>
           <th scope="col" class="px-4 py-3.5 text-left text-xs font-semibold text-slate-600">Applied</th>
           <th scope="col" class="px-4 py-3.5 text-left">
@@ -43,11 +44,11 @@
       <tbody>
         @if (isLoading()) {
           <tr>
-            <td colspan="6" class="px-4 py-8 text-center text-slate-500">Loading…</td>
+            <td colspan="7" class="px-4 py-8 text-center text-slate-500">Loading…</td>
           </tr>
         } @else if (!rows().length) {
           <tr>
-            <td colspan="6" class="px-4 py-12 text-center">
+            <td colspan="7" class="px-4 py-12 text-center">
               <div class="mx-auto flex max-w-sm flex-col items-center gap-4">
                 <div
                   class="flex h-12 w-12 items-center justify-center rounded-2xl bg-[#F1F5F9] text-[var(--ats-primary)]"
@@ -83,6 +84,16 @@
                 {{ job.companyName || '—' }}
               </td>
               <td class="px-4 py-3 text-slate-600">{{ job.jobPosition || '—' }}</td>
+              <td class="px-4 py-3 text-slate-600">
+                @if (job.priority) {
+                  <span class="inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-xs font-medium"
+                    [ngClass]="priorityClasses(job.priority)">
+                    {{ formatPriority(job.priority) }}
+                  </span>
+                } @else {
+                  <span class="text-slate-400">—</span>
+                }
+              </td>
               <td class="min-w-[9.5rem] px-4 py-3 align-middle">
                 <app-application-status-select
                   [status]="job.status"

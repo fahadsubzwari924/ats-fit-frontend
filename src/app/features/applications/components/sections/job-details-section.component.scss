@@ -1,0 +1,187 @@
+@use 'design-tokens' as *;
+
+// ─── Field grid ────────────────────────────────────────────────────────────
+
+.jd-fields {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-md;
+}
+
+// ─── Individual field ──────────────────────────────────────────────────────
+
+.jd-field {
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-xs;
+  min-width: 0;
+
+  &--full {
+    width: 100%;
+  }
+}
+
+// ─── Label row (label + inline action link) ────────────────────────────────
+
+.jd-label-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: $spacing-sm;
+}
+
+// ─── Label ─────────────────────────────────────────────────────────────────
+
+.jd-label {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-semibold;
+  color: $color-muted-foreground;
+  letter-spacing: $letter-spacing-wide;
+  text-transform: uppercase;
+  line-height: $line-height-snug;
+
+  &--required::after {
+    content: ' *';
+    color: $color-destructive;
+  }
+}
+
+// ─── Shared input surface ──────────────────────────────────────────────────
+
+.jd-input {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  font-size: $font-size-sm;
+  line-height: $line-height-normal;
+  color: $color-foreground;
+  background-color: $color-background;
+  border: 1px solid $color-border;
+  border-radius: $radius-md;
+  transition:
+    border-color $transition-fast $easing-ease,
+    box-shadow $transition-fast $easing-ease,
+    background-color $transition-fast $easing-ease;
+
+  &::placeholder {
+    color: $color-muted-foreground;
+  }
+
+  &:hover {
+    border-color: $color-muted-foreground;
+  }
+
+  &:focus {
+    outline: none;
+    background-color: $color-card;
+    border-color: $color-ring;
+    box-shadow: 0 0 0 3px hsl(221 83% 53% / 0.12);
+  }
+
+  &--error {
+    border-color: $color-destructive;
+    background-color: hsl(0 84% 60% / 0.04);
+
+    &:focus {
+      border-color: $color-destructive;
+      box-shadow: 0 0 0 3px hsl(0 84% 60% / 0.12);
+    }
+  }
+}
+
+// ─── Select ────────────────────────────────────────────────────────────────
+
+.jd-select {
+  appearance: none;
+  cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%2364748b' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 0.65rem center;
+  padding-right: 2.25rem;
+}
+
+// ─── Textarea ──────────────────────────────────────────────────────────────
+
+.jd-textarea {
+  resize: vertical;
+  min-height: 6rem;
+  max-height: 14rem; // ~8 rows
+  field-sizing: content; // auto-grow where supported
+}
+
+// ─── Description collapsible panel ────────────────────────────────────────
+
+.jd-description-panel {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows $transition-normal $easing-ease-in-out;
+
+  > * {
+    overflow: hidden;
+  }
+
+  &--open {
+    grid-template-rows: 1fr;
+
+    > * {
+      overflow: visible;
+    }
+  }
+}
+
+// ─── Toggle button ─────────────────────────────────────────────────────────
+
+.jd-toggle-btn {
+  border: none;
+  background: none;
+  padding: 0;
+  cursor: pointer;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $color-primary;
+  white-space: nowrap;
+  line-height: $line-height-snug;
+  transition: color $transition-fast $easing-ease;
+
+  &:hover {
+    color: hsl(221 83% 40%);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px $color-background, 0 0 0 4px $color-ring;
+    border-radius: $radius-sm;
+  }
+}
+
+// ─── URL link ──────────────────────────────────────────────────────────────
+
+.jd-url-link {
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $color-primary;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: color $transition-fast $easing-ease;
+
+  &:hover {
+    color: hsl(221 83% 40%);
+    text-decoration: underline;
+  }
+
+  &:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 2px $color-background, 0 0 0 4px $color-ring;
+    border-radius: $radius-sm;
+  }
+}
+
+// ─── Inline error ──────────────────────────────────────────────────────────
+
+.jd-error {
+  margin: 0;
+  font-size: $font-size-xs;
+  font-weight: $font-weight-medium;
+  color: $color-destructive;
+  line-height: $line-height-snug;
+}

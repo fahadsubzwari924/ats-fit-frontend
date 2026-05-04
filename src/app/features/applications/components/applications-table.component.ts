@@ -1,4 +1,4 @@
-import { DatePipe } from '@angular/common';
+import { DatePipe, NgClass } from '@angular/common';
 import { ChangeDetectionStrategy, Component, input, output } from '@angular/core';
 import { JobApplication } from '@features/apply-new-job/models/job-application.model';
 import { JobApplicationListSortField } from '@features/applications/models/job-application-list-params.model';
@@ -7,7 +7,7 @@ import { ApplicationStatusSelectComponent } from '@features/applications/compone
 @Component({
   selector: 'app-applications-table',
   standalone: true,
-  imports: [DatePipe, ApplicationStatusSelectComponent],
+  imports: [DatePipe, NgClass, ApplicationStatusSelectComponent],
   templateUrl: './applications-table.component.html',
   changeDetection: ChangeDetectionStrategy.OnPush,
 })
@@ -30,6 +30,18 @@ export class ApplicationsTableComponent {
   readonly deleteJob = output<string>();
   readonly adjustFilters = output<void>();
   readonly statusChange = output<{ jobId: string; status: string }>();
+
+  priorityClasses(priority: string): Record<string, boolean> {
+    return {
+      'bg-red-100 text-red-700': priority === 'high' || priority === 'top_choice',
+      'bg-amber-100 text-amber-700': priority === 'medium',
+      'bg-slate-100 text-slate-600': priority === 'low',
+    };
+  }
+
+  formatPriority(priority: string): string {
+    return priority.replace(/_/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+  }
 
   isDateValid(d: Date | undefined | null): boolean {
     return d != null && !Number.isNaN(d.getTime());

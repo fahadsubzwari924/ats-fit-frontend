@@ -133,17 +133,20 @@
   </div>
 
   <!-- Submit -->
-  <button type="submit" [disabled]="form.invalid"
-    class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary to-accent-purple hover:from-primary-hover hover:to-accent-purple-strong disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md shadow-primary/20 hover:shadow-primary/30">
-    <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2">
-      <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path>
-    </svg>
-    Generate {{ jobs.length }} Resume{{ jobs.length !== 1 ? 's' : '' }}
-    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-      stroke="currentColor" stroke-width="2">
-      <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
-    </svg>
-  </button>
+  <ng-container *appQuotaGate="BATCH_FEATURE">
+    <button type="submit" [disabled]="form.invalid"
+      class="w-full py-3.5 rounded-2xl bg-gradient-to-r from-primary to-accent-purple hover:from-primary-hover hover:to-accent-purple-strong disabled:opacity-50 disabled:cursor-not-allowed text-white text-sm font-semibold flex items-center justify-center gap-2 transition-all duration-200 shadow-md shadow-primary/20 hover:shadow-primary/30">
+      <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <path d="M4 14a1 1 0 0 1-.78-1.63l9.9-10.2a.5.5 0 0 1 .86.46l-1.92 6.02A1 1 0 0 0 13 10h7a1 1 0 0 1 .78 1.63l-9.9 10.2a.5.5 0 0 1-.86-.46l1.92-6.02A1 1 0 0 0 11 14z"></path>
+      </svg>
+      Generate {{ jobs.length }} Resume{{ jobs.length !== 1 ? 's' : '' }}
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2">
+        <path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path>
+      </svg>
+    </button>
+    <app-feature-usage-chip [feature]="BATCH_FEATURE" />
+  </ng-container>
 
 </form>

@@ -15,6 +15,9 @@ import {
 } from '@angular/forms';
 import { ResumeTemplate } from '@features/resume-tailoring/models/resume-template.model';
 import { BatchGenerateRequest } from '@features/tailor-apply/models/batch-tailoring.model';
+import { QuotaGateDirective } from '@shared/directives/quota-gate.directive';
+import { FeatureUsageChipComponent } from '@shared/components/feature-usage-chip/feature-usage-chip.component';
+import { FeatureType } from '@core/enums/feature-type.enum';
 
 const MAX_JOBS = 3;
 const MIN_JOBS = 2;
@@ -22,11 +25,13 @@ const MIN_JOBS = 2;
 @Component({
   selector: 'app-batch-job-input',
   standalone: true,
-  imports: [ReactiveFormsModule],
+  imports: [ReactiveFormsModule, QuotaGateDirective, FeatureUsageChipComponent],
   templateUrl: './batch-job-input.component.html',
 })
 export class BatchJobInputComponent implements OnInit {
   private fb = inject(FormBuilder);
+
+  protected readonly BATCH_FEATURE = FeatureType.RESUME_BATCH_GENERATION;
 
   templates = input.required<ResumeTemplate[]>();
   generate = output<BatchGenerateRequest>();

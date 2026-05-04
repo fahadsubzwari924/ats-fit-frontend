@@ -16,6 +16,7 @@ export class JobApplication {
   currentSalary: number;
   expectedSalary: number;
   status: string;
+  priority: string;
   applicationSource: string;
   applicationDeadline: Date;
   appliedAt: Date;
@@ -43,6 +44,7 @@ export class JobApplication {
     this.currentSalary = d['current_salary'] as number;
     this.expectedSalary = d['expected_salary'] as number;
     this.status = d['status'] as string;
+    this.priority = (d['priority'] as string) || '';
     this.applicationSource = d['application_source'] as string;
     this.applicationDeadline = parseOptionalDate(d['application_deadline']);
     this.appliedAt = parseOptionalDate(d['applied_at']);

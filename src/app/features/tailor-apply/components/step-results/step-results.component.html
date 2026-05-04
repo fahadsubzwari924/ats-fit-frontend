@@ -160,61 +160,45 @@
         </svg>
       </button>
 
-      <button (click)="onGenerateCoverLetter()" [disabled]="isGeneratingCoverLetter()"
-        class="group flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-accent-purple-soft hover:bg-accent-purple-border/70 border border-accent-purple-border hover:border-accent-purple/40 transition-all duration-200 text-left disabled:opacity-60 disabled:cursor-not-allowed">
-        <div
-          class="w-7 h-7 rounded-lg bg-accent-purple-border group-hover:bg-accent-purple/25 flex items-center justify-center shrink-0 transition-colors">
-          @if (isGeneratingCoverLetter()) {
-          <div class="w-3.5 h-3.5 border-2 border-accent-purple border-t-transparent rounded-full animate-spin"></div>
-          } @else {
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
-            stroke="currentColor" stroke-width="2" class="text-accent-purple">
-            <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
-            <polyline points="14 2 14 8 20 8"></polyline>
-            <line x1="16" x2="8" y1="13" y2="13"></line>
-            <line x1="16" x2="8" y1="17" y2="17"></line>
+      @if (isCoverLetterExhausted()) {
+        <app-quota-locked-button [feature]="COVER_LETTER_FEATURE" />
+      } @else {
+        <button (click)="onGenerateCoverLetter()" [disabled]="isGeneratingCoverLetter()"
+          class="group flex items-center gap-2.5 px-3.5 py-2.5 rounded-xl bg-accent-purple-soft hover:bg-accent-purple-border/70 border border-accent-purple-border hover:border-accent-purple/40 transition-all duration-200 text-left disabled:opacity-60 disabled:cursor-not-allowed">
+          <div
+            class="w-7 h-7 rounded-lg bg-accent-purple-border group-hover:bg-accent-purple/25 flex items-center justify-center shrink-0 transition-colors">
+            @if (isGeneratingCoverLetter()) {
+            <div class="w-3.5 h-3.5 border-2 border-accent-purple border-t-transparent rounded-full animate-spin"></div>
+            } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" class="text-accent-purple">
+              <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+              <polyline points="14 2 14 8 20 8"></polyline>
+              <line x1="16" x2="8" y1="13" y2="13"></line>
+              <line x1="16" x2="8" y1="17" y2="17"></line>
+            </svg>
+            }
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-xs font-semibold text-accent-purple-strong">
+              {{ isGeneratingCoverLetter() ? 'Generating...' : coverLetterResult() ? 'View cover letter' : 'Cover letter'
+              }}
+            </p>
+            <p class="text-[10px] text-accent-purple/55 leading-tight">Matching letter</p>
+          </div>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2"
+            class="text-accent-purple/40 group-hover:text-accent-purple shrink-0 transition-colors">
+            <polyline points="9 18 15 12 9 6"></polyline>
           </svg>
-          }
-        </div>
-        <div class="flex-1 min-w-0">
-          <p class="text-xs font-semibold text-accent-purple-strong">
-            {{ isGeneratingCoverLetter() ? 'Generating...' : coverLetterResult() ? 'View cover letter' : 'Cover letter'
-            }}
-          </p>
-          <p class="text-[10px] text-accent-purple/55 leading-tight">Matching letter</p>
-        </div>
-        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-          stroke="currentColor" stroke-width="2"
-          class="text-accent-purple/40 group-hover:text-accent-purple shrink-0 transition-colors">
-          <polyline points="9 18 15 12 9 6"></polyline>
-        </svg>
-      </button>
+        </button>
+      }
     </div>
 
-    <!-- Track application (signed-in users) -->
-    @if (canTrackJobApplication()) {
-    <label class="flex items-center gap-3 cursor-pointer bg-primary-soft rounded-xl px-4 py-3 border border-primary-muted">
-      <input type="checkbox" class="w-4 h-4 rounded accent-primary" [ngModel]="trackChecked()"
-        (ngModelChange)="trackChecked.set($event)" />
-      <div class="text-left">
-        <p class="text-sm font-semibold text-slate-800">Track this application</p>
-        <p class="text-xs text-slate-500">Save to Job Applications history (uncheck to skip)</p>
-      </div>
-    </label>
-    }
-
-    @if (canTrackJobApplication() && trackChecked()) {
     <button (click)="onDone()"
       class="w-full py-2.5 rounded-xl text-sm font-semibold text-primary border border-primary-soft-border hover:bg-primary-soft transition-colors">
-      Done &amp; track application
-    </button>
-    }
-    @if (canTrackJobApplication() && !trackChecked()) {
-    <button (click)="onDone()"
-      class="w-full py-2.5 rounded-xl text-sm font-semibold text-slate-700 border border-slate-200 hover:bg-slate-50 transition-colors">
       Done
     </button>
-    }
 
   </div>
   }

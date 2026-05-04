@@ -73,6 +73,26 @@ $color-dark-destructive-foreground: hsl(0 0% 100%);
 $color-dark-border: hsl(217 32% 17%);
 $color-dark-input: hsl(217 32% 17%);
 
+// Quota status palette ────────────────────────────────────────────────
+$quota-approaching:        hsl(36 90% 55%);    // amber — usage ≥ 80%
+$quota-approaching-soft:   hsl(36 100% 96%);
+$quota-approaching-border: hsl(36 90% 87%);
+$quota-approaching-text:   hsl(28 80% 32%);
+
+$quota-exhausted-from:     hsl(221 83% 53%);   // primary blue → gradient pair
+$quota-exhausted-to:       hsl(262 78% 60%);   // accent purple
+$quota-exhausted-tint:     hsl(221 83% 53% / 0.05);
+$quota-exhausted-border:   hsl(221 83% 53% / 0.20);
+
+$quota-urgent-from:        hsl(28 90% 46%);    // beta_expiring_soon
+$quota-urgent-to:          hsl(20 88% 52%);
+$quota-urgent-tint:        hsl(36 100% 97%);
+$quota-urgent-border:      hsl(36 90% 55% / 0.30);
+
+$quota-premium-cap:        hsl(215 16% 50%);   // calm slate (premium_paid)
+$quota-premium-tint:       hsl(215 20% 98%);
+$quota-premium-border:     hsl(215 16% 88%);
+
 // ============================================================================
 // Spacing Scale
 // ============================================================================

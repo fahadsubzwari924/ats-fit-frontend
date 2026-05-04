@@ -4,11 +4,14 @@ import { FormGroup } from '@angular/forms';
 import { ResumeState } from '@core/states/resume.state';
 import { TailoringNudgeBannerComponent } from '@features/resume-tailoring/components/tailoring-nudge-banner/tailoring-nudge-banner.component';
 import { TemplateKey } from '@core/enums/template-key.enum';
+import { QuotaGateDirective } from '@shared/directives/quota-gate.directive';
+import { FeatureUsageChipComponent } from '@shared/components/feature-usage-chip/feature-usage-chip.component';
+import { FeatureType } from '@core/enums/feature-type.enum';
 
 @Component({
   selector: 'app-step-template-select',
   standalone: true,
-  imports: [NgClass, TailoringNudgeBannerComponent],
+  imports: [NgClass, TailoringNudgeBannerComponent, QuotaGateDirective, FeatureUsageChipComponent],
   templateUrl: './step-template-select.component.html',
 })
 export class StepTemplateSelectComponent {
@@ -24,6 +27,7 @@ export class StepTemplateSelectComponent {
 
   readonly templates = this.resumeState.templates;
   readonly TemplateKey = TemplateKey;
+  protected readonly TAILOR_FEATURE = FeatureType.RESUME_GENERATION;
 
   readonly processingPhase = computed(() => {
     const p = this.progress();

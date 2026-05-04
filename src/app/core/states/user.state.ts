@@ -1,5 +1,6 @@
 import { Platform } from '@angular/cdk/platform';
 import { computed, inject, Injectable, signal } from '@angular/core';
+import { Observable, tap } from 'rxjs';
 import { UploadedResume } from '@core/models/user/uploaded-resumes.model';
 import { User } from '@core/models/user/user.model';
 import { StorageService } from '@shared/services/storage.service';
@@ -129,6 +130,23 @@ export class UserState {
         // false logouts when the server is temporarily unreachable.
       },
     });
+  }
+
+  /**
+   * Re-fetches the authenticated user from the API and updates local state +
+   * storage. Returns the observable so callers can chain reactions (e.g. clear
+   * an optimistic override). Errors are swallowed silently — caller decides
+   * whether to react.
+   */
+  public refreshCurrentUser(): Observable<User> {
+    return this.userApiService.getCurrentUser().pipe(
+      tap({
+        next: (user) => {
+          this._currentUser.set(user);
+          this.saveToStorage();
+        },
+      }),
+    );
   }
 
   // Utility methods

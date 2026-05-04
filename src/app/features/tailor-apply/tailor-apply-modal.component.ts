@@ -1,4 +1,4 @@
-import { Component, inject, OnInit, signal } from '@angular/core';
+import { Component, inject, OnInit, signal, viewChild } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
@@ -10,11 +10,13 @@ import { TailoredResume } from '@features/resume-tailoring/models/tailored-resum
 import { TailorApplyStep } from './models/tailor-apply-form.model';
 import { TailoringModalCloseResult } from './models/tailoring-modal-close-result.model';
 import { StepJobDetailsComponent } from './components/step-job-details/step-job-details.component';
-import { StepResumeSourceComponent } from './components/step-resume-source/step-resume-source.component';
 import { StepTemplateSelectComponent } from './components/step-template-select/step-template-select.component';
 import { StepResultsComponent } from './components/step-results/step-results.component';
 import { Messages } from '@core/enums/messages.enum';
 import { trackedApplicationAppliedAtIso } from '@features/applications/lib/date-input-helpers';
+import { QuotaAlertBannerComponent } from '@shared/components/quota-alert-banner/quota-alert-banner.component';
+import { FeatureType } from '@core/enums/feature-type.enum';
+import { QuotaState } from '@core/states/quota.state';
 
 @Component({
   selector: 'app-tailor-apply-modal',
@@ -22,9 +24,9 @@ import { trackedApplicationAppliedAtIso } from '@features/applications/lib/date-
   imports: [
     NgClass,
     StepJobDetailsComponent,
-    StepResumeSourceComponent,
     StepTemplateSelectComponent,
     StepResultsComponent,
+    QuotaAlertBannerComponent,
   ],
   templateUrl: './tailor-apply-modal.component.html',
   styleUrl: './tailor-apply-modal.component.scss',
@@ -34,7 +36,11 @@ export class TailorApplyModalComponent implements OnInit {
   private readonly resumeService = inject(ResumeService);
   private readonly snackbar = inject(SnackbarService);
   private readonly jobService = inject(JobService);
+  private readonly quotaState = inject(QuotaState);
   readonly dialogRef = inject(MatDialogRef<TailorApplyModalComponent>);
+
+  protected readonly TAILOR_FEATURES: FeatureType[] = [FeatureType.RESUME_GENERATION];
+  protected readonly quotaBanner = viewChild(QuotaAlertBannerComponent);
 
   form!: FormGroup;
   currentStep = signal<TailorApplyStep>(1);
@@ -42,7 +48,7 @@ export class TailorApplyModalComponent implements OnInit {
   progress = signal(0);
   tailoredResume = signal<TailoredResume | null>(null);
 
-  readonly STEP_LABELS = ['', 'Job Details', 'Resume', 'Generate', 'Results'];
+  readonly STEP_LABELS = ['', 'Job Details', 'Generate', 'Results'];
 
   ngOnInit(): void {
     this.form = this.fb.group({
@@ -63,7 +69,7 @@ export class TailorApplyModalComponent implements OnInit {
 
   onNext(): void {
     const next = (this.currentStep() + 1) as TailorApplyStep;
-    if (next <= 4) this.currentStep.set(next);
+    if (next <= 3) this.currentStep.set(next);
   }
 
   async onGenerate(): Promise<void> {
@@ -76,7 +82,8 @@ export class TailorApplyModalComponent implements OnInit {
         await new Promise((r) => setTimeout(r, 600));
         this.isProcessing.set(false);
         this.tailoredResume.set(resume);
-        this.currentStep.set(4);
+        this.currentStep.set(3);
+        this.quotaState.notifyFeatureConsumed(FeatureType.RESUME_GENERATION);
       },
       error: (err) => {
         this.isProcessing.set(false);
@@ -163,7 +170,7 @@ export class TailorApplyModalComponent implements OnInit {
   }
 
   closeModal(): void {
-    const hasTailored = this.currentStep() === 4 && this.tailoredResume() !== null;
+    const hasTailored = this.currentStep() === 3 && this.tailoredResume() !== null;
     const result: TailoringModalCloseResult | undefined = hasTailored
       ? { refreshDashboard: true, tailoringCompleted: true }
       : undefined;

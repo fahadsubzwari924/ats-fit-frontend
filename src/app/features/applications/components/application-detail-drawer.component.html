@@ -1,11 +1,15 @@
+@if (visible()) {
 <div
+  @backdropFade
   class="app-detail-drawer__overlay"
   (click)="onBackdropClick()"
   (keydown)="onBackdropOverlayKeydown($event)"
   tabindex="-1"
   role="presentation"
+  (@backdropFade.done)="onAnimationDone($event)"
 >
   <aside
+    @drawerPanel
     class="app-detail-drawer__panel"
     role="dialog"
     aria-modal="true"
@@ -16,179 +20,156 @@
     (keydown)="onPanelKeydown($event)"
   >
     <div class="app-detail-drawer">
+
+      <!-- ── Sticky header ──────────────────────────────────────────────── -->
       <header class="app-detail-drawer__header">
-        <div class="app-detail-drawer__header-text">
-          <p class="app-detail-drawer__eyebrow">Job application</p>
-          <h2 id="application-detail-title" class="app-detail-drawer__title">Details</h2>
+        <div class="app-detail-drawer__header-leading">
+          <button
+            type="button"
+            class="app-detail-drawer__icon-btn"
+            aria-label="Close drawer"
+            (click)="onCloseClick()"
+          >
+            <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+              <path d="M18 6 6 18"></path>
+              <path d="m6 6 12 12"></path>
+            </svg>
+          </button>
+
+          <div class="app-detail-drawer__header-identity">
+            <h2
+              id="application-detail-title"
+              class="app-detail-drawer__header-company"
+              [title]="headerCompanyName"
+            >{{ headerCompanyName }}</h2>
+            <p class="app-detail-drawer__header-position" [title]="headerJobPosition">{{ headerJobPosition }}</p>
+          </div>
         </div>
-        <button
-          type="button"
-          class="app-detail-drawer__icon-btn"
-          aria-label="Close drawer"
-          (click)="closed.emit()"
-        >
-          <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
-            <path d="M18 6 6 18"></path>
-            <path d="m6 6 12 12"></path>
-          </svg>
-        </button>
+
+        <div class="app-detail-drawer__header-trailing">
+          @if (headerPriority) {
+            <span
+              [ngClass]="priorityDotClass(headerPriority)"
+              [attr.aria-label]="'Priority: ' + headerPriority"
+              title="Priority: {{ headerPriority }}"
+            ></span>
+          }
+
+          @if (!isLoading() && job()) {
+            <app-application-status-select
+              [status]="headerStatus"
+              [companyName]="headerCompanyName"
+              (statusChange)="onStatusChange($event)"
+            />
+          }
+
+          @if (job()?.updatedAt) {
+            <span class="app-detail-drawer__updated-ago">
+              Updated {{ formatUpdatedAgo(job()?.updatedAt) }}
+            </span>
+          }
+        </div>
       </header>
 
-      @if (loading()) {
-        <div class="app-detail-drawer__loading" aria-busy="true">
+      <!-- ── Loading skeleton ───────────────────────────────────────────── -->
+      @if (isLoading()) {
+        <div class="app-detail-drawer__loading" aria-busy="true" aria-label="Loading application details">
           <div class="app-detail-drawer__skeleton app-detail-drawer__skeleton--hero"></div>
           <div class="app-detail-drawer__skeleton"></div>
           <div class="app-detail-drawer__skeleton app-detail-drawer__skeleton--short"></div>
+          <div class="app-detail-drawer__skeleton"></div>
+          <div class="app-detail-drawer__skeleton app-detail-drawer__skeleton--short"></div>
         </div>
-      } @else {
-        @let current = job();
-        @if (current) {
-        <form class="app-detail-drawer__form" (ngSubmit)="save()">
+      }
+
+      <!-- ── Form (shown after load) ────────────────────────────────────── -->
+      @if (!isLoading() && job()) {
+        <form
+          class="app-detail-drawer__form"
+          [formGroup]="form"
+          (ngSubmit)="onSave()"
+          novalidate
+        >
+          <!-- Scrollable sections area -->
           <div class="app-detail-drawer__scroll">
-            <div class="app-detail-drawer__hero">
-              <div class="app-detail-drawer__hero-main">
-                <h3 class="app-detail-drawer__company">{{ current.companyName || 'Company' }}</h3>
-                <p class="app-detail-drawer__position">{{ current.jobPosition || 'Role' }}</p>
-              </div>
-              <div class="app-detail-drawer__chips">
-                <span [ngClass]="statusPillNgClass(current.status)">{{ statusLabel(current.status || '') }}</span>
-                @if (current.applicationSource) {
-                  <span class="app-detail-drawer__chip">{{ formatSource(current.applicationSource) }}</span>
-                }
-              </div>
+            <div class="drawer-sections">
+              <app-job-details-section
+                [group]="form.controls.jobDetails"
+                [expanded]="openSection() === 'jobDetails'"
+                (expandedChange)="setOpen('jobDetails', $event)"
+              />
+              <app-pipeline-section
+                [group]="form.controls.pipeline"
+                [expanded]="openSection() === 'pipeline'"
+                (expandedChange)="setOpen('pipeline', $event)"
+              />
+              <app-compensation-section
+                [group]="form.controls.compensation"
+                [expanded]="openSection() === 'compensation'"
+                (expandedChange)="setOpen('compensation', $event)"
+              />
+              <app-interviews-section
+                [jobApplicationId]="jobId()"
+                [expanded]="openSection() === 'interviews'"
+                (expandedChange)="setOpen('interviews', $event)"
+              />
+              <app-notes-tags-section
+                [notesControl]="form.controls.notes"
+                [tagsControl]="form.controls.tags"
+                [expanded]="openSection() === 'notes'"
+                (expandedChange)="setOpen('notes', $event)"
+              />
+              @if (currentStatus() === 'rejected') {
+                <app-rejection-section [group]="form.controls.rejection" />
+              }
+              @if (currentStatus() === 'offer' || currentStatus() === 'offer_accepted' || currentStatus() === 'offer_declined') {
+                <app-offer-section [group]="form.controls.offer" />
+              }
+              <app-activity-timeline
+                [history]="job()?.statusHistory ?? []"
+                [expanded]="openSection() === 'activity'"
+                (expandedChange)="setOpen('activity', $event)"
+              />
             </div>
-
-            <div class="app-detail-drawer__meta-grid">
-              <div class="app-detail-drawer__meta-cell">
-                <span class="app-detail-drawer__meta-label">Listing URL</span>
-                @if (current.jobUrl) {
-                  <a class="app-detail-drawer__link" [href]="current.jobUrl" target="_blank" rel="noopener noreferrer">Open link</a>
-                } @else {
-                  <span class="app-detail-drawer__meta-empty">—</span>
-                }
-              </div>
-              <div class="app-detail-drawer__meta-cell">
-                <span class="app-detail-drawer__meta-label">Location</span>
-                <span class="app-detail-drawer__meta-value">{{ current.jobLocation || '—' }}</span>
-              </div>
-              <div class="app-detail-drawer__meta-cell">
-                <span class="app-detail-drawer__meta-label">Applied</span>
-                <span class="app-detail-drawer__meta-value">
-                  @if (isDateValid(current.appliedAt)) {
-                    {{ current.appliedAt | date: 'mediumDate' }}
-                  } @else {
-                    —
-                  }
-                </span>
-              </div>
-            </div>
-
-            <details class="app-detail-drawer__details">
-              <summary class="app-detail-drawer__details-summary">Job description</summary>
-              <div class="app-detail-drawer__jd">
-                <p class="app-detail-drawer__jd-text">{{ jdPreview() }}</p>
-                @if (canToggleJdMore()) {
-                  <button type="button" class="app-detail-drawer__text-btn" (click)="toggleJd(); $event.stopPropagation()">
-                    {{ jdExpanded() ? 'Show less' : 'Show more' }}
-                  </button>
-                }
-              </div>
-            </details>
-
-            <section class="app-detail-drawer__section" aria-labelledby="edit-pipeline-heading">
-              <h4 id="edit-pipeline-heading" class="app-detail-drawer__section-title">Pipeline</h4>
-              <div class="app-detail-drawer__fields">
-                <label class="app-detail-drawer__field">
-                  <span class="app-detail-drawer__label">Status</span>
-                  <select
-                    name="status"
-                    [(ngModel)]="editStatus"
-                    class="app-detail-drawer__input app-detail-drawer__select"
-                  >
-                    @for (s of statusOptions; track s) {
-                      <option [value]="s">{{ statusLabel(s) }}</option>
-                    }
-                  </select>
-                </label>
-                <label class="app-detail-drawer__field">
-                  <span class="app-detail-drawer__label">Applied date</span>
-                  <input
-                    name="applied_at"
-                    type="date"
-                    [(ngModel)]="editAppliedAt"
-                    class="app-detail-drawer__input"
-                  />
-                </label>
-              </div>
-            </section>
-
-            <section class="app-detail-drawer__section" aria-labelledby="edit-interview-heading">
-              <h4 id="edit-interview-heading" class="app-detail-drawer__section-title">Interview</h4>
-              <div class="app-detail-drawer__fields">
-                <label class="app-detail-drawer__field">
-                  <span class="app-detail-drawer__label">Scheduled</span>
-                  <input
-                    name="interview_scheduled_at"
-                    type="date"
-                    [(ngModel)]="editInterviewAt"
-                    class="app-detail-drawer__input"
-                  />
-                </label>
-                <label class="app-detail-drawer__field app-detail-drawer__field--full">
-                  <span class="app-detail-drawer__label">Interview notes</span>
-                  <textarea
-                    name="interview_notes"
-                    [(ngModel)]="editInterviewNotes"
-                    rows="3"
-                    class="app-detail-drawer__input app-detail-drawer__textarea"
-                  ></textarea>
-                </label>
-              </div>
-            </section>
-
-            <section class="app-detail-drawer__section" aria-labelledby="edit-notes-heading">
-              <h4 id="edit-notes-heading" class="app-detail-drawer__section-title">Follow-up & notes</h4>
-              <div class="app-detail-drawer__fields">
-                <label class="app-detail-drawer__field">
-                  <span class="app-detail-drawer__label">Follow-up date</span>
-                  <input name="follow_up_date" type="date" [(ngModel)]="editFollowUp" class="app-detail-drawer__input" />
-                </label>
-                <label class="app-detail-drawer__field app-detail-drawer__field--full">
-                  <span class="app-detail-drawer__label">Notes</span>
-                  <textarea name="notes" [(ngModel)]="editNotes" rows="3" class="app-detail-drawer__input app-detail-drawer__textarea"></textarea>
-                </label>
-                <label class="app-detail-drawer__field app-detail-drawer__field--full">
-                  <span class="app-detail-drawer__label">Rejection reason</span>
-                  <textarea
-                    name="rejection_reason"
-                    [(ngModel)]="editRejection"
-                    rows="2"
-                    class="app-detail-drawer__input app-detail-drawer__textarea"
-                  ></textarea>
-                </label>
-                <label class="app-detail-drawer__field">
-                  <span class="app-detail-drawer__label">Contact phone</span>
-                  <input
-                    name="contact_phone"
-                    type="text"
-                    [(ngModel)]="editContactPhone"
-                    maxlength="20"
-                    class="app-detail-drawer__input"
-                    autocomplete="tel"
-                  />
-                </label>
-              </div>
-            </section>
           </div>
 
+          <!-- ── Sticky footer ──────────────────────────────────────────── -->
           <footer class="app-detail-drawer__footer">
-            <button type="submit" class="app-detail-drawer__save" [disabled]="saving()">
-              {{ saving() ? 'Saving…' : 'Save changes' }}
-            </button>
+            <div class="app-detail-drawer__footer-status">
+              @if (form.dirty) {
+                <span class="app-detail-drawer__dirty-badge">
+                  <svg width="8" height="8" viewBox="0 0 8 8" fill="currentColor" aria-hidden="true">
+                    <circle cx="4" cy="4" r="4"/>
+                  </svg>
+                  Unsaved changes
+                </span>
+              } @else if (savedAt()) {
+                <span class="app-detail-drawer__saved-label">{{ savedAgoLabel() }}</span>
+              }
+            </div>
+
+            <div class="app-detail-drawer__footer-actions">
+              <button
+                type="button"
+                class="app-detail-drawer__btn app-detail-drawer__btn--cancel"
+                (click)="onCancel()"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                class="app-detail-drawer__btn app-detail-drawer__btn--save"
+                [disabled]="form.pristine || form.invalid || saving()"
+                [attr.aria-busy]="saving()"
+                [title]="form.invalid ? 'Fix validation errors first' : form.pristine ? 'No changes to save' : ''"
+              >
+                {{ saving() ? 'Saving…' : 'Save changes' }}
+              </button>
+            </div>
           </footer>
         </form>
-        }
       }
     </div>
   </aside>
 </div>
+}

@@ -2,6 +2,8 @@ import { ApplicationStatus } from '@features/dashboard/enums/application-status.
 
 /** Active pipeline — still in motion. */
 export const APPLICATION_PIPELINE_STATUSES: ApplicationStatus[] = [
+  ApplicationStatus.WISHLIST,
+  ApplicationStatus.INTERESTED,
   ApplicationStatus.APPLIED,
   ApplicationStatus.SCREENING,
   ApplicationStatus.TECHNICAL_ROUND,
@@ -12,6 +14,7 @@ export const APPLICATION_PIPELINE_STATUSES: ApplicationStatus[] = [
 /** Resolved / terminal outcomes. */
 export const APPLICATION_OUTCOME_STATUSES: ApplicationStatus[] = [
   ApplicationStatus.ACCEPTED,
+  ApplicationStatus.OFFER_DECLINED,
   ApplicationStatus.REJECTED,
   ApplicationStatus.WITHDRAWN,
 ];

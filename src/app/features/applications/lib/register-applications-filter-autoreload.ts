@@ -18,6 +18,9 @@ export function registerApplicationsFilterAutoReload(
   filterStatuses: Signal<string[]>,
   filterAppliedFrom: Signal<string>,
   filterAppliedTo: Signal<string>,
+  filterPriority: Signal<string>,
+  filterWorkMode: Signal<string>,
+  filterEmploymentType: Signal<string>,
   reload: () => void,
 ): void {
   const search$ = toObservable(filterSearch).pipe(
@@ -29,12 +32,18 @@ export function registerApplicationsFilterAutoReload(
   );
   const appliedFrom$ = toObservable(filterAppliedFrom).pipe(distinctUntilChanged());
   const appliedTo$ = toObservable(filterAppliedTo).pipe(distinctUntilChanged());
+  const priority$ = toObservable(filterPriority).pipe(distinctUntilChanged());
+  const workMode$ = toObservable(filterWorkMode).pipe(distinctUntilChanged());
+  const employmentType$ = toObservable(filterEmploymentType).pipe(distinctUntilChanged());
 
   combineLatest({
     q: search$,
     statuses: statuses$,
     appliedFrom: appliedFrom$,
     appliedTo: appliedTo$,
+    priority: priority$,
+    workMode: workMode$,
+    employmentType: employmentType$,
   })
     .pipe(skip(1), takeUntilDestroyed(destroyRef))
     .subscribe(() => reload());

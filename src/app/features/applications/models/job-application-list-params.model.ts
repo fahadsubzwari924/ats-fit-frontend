@@ -27,4 +27,11 @@ export interface JobApplicationListParams {
   sort_order?: 'ASC' | 'DESC';
   /** Sent as a single comma-separated `fields` query param. */
   fields?: string[];
+  job_board_source?: string;
+  work_mode?: string;
+  employment_type?: string;
+  priority?: string;
+  tag?: string;
+  decision_deadline_from?: string;
+  decision_deadline_to?: string;
 }
