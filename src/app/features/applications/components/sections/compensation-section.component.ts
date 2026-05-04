@@ -1,9 +1,11 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  EventEmitter,
   Input,
   OnDestroy,
   OnInit,
+  Output,
 } from '@angular/core';
 import { AbstractControl, FormBuilder, FormGroup, ReactiveFormsModule, ValidationErrors, ValidatorFn } from '@angular/forms';
 import { Subscription } from 'rxjs';
@@ -30,7 +32,7 @@ const salaryMinMaxValidator: ValidatorFn = (group: AbstractControl): ValidationE
     SalaryRangeComponent,
   ],
   template: `
-    <app-accordion-section title="Compensation" [expanded]="expanded">
+    <app-accordion-section title="Compensation" [expanded]="expanded" (expandedChange)="expandedChange.emit($event)">
       <div class="compensation-section" [formGroup]="group">
 
         <!-- Salary range row -->
@@ -150,23 +152,19 @@ const salaryMinMaxValidator: ValidatorFn = (group: AbstractControl): ValidationE
 })
 export class CompensationSectionComponent implements OnInit, OnDestroy {
   @Input({ required: true }) group!: FormGroup;
+  @Input() expanded = false;
+  @Output() expandedChange = new EventEmitter<boolean>();
 
   readonly PayPeriod = PayPeriod;
 
   /** Internal reactive FormControl for the SalaryRangeComponent CVA. */
   readonly salaryRangeControl = new FormBuilder().control<SalaryRangeValue>({ min: null, max: null });
 
-  expanded = false;
-
   private readonly subscriptions = new Subscription();
 
   ngOnInit(): void {
-    // Auto-open if salary data is already present on load
     const min = this.group.get('salary_min')?.value as number | null;
     const max = this.group.get('salary_max')?.value as number | null;
-    if (min !== null || max !== null) {
-      this.expanded = true;
-    }
 
     // Seed the composite control from the form group values
     this.salaryRangeControl.setValue({ min: min ?? null, max: max ?? null }, { emitEvent: false });

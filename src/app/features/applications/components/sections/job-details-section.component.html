@@ -1,4 +1,4 @@
-<app-accordion-section title="Job details" [expanded]="true">
+<app-accordion-section title="Job details" [expanded]="expanded" (expandedChange)="expandedChange.emit($event)">
   <div class="jd-fields" [formGroup]="group">
 
     <!-- Company -->

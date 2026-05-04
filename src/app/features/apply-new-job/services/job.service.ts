@@ -25,13 +25,13 @@ export class JobService {
       .pipe(map((response) => new JobApplication(response?.data)));
   }
 
-  editJob(jobId: string, payload: JobApplicationUpdatePayload): Observable<JobApplication> {
+  editJob(jobId: string, payload: JobApplicationUpdatePayload): Observable<Record<string, unknown>> {
     return this.http
-      .put<ApiResponse<JobApplication>>(
+      .put<ApiResponse<unknown>>(
         API_ROUTES.createAPIRoute(`${API_ROUTES.JOBS.APPLICATIONS}/${jobId}`),
         payload,
       )
-      .pipe(map((response) => new JobApplication(response?.data)));
+      .pipe(map((response) => response?.data as Record<string, unknown>));
   }
 
   deleteJob(jobId: string): Observable<void> {
@@ -58,7 +58,7 @@ export class JobService {
   getJobById(
     jobId: string,
     options?: { params?: Record<string, string> },
-  ): Observable<JobApplication> {
+  ): Observable<Record<string, unknown>> {
     let params = new HttpParams();
     const raw = options?.params;
     if (raw) {
@@ -72,7 +72,7 @@ export class JobService {
       .get<ApiResponse<unknown>>(API_ROUTES.createAPIRoute(`${API_ROUTES.JOBS.APPLICATIONS}/${jobId}`), {
         params,
       })
-      .pipe(map((response) => new JobApplication(response?.data)));
+      .pipe(map((response) => response?.data as Record<string, unknown>));
   }
 
   private toListParams(p?: JobApplicationListParams): HttpParams {

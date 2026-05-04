@@ -2,10 +2,12 @@ import {
   ChangeDetectionStrategy,
   ChangeDetectorRef,
   Component,
+  EventEmitter,
   inject,
   Input,
   OnChanges,
   OnInit,
+  Output,
   signal,
   SimpleChanges,
 } from '@angular/core';
@@ -29,7 +31,8 @@ import { InterviewFormComponent } from './interview-form.component';
   template: `
     <app-accordion-section
       title="Interviews"
-      [expanded]="interviews().length > 0"
+      [expanded]="expanded"
+      (expandedChange)="expandedChange.emit($event)"
     >
       <div class="interviews-section">
 
@@ -243,6 +246,8 @@ import { InterviewFormComponent } from './interview-form.component';
 })
 export class InterviewsSectionComponent implements OnInit, OnChanges {
   @Input({ required: true }) jobApplicationId!: string;
+  @Input() expanded = false;
+  @Output() expandedChange = new EventEmitter<boolean>();
 
   private readonly interviewService = inject(JobApplicationInterviewService);
   private readonly cdr = inject(ChangeDetectorRef);

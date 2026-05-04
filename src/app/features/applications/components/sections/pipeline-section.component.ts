@@ -2,9 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  EventEmitter,
   inject,
   Input,
   OnInit,
+  Output,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -29,7 +31,7 @@ import {
     SegmentedControlComponent,
   ],
   template: `
-    <app-accordion-section title="Pipeline & timing" [expanded]="true">
+    <app-accordion-section title="Pipeline & timing" [expanded]="expanded" (expandedChange)="expandedChange.emit($event)">
       <div class="pipeline-section" [formGroup]="group">
 
         <!-- Row 1: Status -->
@@ -255,6 +257,8 @@ export class PipelineSectionComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
 
   @Input({ required: true }) group!: FormGroup;
+  @Input() expanded = false;
+  @Output() expandedChange = new EventEmitter<boolean>();
 
   readonly statusOptions: readonly { value: string; label: string }[] = [
     { value: ApplicationStatus.WISHLIST, label: 'Wishlist' },

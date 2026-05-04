@@ -1,7 +1,9 @@
 import {
   ChangeDetectionStrategy,
   Component,
+  EventEmitter,
   Input,
+  Output,
   signal,
 } from '@angular/core';
 import { FormGroup, ReactiveFormsModule } from '@angular/forms';
@@ -25,6 +27,8 @@ import { WorkMode } from '@features/applications/models/enums/work-mode.enum';
 })
 export class JobDetailsSectionComponent {
   @Input({ required: true }) group!: FormGroup;
+  @Input() expanded = true;
+  @Output() expandedChange = new EventEmitter<boolean>();
 
   readonly descriptionExpanded = signal(false);
 

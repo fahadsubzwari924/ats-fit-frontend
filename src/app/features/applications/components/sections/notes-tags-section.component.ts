@@ -2,9 +2,11 @@ import {
   ChangeDetectionStrategy,
   Component,
   DestroyRef,
+  EventEmitter,
   inject,
   Input,
   OnInit,
+  Output,
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -19,7 +21,7 @@ import { catchError, of } from 'rxjs';
   standalone: true,
   imports: [ReactiveFormsModule, AccordionSectionComponent, ChipInputComponent],
   template: `
-    <app-accordion-section title="Notes & tags" [expanded]="true">
+    <app-accordion-section title="Notes & tags" [expanded]="expanded" (expandedChange)="expandedChange.emit($event)">
       <div class="notes-tags-section">
 
         <!-- Tags field -->
@@ -117,6 +119,8 @@ export class NoteTagsSectionComponent implements OnInit {
 
   @Input({ required: true }) notesControl!: FormControl<string | null>;
   @Input({ required: true }) tagsControl!: FormControl<string[]>;
+  @Input() expanded = false;
+  @Output() expandedChange = new EventEmitter<boolean>();
 
   readonly notesId = 'notes-' + Math.random().toString(36).slice(2);
   readonly tagSuggestions = signal<string[]>([]);
