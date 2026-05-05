@@ -3,9 +3,15 @@
 
     <!-- Col 1: Brand -->
     <div class="app-header__left">
-      <a routerLink="/" class="app-header__brand" aria-label="ATS Fit home">
-        <img src="/logos/transparent_blue_logo.svg" alt="ATS Fit" class="app-header__logo" style="height:36px;width:auto;">
-      </a>
+      @if (isAuthenticated()) {
+        <a routerLink="/dashboard" class="app-header__brand" aria-label="Tairly home">
+          <img src="/logos/transparent_blue_logo.svg" alt="Tairly" class="app-header__logo" style="height:36px;width:auto;">
+        </a>
+      } @else {
+        <a href="https://tairly.com/" class="app-header__brand" aria-label="Tairly home">
+          <img src="/logos/transparent_blue_logo.svg" alt="Tairly" class="app-header__logo" style="height:36px;width:auto;">
+        </a>
+      }
     </div>
 
     <!-- Col 2: Centre nav -->
@@ -30,9 +36,9 @@
       </nav>
     } @else {
       <nav class="app-header__nav app-header__nav--public" aria-label="Marketing">
-        <a href="/" class="app-header__nav-link">Features</a>
-        <a href="/" class="app-header__nav-link">Pricing</a>
-        <a href="/" class="app-header__nav-link">About</a>
+        <a href="https://tairly.com/#features" class="app-header__nav-link">Features</a>
+        <a href="https://tairly.com/#pricing" class="app-header__nav-link">Pricing</a>
+        <a href="https://tairly.com/about" class="app-header__nav-link">About</a>
       </nav>
     }
 
@@ -221,9 +227,9 @@
         <button type="button" class="app-header__dropdown-item" (click)="goToDashboardSection('settings')">Settings</button>
         <button type="button" class="app-header__dropdown-item app-header__dropdown-item--danger" (click)="logout()">Sign Out</button>
       } @else {
-        <a href="/" class="app-header__nav-link" (click)="closeMobile()">Features</a>
-        <a href="/" class="app-header__nav-link" (click)="closeMobile()">Pricing</a>
-        <a href="/" class="app-header__nav-link" (click)="closeMobile()">About</a>
+        <a href="https://tairly.com/#features" class="app-header__nav-link">Features</a>
+        <a href="https://tairly.com/#pricing" class="app-header__nav-link">Pricing</a>
+        <a href="https://tairly.com/about" class="app-header__nav-link">About</a>
         <a [routerLink]="'/signin'" class="app-header__btn" (click)="closeMobile()">Sign In</a>
         <a [routerLink]="'/signup'" class="app-header__btn app-header__btn--primary" (click)="closeMobile()">Get Started</a>
       }
