@@ -1,0 +1,15 @@
+node_modules
+dist
+.git
+.angular
+.vscode
+.idea
+.claude
+.ai
+vendor
+coverage
+*.log
+docs
+*.md
+.github
+scripts
