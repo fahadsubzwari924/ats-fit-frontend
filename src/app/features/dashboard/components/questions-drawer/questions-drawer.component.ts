@@ -9,15 +9,11 @@ import {
   signal,
 } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
-import { interval, Subscription, switchMap } from 'rxjs';
 import { CommonModule } from '@angular/common';
 import { ProfileQuestionsService } from '@features/dashboard/services/profile-questions.service';
 import { ResumeProfileState } from '@core/states/resume-profile.state';
 import { EmployerQuestionGroup } from '@features/dashboard/models/profile-question.model';
 import { EmployerQuestionGroupComponent } from '../resume-insights-questions/employer-question-group/employer-question-group.component';
-
-const ENRICHMENT_POLL_INTERVAL_MS = 4000;
-const ENRICHMENT_POLL_MAX_ATTEMPTS = 15;
 
 /** Matches drawer panel `transform` and backdrop `duration-300` in the template. */
 export const QUESTIONS_DRAWER_EXIT_MS = 300;
@@ -58,8 +54,6 @@ export class QuestionsDrawerComponent {
   saveError = signal<string | null>(null);
   completing = signal(false);
   expandedIndex = signal<number | null>(0);
-
-  private enrichmentPollSub: Subscription | null = null;
 
   // ── Derived counts ────────────────────────────────────────────────────────
   readonly totalQ = computed(() =>
@@ -103,6 +97,9 @@ export class QuestionsDrawerComponent {
   );
   readonly isProfileComplete = computed(
     () => this.profileState.profileState() === 'complete'
+  );
+  readonly enrichmentTimedOut = computed(
+    () => this.profileState.pollingTimedOut() && this.isEnriching()
   );
   readonly needsFallbackComplete = computed(
     () => this.allAnswered() && !this.isProfileComplete() && !this.isEnriching()
@@ -166,7 +163,7 @@ export class QuestionsDrawerComponent {
           if (res.enrichedProfileId) {
             this.profileState.setEnrichedProfileId(res.enrichedProfileId);
           } else if (newAnswered === total) {
-            this.startEnrichmentPolling();
+            this.profileQuestionsService.startEnrichmentPolling();
           }
         },
         error: () => {
@@ -215,7 +212,7 @@ export class QuestionsDrawerComponent {
           if (res.enrichedProfileId) {
             this.profileState.setEnrichedProfileId(res.enrichedProfileId);
           } else if (newAnswered === total) {
-            this.startEnrichmentPolling();
+            this.profileQuestionsService.startEnrichmentPolling();
           }
         },
         error: () => {
@@ -283,8 +280,9 @@ export class QuestionsDrawerComponent {
             this.profileState.setEnrichedProfileId(res.enrichedProfileId);
             this.onClose();
           } else {
-            // Enrichment is running in the background — show spinner, poll for completion.
-            this.startEnrichmentPolling();
+            // Enrichment running in background — poll via root-level service so
+            // it survives drawer close.
+            this.profileQuestionsService.startEnrichmentPolling();
           }
         },
         error: () => {
@@ -294,42 +292,9 @@ export class QuestionsDrawerComponent {
       });
   }
 
-  /**
-   * Polls GET /resume-profile-status every 4s until enrichedProfileId appears.
-   * Stops automatically when enrichment completes, max attempts are reached,
-   * or the component is destroyed (takeUntilDestroyed via manual sub cleanup).
-   */
-  private startEnrichmentPolling(): void {
-    this.stopEnrichmentPolling();
-
-    let attempts = 0;
-    this.enrichmentPollSub = interval(ENRICHMENT_POLL_INTERVAL_MS)
-      .pipe(
-        switchMap(() => this.profileQuestionsService.getProfileStatus()),
-        takeUntilDestroyed(this.destroyRef),
-      )
-      .subscribe({
-        next: (status) => {
-          attempts++;
-          this.profileState.setProfileStatus(status);
-
-          if (status.enrichedProfileId) {
-            this.profileState.setEnrichedProfileId(status.enrichedProfileId);
-            this.stopEnrichmentPolling();
-            return;
-          }
-
-          if (attempts >= ENRICHMENT_POLL_MAX_ATTEMPTS) {
-            this.stopEnrichmentPolling();
-          }
-        },
-        error: () => this.stopEnrichmentPolling(),
-      });
-  }
-
-  private stopEnrichmentPolling(): void {
-    this.enrichmentPollSub?.unsubscribe();
-    this.enrichmentPollSub = null;
+  /** User-triggered retry from the timeout banner. */
+  onRetryEnrichment(): void {
+    this.profileQuestionsService.startEnrichmentPolling();
   }
 
   companyColorFor(index: number): string {
