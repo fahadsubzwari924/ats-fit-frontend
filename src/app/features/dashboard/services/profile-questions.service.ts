@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { interval, map, Observable, Subscription, switchMap } from 'rxjs';
 import { API_ROUTES } from '@core/constants/api.constant';
 import {
   EmployerQuestionGroup,
@@ -9,6 +9,12 @@ import {
 } from '@features/dashboard/models/profile-question.model';
 import { ResumeProfileStatus } from '@features/dashboard/models/resume-profile.model';
 import { ApiResponse } from '@core/models/response/api-response.model';
+import { ResumeProfileState } from '@core/states/resume-profile.state';
+
+const ENRICHMENT_POLL_INTERVAL_MS = 4000;
+// Profile enrichment runs Claude on the backend; some resumes take a few minutes.
+// 5 min cap so the UI surfaces a retry instead of spinning forever.
+const ENRICHMENT_POLL_MAX_ATTEMPTS = 75;
 
 /** Raw question item from GET profile-questions API */
 interface ProfileQuestionApiItem {
@@ -30,6 +36,8 @@ interface ProfileQuestionApiItem {
 })
 export class ProfileQuestionsService {
   private readonly http = inject(HttpClient);
+  private readonly profileState = inject(ResumeProfileState);
+  private enrichmentPollSub: Subscription | null = null;
 
   getProfileStatus(): Observable<ResumeProfileStatus> {
     return this.http
@@ -81,6 +89,44 @@ export class ProfileQuestionsService {
         {}
       )
       .pipe(map((res) => res.data as { enrichedProfileId: string }));
+  }
+
+  /**
+   * Polls GET /resume-profile-status until enrichedProfileId is present or the
+   * cap is reached. Lives on the root-level service so the subscription
+   * survives drawer close — otherwise enrichment that completes after the user
+   * dismisses the drawer would leave the UI stuck in `enriching` until refresh.
+   * Idempotent: calling while already polling is a no-op.
+   */
+  startEnrichmentPolling(): void {
+    if (this.enrichmentPollSub) return;
+    this.profileState.setPollingTimedOut(false);
+
+    let attempts = 0;
+    this.enrichmentPollSub = interval(ENRICHMENT_POLL_INTERVAL_MS)
+      .pipe(switchMap(() => this.getProfileStatus()))
+      .subscribe({
+        next: (status) => {
+          attempts++;
+          this.profileState.setProfileStatus(status);
+
+          if (status.enrichedProfileId) {
+            this.stopEnrichmentPolling();
+            return;
+          }
+
+          if (attempts >= ENRICHMENT_POLL_MAX_ATTEMPTS) {
+            this.profileState.setPollingTimedOut(true);
+            this.stopEnrichmentPolling();
+          }
+        },
+        error: () => this.stopEnrichmentPolling(),
+      });
+  }
+
+  stopEnrichmentPolling(): void {
+    this.enrichmentPollSub?.unsubscribe();
+    this.enrichmentPollSub = null;
   }
 
   private groupQuestionsByEmployer(

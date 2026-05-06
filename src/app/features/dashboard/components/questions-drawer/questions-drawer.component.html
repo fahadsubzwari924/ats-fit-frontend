@@ -101,7 +101,7 @@
     }
 
     <!-- Enriching state -->
-    @if (!loading() && isEnriching()) {
+    @if (!loading() && isEnriching() && !enrichmentTimedOut()) {
       <div class="rounded-xl bg-gradient-to-r from-primary-soft to-primary-muted border border-primary-soft-border px-4 py-3">
         <div class="flex items-center gap-3">
           <div class="w-9 h-9 bg-gradient-to-br from-primary to-primary-hover rounded-lg flex items-center justify-center flex-shrink-0">
@@ -113,6 +113,35 @@
           <div>
             <p class="text-[13px] font-semibold text-primary-darkest">Building Your Precision Profile</p>
             <p class="text-[12px] text-primary-hover leading-snug mt-0.5">Merging your answers with your resume — this takes a few seconds.</p>
+          </div>
+        </div>
+      </div>
+    }
+
+    <!-- Enrichment timed out -->
+    @if (!loading() && enrichmentTimedOut()) {
+      <div class="rounded-xl bg-amber-50 border border-amber-100 px-4 py-3">
+        <div class="flex items-start gap-3">
+          <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
+               fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"
+               class="text-amber-500 flex-shrink-0 mt-0.5">
+            <circle cx="12" cy="12" r="10"></circle>
+            <polyline points="12 6 12 12 16 14"></polyline>
+          </svg>
+          <div class="flex-1">
+            <p class="text-[13px] font-semibold text-amber-800">Taking longer than expected…</p>
+            <p class="text-[12px] text-amber-700 leading-snug mt-0.5">Enrichment is still running on our end. Tap below to check again.</p>
+            <button
+              type="button"
+              (click)="onRetryEnrichment()"
+              class="mt-2 inline-flex items-center gap-1.5 px-3 py-1.5 bg-amber-500 hover:bg-amber-600 text-white text-[12px] font-semibold rounded-lg transition-colors">
+              <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2.5">
+                <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
+                <path d="M3 3v5h5"></path>
+              </svg>
+              Check again
+            </button>
           </div>
         </div>
       </div>

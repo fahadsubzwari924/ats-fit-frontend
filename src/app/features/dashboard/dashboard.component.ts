@@ -123,18 +123,36 @@ export class DashboardComponent implements OnInit {
     const needsEnrichment =
       status.questionsTotal > 0 &&
       status.questionsAnswered === status.questionsTotal &&
-      !status.enrichedProfileId &&
-      !this.enrichmentAutoTriggered();
+      !status.enrichedProfileId;
 
     if (!needsEnrichment) return;
+
+    // Refresh path: enrichment was already enqueued by the answer endpoint, but
+    // the previous session might have died before polling caught the result.
+    // Just resume polling — backend job is idempotent and self-recovering.
+    if (this.enrichmentAutoTriggered()) {
+      this.profileQuestionsService.startEnrichmentPolling();
+      return;
+    }
 
     this.enrichmentAutoTriggered.set(true);
     this.profileQuestionsService
       .markComplete()
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (res) => this.profileStateService.setEnrichedProfileId(res.enrichedProfileId),
-        error: () => this.enrichmentAutoTriggered.set(false),
+        next: (res) => {
+          if (res.enrichedProfileId) {
+            this.profileStateService.setEnrichedProfileId(res.enrichedProfileId);
+          } else {
+            // /complete is async — it returns null and runs enrichment in the
+            // background. Poll until the enriched profile id appears.
+            this.profileQuestionsService.startEnrichmentPolling();
+          }
+        },
+        error: () => {
+          this.enrichmentAutoTriggered.set(false);
+          this.profileQuestionsService.startEnrichmentPolling();
+        },
       });
   }
 
