@@ -79,17 +79,7 @@ export class ResumeComparisonComponent implements OnInit {
         0,
       );
     }
-    const summaryKw = d.summary?.addedKeywords?.length ?? 0;
-    const experienceKw = d.experience.reduce(
-      (sum, exp) =>
-        sum +
-        exp.bulletChanges.reduce(
-          (bs, b) => bs + (b.addedKeywords?.length ?? 0),
-          0,
-        ),
-      0,
-    );
-    return summaryKw + experienceKw;
+    return d.keywordAnalysis.newlyAdded.length;
   });
 
   readonly totalBulletsRewritten = computed<number>(() => {

@@ -88,3 +88,79 @@ src/
 
 - One logical change per commit when possible
 - Update public docs when behavior visible to users changes
+
+## Consuming Server-Sent Events (SSE)
+
+Use SSE when:
+- The server pushes multiple updates over time (progress, live state)
+- One-way (server → client) streaming is sufficient
+- The operation takes >5s and the user should see incremental progress
+
+Use polling when SSE is unavailable (proxies, CDNs). Use WebSocket only for two-way real-time communication.
+
+### Pattern: `*EventsService` wrapper
+
+Create a dedicated injectable service that wraps `EventSource`:
+
+```typescript
+@Injectable({ providedIn: 'root' })
+export class MyEventsService {
+  readonly connectionStatus = signal<'connecting'|'open'|'reconnecting'|'closed'>('closed');
+
+  open(id: string, accessToken: string): Observable<MyEvent> {
+    // 1. Build URL with ?access_token= query param (EventSource cannot send headers)
+    // 2. Register named event listeners for each event type
+    // 3. Run callbacks inside NgZone.run() to trigger change detection
+    // 4. Return Observable — teardown logic closes EventSource
+    // 5. Complete subject on terminal event (e.g. batch_completed)
+  }
+}
+```
+
+### Pattern: signals state machine
+
+Use a plain class (not injectable) instantiated per-component:
+
+```typescript
+export class MyState {
+  private readonly _data = signal<MySnapshot | null>(null);
+  readonly data = this._data.asReadonly();
+  readonly progress = computed(() => ...);
+
+  applySnapshot(snap: MySnapshot): void { this._data.set(snap); }
+  applyEvent(name: EventName, data: unknown): void { /* switch/case */ }
+}
+```
+
+### Polling fallback
+
+Use an `effect()` in the component to start polling when `connectionStatus() === 'reconnecting'` for >10s:
+
+```typescript
+effect(() => {
+  if (this.eventsService.connectionStatus() === 'reconnecting') {
+    setTimeout(() => {
+      if (this.eventsService.connectionStatus() === 'reconnecting') {
+        this.startPolling(); // interval(2000).pipe(switchMap(...))
+      }
+    }, 10_000);
+  } else {
+    this.stopPolling();
+  }
+});
+```
+
+### Cleanup
+
+Always clean up in `destroyRef.onDestroy()` or `ngOnDestroy()`:
+
+```typescript
+this.destroyRef.onDestroy(() => {
+  this.sseSub?.unsubscribe();
+  this.pollSub?.unsubscribe();
+});
+```
+
+### Example implementation
+
+See `BatchTailoringV2EventsService` and `BatchTailoringV2State` in `src/app/features/tailor-apply/`.

@@ -1,0 +1,46 @@
+<div class="space-y-5">
+
+  @if (connectionStatus()() === 'reconnecting') {
+    <div class="flex items-center gap-2 px-4 py-2 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-sm" role="alert">
+      <svg class="animate-spin h-4 w-4" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+      </svg>
+      Reconnecting…
+    </div>
+  }
+
+  <div class="flex flex-col items-center gap-3 text-center">
+    <div>
+      <h3 class="text-xl font-bold text-slate-900">Tailoring Your Resumes</h3>
+      <p class="text-xs text-slate-500 mt-1" role="status" aria-live="polite">
+        {{ state().completedCount() }} of {{ state().totalCount() }} complete
+        @if (etaSeconds() > 0) {
+          · ~{{ etaSeconds() }}s remaining
+        }
+      </p>
+    </div>
+
+    <div
+      class="w-full bg-slate-100 rounded-full h-2 overflow-hidden"
+      role="progressbar"
+      [attr.aria-valuenow]="state().progressPct()"
+      aria-valuemin="0"
+      aria-valuemax="100">
+      <div
+        class="h-full bg-gradient-to-r from-accent-purple to-primary transition-all duration-500 ease-out"
+        [style.width.%]="state().progressPct()">
+      </div>
+    </div>
+  </div>
+
+  <div class="space-y-2">
+    @for (job of state().snapshot()?.jobs ?? []; track job.index) {
+      <app-batch-job-card
+        [job]="job"
+        (download)="download.emit($event)"
+        (seeChanges)="seeChanges.emit($event)"
+        (retry)="retry.emit($event)" />
+    }
+  </div>
+
+</div>

@@ -2,15 +2,15 @@
 export const UpgradePromptCopy = {
   quickTailorTitle: 'Quick Tailor is a Pro feature',
   quickTailorBody:
-    'Tailor multiple resumes for different jobs in one batch. Upgrade to Premium to unlock Quick Tailor and higher monthly limits.',
+    'Tailor up to 3 resumes in a single click — perfect for applying to several roles at once. Upgrade to Pro to unlock Quick Tailor and 30 tailored resumes per month.',
   viewPlans: 'View plans',
   cancel: 'Not now',
   postTailorTitle: 'Get more out of ATS Fit',
   postTailorBody:
-    'Premium unlocks higher limits, Quick Tailor for multiple jobs, and resume management—so you can iterate faster.',
+    'Pro gives you 30 tailored resumes per month — single or batch — plus 15 cover letters, full history, and Quick Tailor for applying to multiple jobs at once.',
   postTailorDismiss: 'Dismiss',
-  usageNearLimit: "You're close to this month's included usage.",
-  usageAtLimit: "You've used all included usage for this period. Upgrade for higher limits.",
+  usageNearLimit: "You're close to this month's tailored-resume limit.",
+  usageAtLimit: "You've used all your tailored resumes this month. Resets next billing cycle.",
   plansTeaser: 'See everything included on Pro',
   resumePreviewTitle: 'Resume management is a Premium feature',
   resumePreviewBody:

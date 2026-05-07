@@ -10,13 +10,13 @@
       <p class="text-xs text-slate-500 mt-0.5">
         @switch (step()) {
           @case ('input') { Generate tailored resumes for multiple jobs at once }
-          @case ('generating') { AI is optimizing your resumes... }
+          @case ('processing') { AI is optimizing your resumes... }
           @case ('results') { Your tailored resumes are ready }
         }
       </p>
     </div>
-    @if (step() !== 'generating') {
-      <button (click)="close()"
+    @if (step() !== 'processing') {
+      <button (click)="close()" matTooltip="Close"
         class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors text-slate-400 hover:text-slate-600">
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
           stroke="currentColor" stroke-width="2.5">
@@ -37,7 +37,7 @@
     @switch (step()) {
 
       @case ('input') {
-        @if (!quotaBanner()?.isExhausted()) {
+        @if (!isBatchQuotaExhausted()) {
           @if (templates().length) {
             <app-batch-job-input
               [templates]="templates()"
@@ -55,7 +55,7 @@
         } @else {
           <div class="flex flex-col items-center justify-center text-center py-8 gap-3">
             <p class="text-sm text-slate-500 max-w-sm">
-              Upgrade to keep tailoring multiple resumes at once. Your existing tailored resumes are still available in history.
+              You've hit this month's batch limit. Single tailoring still works as long as you have tailored resumes left in your monthly pool. Resets next billing cycle.
             </p>
             <button (click)="close()"
               class="text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors px-4 py-2">
@@ -65,49 +65,13 @@
         }
       }
 
-      @case ('generating') {
-        <div class="flex flex-col items-center justify-center gap-6 h-full text-center">
-
-          <!-- Animated spinner -->
-          <div class="relative">
-            <div class="w-20 h-20 rounded-3xl bg-gradient-to-br from-primary to-accent-purple flex items-center justify-center shadow-xl shadow-primary/35">
-              <svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 24 24" fill="none"
-                stroke="currentColor" stroke-width="2" class="text-white animate-spin">
-                <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
-              </svg>
-            </div>
-            <div class="absolute -inset-3 bg-primary/15 rounded-3xl blur-xl -z-10"></div>
-          </div>
-
-          <div class="space-y-1">
-            <h3 class="text-xl font-bold text-slate-900">
-              Generating {{ jobCount() }} Tailored Resume{{ jobCount() !== 1 ? 's' : '' }}
-            </h3>
-            <p class="text-sm text-slate-500">AI is analyzing each job and optimizing your resume</p>
-          </div>
-
-          <!-- Progress bar -->
-          <div class="w-full max-w-sm space-y-2">
-            <div class="w-full h-2 bg-slate-100 rounded-full overflow-hidden">
-              <div
-                class="h-full bg-gradient-to-r from-primary to-accent-purple rounded-full transition-all duration-1000"
-                [style.width.%]="progressPercent">
-              </div>
-            </div>
-            <p class="text-xs text-slate-400">
-              @if (remainingSeconds > 0) {
-                ~{{ remainingSeconds }}s remaining
-              } @else {
-                Almost there...
-              }
-            </p>
-          </div>
-
-          <p class="text-xs text-slate-400 max-w-xs">
-            This takes {{ estimatedSeconds() }}–{{ estimatedSeconds() + 30 }}s for {{ jobCount() }} jobs.
-            Please keep this window open.
-          </p>
-        </div>
+      @case ('processing') {
+        <app-batch-processing-view
+          [state]="batchV2State"
+          [connectionStatus]="flow.connectionStatus"
+          (download)="onDownloadJob($event)"
+          (seeChanges)="onSeeChanges($event)"
+          (retry)="onRetry($event)" />
       }
 
       @case ('results') {
@@ -115,7 +79,6 @@
           <app-batch-results
             [batchResponse]="batchResponse()!"
             (tailorAnother)="onTailorAnother()"
-            (finishWithoutTracking)="close()"
             (finishWithTracking)="close()">
           </app-batch-results>
         }

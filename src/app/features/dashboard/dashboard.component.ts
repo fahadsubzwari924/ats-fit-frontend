@@ -33,6 +33,7 @@ import { Messages } from '@core/enums/messages.enum';
 import { ApiResponse } from '@core/models/response/api-response.model';
 import { ResponseStatus } from '@core/enums/response-status.enum';
 import { saveAs } from 'file-saver';
+import { generateResumeFilename } from '@core/utils/download-filename.util';
 import { DashboardHeroComponent } from '@shared/components/dashboard-hero/dashboard-hero.component';
 import { QuestionsBannerComponent } from '@shared/components/questions-banner/questions-banner.component';
 import { ResumeHistoryCardComponent } from '@shared/components/resume-history-card/resume-history-card.component';
@@ -386,7 +387,7 @@ export class DashboardComponent implements OnInit {
     this.downloadingId.set(item.id);
     this.resumeService.downloadResumeById(item.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (blob) => {
-        const filename = `${item.jobPosition ?? 'resume'}-${item.companyName ?? ''}.pdf`.replace(/\s+/g, '-').toLowerCase();
+        const filename = generateResumeFilename(this.userState.currentUser()?.fullName ?? '', item.jobPosition ?? '');
         saveAs(blob, filename);
         this.downloadingId.set(null);
       },

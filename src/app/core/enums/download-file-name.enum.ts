@@ -1,3 +1,3 @@
 export enum DownloadFileName {
-  TAILORED_RESUME = 'tailored-resume.pdf'
+  TAILORED_RESUME = 'Resume.pdf'
 }

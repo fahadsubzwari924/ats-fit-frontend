@@ -8,9 +8,11 @@ import {
 import { DatePipe } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { saveAs } from 'file-saver';
+import { generateResumeFilename } from '@core/utils/download-filename.util';
 
 import {
   ResumeHistoryService,
@@ -22,19 +24,25 @@ import {
 } from '@features/dashboard/models/resume-history.model';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { ResumeComparisonComponent } from '@features/tailor-apply/components/resume-comparison/resume-comparison.component';
+import { CoverLetterPreviewComponent } from '@features/tailor-apply/components/cover-letter-preview/cover-letter-preview.component';
+import { CoverLetterService } from '@shared/services/cover-letter.service';
+import { CoverLetterResult } from '@features/resume-tailoring/models/cover-letter.model';
+import { UserState } from '@core/states/user.state';
 
 const PAGE_LIMIT = 8;
 
 @Component({
   selector: 'app-resume-history-modal',
   standalone: true,
-  imports: [DatePipe, FormsModule, ResumeComparisonComponent],
+  imports: [DatePipe, FormsModule, ResumeComparisonComponent, CoverLetterPreviewComponent, MatTooltipModule],
   templateUrl: './resume-history-modal.component.html',
 })
 export class ResumeHistoryModalComponent implements OnInit {
   private readonly historyService = inject(ResumeHistoryService);
+  private readonly coverLetterService = inject(CoverLetterService);
   private readonly snackbar = inject(SnackbarService);
   private readonly destroyRef = inject(DestroyRef);
+  protected readonly userState = inject(UserState);
   readonly dialogRef = inject(MatDialogRef<ResumeHistoryModalComponent>);
 
   private readonly searchSubject = new Subject<string>();
@@ -54,6 +62,13 @@ export class ResumeHistoryModalComponent implements OnInit {
   /** When set, shows the full ResumeComparisonComponent instead of the list. */
   activeComparisonId = signal<string | null>(null);
   activeComparisonItem = signal<ResumeHistoryItem | null>(null);
+
+  /** When set, shows the cover-letter takeover panel. */
+  activeCoverLetterId = signal<string | null>(null);
+  activeCoverLetterItem = signal<ResumeHistoryItem | null>(null);
+  activeCoverLetter = signal<CoverLetterResult | null>(null);
+  coverLetterCache = new Map<string, CoverLetterResult>();
+  coverLetterLoadingId = signal<string | null>(null);
 
   ngOnInit(): void {
     this.loadPage(1);
@@ -161,9 +176,7 @@ export class ResumeHistoryModalComponent implements OnInit {
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
       next: (blob) => {
-        const filename = `${item.jobPosition ?? 'resume'}-${item.companyName ?? ''}.pdf`
-          .replace(/\s+/g, '-')
-          .toLowerCase();
+        const filename = generateResumeFilename(this.userState.currentUser()?.fullName ?? '', item.jobPosition ?? '');
         saveAs(blob, filename);
         this.downloadingId.set(null);
       },
@@ -183,6 +196,43 @@ export class ResumeHistoryModalComponent implements OnInit {
   closeComparison(): void {
     this.activeComparisonId.set(null);
     this.activeComparisonItem.set(null);
+  }
+
+  openCoverLetter(item: ResumeHistoryItem, event: Event): void {
+    event.stopPropagation();
+    if (!item.hasCoverLetter) return;
+
+    const cached = this.coverLetterCache.get(item.id);
+    if (cached) {
+      this.activeCoverLetterItem.set(item);
+      this.activeCoverLetterId.set(item.id);
+      this.activeCoverLetter.set(cached);
+      return;
+    }
+
+    this.coverLetterLoadingId.set(item.id);
+    this.coverLetterService
+      .getByResumeGenerationId(item.id)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (result) => {
+          this.coverLetterCache.set(item.id, result);
+          this.activeCoverLetterItem.set(item);
+          this.activeCoverLetterId.set(item.id);
+          this.activeCoverLetter.set(result);
+          this.coverLetterLoadingId.set(null);
+        },
+        error: () => {
+          this.coverLetterLoadingId.set(null);
+          this.snackbar.showError('Could not load cover letter. Please try again.');
+        },
+      });
+  }
+
+  closeCoverLetter(): void {
+    this.activeCoverLetterId.set(null);
+    this.activeCoverLetterItem.set(null);
+    this.activeCoverLetter.set(null);
   }
 
   close(): void {

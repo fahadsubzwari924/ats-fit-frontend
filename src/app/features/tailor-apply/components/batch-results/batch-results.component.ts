@@ -1,6 +1,7 @@
-import { Component, inject, input, output, signal } from '@angular/core';
-import { FormsModule } from '@angular/forms';
+import { Component, DestroyRef, inject, input, output, signal } from '@angular/core';
+import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { saveAs } from 'file-saver';
+import { generateResumeFilename } from '@core/utils/download-filename.util';
 import JSZip from 'jszip';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -8,30 +9,30 @@ import { BatchGenerateResponse, BatchJobResult } from '@features/tailor-apply/mo
 import { BatchTailoringService } from '@features/tailor-apply/services/batch-tailoring.service';
 import { JobApplicationCreatePayload } from '@features/apply-new-job/models/job-application-create-payload.model';
 import { JobService } from '@features/apply-new-job/services/job.service';
+import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { trackedApplicationAppliedAtIso } from '@features/applications/lib/date-input-helpers';
 import { ResumeComparisonComponent } from '@features/tailor-apply/components/resume-comparison/resume-comparison.component';
+import { UserState } from '@core/states/user.state';
 
 @Component({
   selector: 'app-batch-results',
   standalone: true,
-  imports: [FormsModule, ResumeComparisonComponent],
+  imports: [ResumeComparisonComponent],
   templateUrl: './batch-results.component.html',
 })
 export class BatchResultsComponent {
   private readonly batchService = inject(BatchTailoringService);
+  private readonly resumeService = inject(ResumeService);
   private readonly jobService = inject(JobService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly userState = inject(UserState);
+  private readonly destroyRef = inject(DestroyRef);
 
   batchResponse = input.required<BatchGenerateResponse>();
   tailorAnother = output<void>();
-  /** Emitted when the user finishes without saving to the job tracker (checkbox off). */
-  finishWithoutTracking = output<void>();
   /** Emitted after applications are successfully tracked — signals the modal to close. */
   finishWithTracking = output<void>();
-
-  /** Default on: user can uncheck to skip tracking when using the primary action. */
-  readonly trackApplicationsChecked = signal(true);
 
   activeComparisonId = signal<string | null>(null);
 
@@ -48,41 +49,91 @@ export class BatchResultsComponent {
     return this.batchResponse().results.filter((r) => r.status === 'failed');
   }
 
-  downloadSingle(result: BatchJobResult, index: number): void {
-    if (this.downloadingIndex() === index) return;
-    const blob = this.batchService.buildBlob(result);
-    if (!blob) {
-      this.snackbar.showError('PDF not available for this result.');
-      return;
-    }
-    this.downloadingIndex.set(index);
-    const filename = `${result.companyName}_${result.jobPosition}_Resume.pdf`
-      .replace(/\s+/g, '_');
-    saveAs(blob, filename);
-    setTimeout(() => this.downloadingIndex.set(null), 1000);
+  /**
+   * Resolves a PDF blob for a result. Inline `pdfContent` (v1 sync path) wins
+   * when available; otherwise fetches by `resumeGenerationId` (v2 async path,
+   * where SSE deliberately omits the base64 payload). Resolves to `null` if
+   * neither source is available or the HTTP fetch fails.
+   */
+  private resolvePdfBlob(result: BatchJobResult) {
+    const inline = this.batchService.buildBlob(result);
+    if (inline) return of(inline);
+    if (!result.resumeGenerationId) return of(null);
+    return this.resumeService.downloadResumeById(result.resumeGenerationId).pipe(
+      catchError(() => of(null)),
+    );
   }
 
-  async downloadAllAsZip(): Promise<void> {
+  downloadSingle(result: BatchJobResult, index: number): void {
+    if (this.downloadingIndex() === index) return;
+    this.downloadingIndex.set(index);
+
+    this.resolvePdfBlob(result)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: (blob) => {
+          if (!blob) {
+            this.snackbar.showError('PDF not available for this result.');
+            this.downloadingIndex.set(null);
+            return;
+          }
+          const filename = generateResumeFilename(
+            this.userState.currentUser()?.fullName ?? '',
+            result.jobPosition ?? '',
+          );
+          saveAs(blob, filename);
+          this.downloadingIndex.set(null);
+        },
+        error: () => {
+          this.snackbar.showError('Could not download this resume. Please try again.');
+          this.downloadingIndex.set(null);
+        },
+      });
+  }
+
+  downloadAllAsZip(): void {
     const items = this.succeeded;
     if (!items.length) return;
     this.isZipping.set(true);
-    try {
-      const zip = new JSZip();
-      for (const result of items) {
-        const blob = this.batchService.buildBlob(result);
-        if (blob) {
-          const filename = `${result.companyName}_${result.jobPosition}_Resume.pdf`
-            .replace(/\s+/g, '_');
-          zip.file(filename, blob);
-        }
-      }
-      const content = await zip.generateAsync({ type: 'blob' });
-      saveAs(content, 'tailored-resumes.zip');
-    } catch {
-      this.snackbar.showError('Failed to create ZIP file. Please try individual downloads.');
-    } finally {
-      this.isZipping.set(false);
-    }
+
+    forkJoin(items.map((r) => this.resolvePdfBlob(r).pipe(map((blob) => ({ result: r, blob })))))
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: async (entries) => {
+          const usable = entries.filter((e): e is { result: BatchJobResult; blob: Blob } => e.blob !== null);
+          if (!usable.length) {
+            this.snackbar.showError('No PDFs available to bundle. Please try individual downloads.');
+            this.isZipping.set(false);
+            return;
+          }
+          try {
+            const zip = new JSZip();
+            for (const { result, blob } of usable) {
+              const filename = generateResumeFilename(
+                this.userState.currentUser()?.fullName ?? '',
+                result.jobPosition ?? '',
+              );
+              zip.file(filename, blob);
+            }
+            const content = await zip.generateAsync({ type: 'blob' });
+            const ts = new Date().toISOString().slice(0, 19).replace('T', '_').replace(/:/g, '-');
+            saveAs(content, `TailoredResumes_${ts}.zip`);
+            if (usable.length < items.length) {
+              this.snackbar.showWarning(
+                `${items.length - usable.length} of ${items.length} resume(s) could not be included.`,
+              );
+            }
+          } catch {
+            this.snackbar.showError('Failed to create ZIP file. Please try individual downloads.');
+          } finally {
+            this.isZipping.set(false);
+          }
+        },
+        error: () => {
+          this.snackbar.showError('Failed to create ZIP file. Please try individual downloads.');
+          this.isZipping.set(false);
+        },
+      });
   }
 
   openComparison(id: string): void {
@@ -91,10 +142,6 @@ export class BatchResultsComponent {
 
   closeComparison(): void {
     this.activeComparisonId.set(null);
-  }
-
-  onFinishWithoutTracking(): void {
-    this.finishWithoutTracking.emit();
   }
 
   trackAllApplications(): void {

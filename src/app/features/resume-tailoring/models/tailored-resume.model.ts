@@ -3,6 +3,8 @@ import { TailoringMode } from '@features/dashboard/models/resume-profile.model';
 export class TailoredResume {
   public blob: Blob;
   public filename: string;
+  public jobPosition: string;
+  public companyName: string;
   public resumeGenerationId: string;
   public tailoringMode: TailoringMode;
   public keywordsAdded: number;
@@ -17,6 +19,8 @@ export class TailoredResume {
   constructor(data: {
     blob: Blob;
     filename?: string;
+    jobPosition?: string;
+    companyName?: string;
     resumeGenerationId?: string;
     tailoringMode?: TailoringMode;
     keywordsAdded?: number;
@@ -29,6 +33,8 @@ export class TailoredResume {
   }) {
     this.blob = data?.blob;
     this.filename = data?.filename ?? '';
+    this.jobPosition = data?.jobPosition ?? '';
+    this.companyName = data?.companyName ?? '';
     this.resumeGenerationId = data?.resumeGenerationId ?? '';
     this.tailoringMode = data?.tailoringMode ?? 'standard';
     this.keywordsAdded = data?.keywordsAdded ?? 0;

@@ -7,3 +7,32 @@
     background: rgba(255, 255, 255, 0.15);
   }
 }
+
+// Primary tailored-resumes quota strip — single source of monthly progress.
+// Healthy: subtle white-on-blue. Approaching: amber accent. Exhausted: red accent.
+.quota-strip {
+  background: rgba(255, 255, 255, 0.08);
+  border: 1px solid rgba(255, 255, 255, 0.15);
+
+  &__fill {
+    background: rgba(255, 255, 255, 0.85);
+  }
+
+  &--approaching {
+    background: rgba(245, 158, 11, 0.18);
+    border-color: rgba(245, 158, 11, 0.35);
+
+    .quota-strip__fill {
+      background: #FBBF24;
+    }
+  }
+
+  &--exhausted {
+    background: rgba(239, 68, 68, 0.18);
+    border-color: rgba(239, 68, 68, 0.4);
+
+    .quota-strip__fill {
+      background: #FCA5A5;
+    }
+  }
+}
