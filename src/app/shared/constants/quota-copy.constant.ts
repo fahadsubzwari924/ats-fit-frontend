@@ -26,9 +26,9 @@ export interface QuotaCopyEntry {
 }
 
 export const FEATURE_NOUNS: Record<FeatureType, string> = {
-  [FeatureType.RESUME_GENERATION]: 'Tailor',
+  [FeatureType.RESUME_GENERATION]: 'tailored resume',
   [FeatureType.COVER_LETTER]: 'cover letter',
-  [FeatureType.RESUME_BATCH_GENERATION]: 'batch tailor',
+  [FeatureType.RESUME_BATCH_GENERATION]: 'batch job',
   [FeatureType.JOB_APPLICATION_TRACKING]: 'application',
 };
 

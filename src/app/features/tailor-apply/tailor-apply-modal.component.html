@@ -6,7 +6,7 @@
       <h2 class="text-lg font-bold text-slate-900">Tailor Resume</h2>
       <p class="text-xs text-slate-500 mt-0.5">AI-powered optimization for your next role</p>
     </div>
-    <button (click)="closeModal()"
+    <button (click)="closeModal()" matTooltip="Close"
       class="w-8 h-8 rounded-lg hover:bg-slate-100 flex items-center justify-center transition-colors text-slate-400 hover:text-slate-600">
       <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none"
         stroke="currentColor" stroke-width="2.5">
@@ -23,7 +23,7 @@
     </div>
   }
 
-  @if (!quotaBanner()?.isExhausted()) {
+  @if (!isTailorQuotaExhausted()) {
     <!-- Step indicator (steps 1-2; step 3 is results) -->
     @if (currentStep() < 3) {
       <div class="px-6 pt-4 pb-2 shrink-0">

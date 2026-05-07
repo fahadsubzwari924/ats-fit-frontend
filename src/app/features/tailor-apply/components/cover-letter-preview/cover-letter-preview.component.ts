@@ -3,6 +3,7 @@ import { CoverLetterResult } from '@features/resume-tailoring/models/cover-lette
 import { saveAs } from 'file-saver';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { inject } from '@angular/core';
+import { generateResumeFilename } from '@core/utils/download-filename.util';
 
 @Component({
   selector: 'app-cover-letter-preview',
@@ -14,6 +15,8 @@ export class CoverLetterPreviewComponent {
   private readonly snackbar = inject(SnackbarService);
 
   coverLetter = input.required<CoverLetterResult>();
+  jobPosition = input<string>('');
+  candidateName = input<string>('');
   dismissed = output<void>();
 
   get fullText(): string {
@@ -39,9 +42,7 @@ export class CoverLetterPreviewComponent {
   }
 
   onDownloadText(): void {
-    const cl = this.coverLetter()?.coverLetter;
-    const name = cl?.candidateName?.replace(/\s+/g, '_') ?? 'Cover';
-    const filename = `Cover_Letter_${name}.txt`;
+    const filename = generateResumeFilename(this.candidateName(), this.jobPosition(), 'Cover_Letter', 'txt');
     const blob = new Blob([this.fullText], { type: 'text/plain;charset=utf-8' });
     saveAs(blob, filename);
   }

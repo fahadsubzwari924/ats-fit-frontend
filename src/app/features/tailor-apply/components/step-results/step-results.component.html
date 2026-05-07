@@ -3,7 +3,11 @@
   <!-- Cover Letter panel — full takeover -->
   @if (activePanel() === 'coverLetter' && coverLetterResult()) {
   <div>
-    <app-cover-letter-preview [coverLetter]="coverLetterResult()!" (dismissed)="onCloseCoverLetter()">
+    <app-cover-letter-preview
+      [coverLetter]="coverLetterResult()!"
+      [jobPosition]="tailoredResume().jobPosition"
+      [candidateName]="userState.currentUser()?.fullName ?? ''"
+      (dismissed)="onCloseCoverLetter()">
     </app-cover-letter-preview>
   </div>
   }

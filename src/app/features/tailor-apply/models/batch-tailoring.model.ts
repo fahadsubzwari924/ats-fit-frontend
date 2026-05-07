@@ -15,6 +15,9 @@ export interface BatchJobResult {
   filename?: string;
   optimizationConfidence?: number;
   keywordsAdded?: number;
+  sectionsChanged?: number;
+  matchScoreBefore?: number;
+  matchScoreAfter?: number;
   error?: string;
   blob?: Blob;
 }
@@ -36,4 +39,4 @@ export interface BatchGenerateResponse {
   };
 }
 
-export type BatchTailoringStep = 'input' | 'generating' | 'results';
+export type BatchTailoringStep = 'input' | 'processing' | 'results';

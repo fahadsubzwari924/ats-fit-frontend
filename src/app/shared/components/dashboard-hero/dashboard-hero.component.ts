@@ -1,15 +1,19 @@
-import { Component, computed, input, output } from '@angular/core';
-import { QuotaTileBadgeComponent } from '@shared/components/quota-tile-badge/quota-tile-badge.component';
+import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
+import { DatePipe } from '@angular/common';
 import { FeatureType } from '@core/enums/feature-type.enum';
+import { QuotaState } from '@core/states/quota.state';
 
 @Component({
   selector: 'app-dashboard-hero',
   standalone: true,
-  imports: [QuotaTileBadgeComponent],
+  imports: [DatePipe],
   templateUrl: './dashboard-hero.component.html',
   styleUrl: './dashboard-hero.component.scss',
+  changeDetection: ChangeDetectionStrategy.OnPush,
 })
 export class DashboardHeroComponent {
+  private readonly quotaState = inject(QuotaState);
+
   userName = input<string | null | undefined>(undefined);
   resumeCount = input<number>(0);
 
@@ -19,6 +23,15 @@ export class DashboardHeroComponent {
 
   readonly displayName = computed(() => this.userName() || 'User');
 
-  protected readonly TAILOR_FEATURE = FeatureType.RESUME_GENERATION;
-  protected readonly BATCH_FEATURE = FeatureType.RESUME_BATCH_GENERATION;
+  /**
+   * Single primary quota stat for the hero: tailored resumes per month.
+   * Single tailoring + every resume produced in a batch share this same pool,
+   * so we surface ONE clear number instead of duplicating it per action card.
+   * Returns null when usage hasn't loaded yet (hides the strip until ready).
+   */
+  readonly tailoredResumesQuota = this.quotaState.quotaFor(
+    FeatureType.RESUME_GENERATION,
+  );
+
+  readonly quotaStatus = computed(() => this.tailoredResumesQuota()?.status ?? 'healthy');
 }

@@ -26,6 +26,18 @@ export class CoverLetterService {
       .pipe(map((res) => res.data as CoverLetterResult));
   }
 
+  getByResumeGenerationId(
+    resumeGenerationId: string,
+  ): Observable<CoverLetterResult> {
+    return this._http
+      .get<ApiResponse<CoverLetterResult>>(
+        API_ROUTES.createAPIRoute(
+          `${API_ROUTES.RESUME.COVER_LETTER}/${resumeGenerationId}`,
+        ),
+      )
+      .pipe(map((res) => res.data as CoverLetterResult));
+  }
+
   generateStandalone(
     jobPosition: string,
     companyName: string,

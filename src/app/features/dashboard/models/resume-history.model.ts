@@ -9,6 +9,7 @@ export interface ResumeHistoryItem {
   templateId: string | null;
   createdAt: string | Date;
   canDownload: boolean;
+  hasCoverLetter: boolean;
   matchScore: { before: number; after: number; delta: number } | null;
   atsChecks: { passed: number; total: number } | null;
 }

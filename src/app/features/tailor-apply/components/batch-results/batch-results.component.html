@@ -76,10 +76,25 @@
             {{ result.jobPosition }}
             <span class="text-slate-400 font-normal">&#64; {{ result.companyName }}</span>
           </p>
-          @if (result.status === 'success' && result.optimizationConfidence) {
-            <p class="text-xs text-slate-400 mt-0.5">
-              <span class="text-success font-semibold">{{ result.optimizationConfidence }}% confidence</span>
-              · {{ result.keywordsAdded }} keywords added
+          @if (result.status === 'success') {
+            <p class="text-xs text-slate-500 mt-0.5">
+              @if (
+                result.matchScoreBefore != null &&
+                result.matchScoreAfter != null &&
+                result.matchScoreAfter > result.matchScoreBefore
+              ) {
+                <span class="text-slate-400">{{ result.matchScoreBefore }}%</span>
+                <span class="text-slate-300 mx-1" aria-hidden="true">→</span>
+                <span class="text-success-strong font-semibold">{{ result.matchScoreAfter }}% match</span>
+              } @else if (result.matchScoreAfter != null) {
+                <span class="text-success-strong font-semibold">{{ result.matchScoreAfter }}% match</span>
+              }
+              @if (result.matchScoreAfter != null && result.sectionsChanged != null) {
+                <span class="text-slate-300 mx-1.5" aria-hidden="true">·</span>
+              }
+              @if (result.sectionsChanged != null) {
+                <span>{{ result.sectionsChanged }} section{{ result.sectionsChanged !== 1 ? 's' : '' }} updated</span>
+              }
             </p>
           }
           @if (result.status === 'failed') {
@@ -129,22 +144,6 @@
 
   <!-- Bulk actions -->
   @if (succeeded.length > 0) {
-    <label
-      class="flex cursor-pointer items-center gap-3 rounded-xl border border-primary-muted bg-primary-soft/80 px-4 py-3"
-    >
-      <input
-        type="checkbox"
-        class="h-4 w-4 rounded accent-primary disabled:opacity-50"
-        [disabled]="tracked() || isTracking()"
-        [ngModel]="trackApplicationsChecked()"
-        (ngModelChange)="trackApplicationsChecked.set($event)"
-      />
-      <div class="min-w-0 text-left">
-        <p class="text-sm font-semibold text-slate-800">Track applications</p>
-        <p class="text-xs text-slate-500">Save successful jobs to Job Applications (uncheck to skip)</p>
-      </div>
-    </label>
-
     <div class="flex flex-col gap-3 sm:flex-row">
       @if (succeeded.length > 1) {
         <button (click)="downloadAllAsZip()" [disabled]="isZipping()"
@@ -167,48 +166,36 @@
         </button>
       }
 
-      @if (trackApplicationsChecked()) {
-        <button (click)="trackAllApplications()"
-          [disabled]="isTracking() || tracked()"
-          class="flex flex-1 items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-all disabled:opacity-50"
-          [class.bg-gradient-to-r]="!tracked()"
-          [class.from-accent-purple]="!tracked()"
-          [class.to-primary]="!tracked()"
-          [class.text-white]="!tracked()"
-          [class.shadow-md]="!tracked()"
-          [class.bg-success-softer]="tracked()"
-          [class.text-success-strong]="tracked()">
-          @if (isTracking()) {
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2" class="animate-spin">
-              <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
-            </svg>
-            Tracking...
-          } @else if (tracked()) {
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2.5">
-              <polyline points="20 6 9 17 4 12"></polyline>
-            </svg>
-            {{ succeeded.length > 1 ? 'All Tracked!' : 'Tracked!' }}
-          } @else {
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2">
-              <path d="M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8"></path>
-              <path d="M3 3v5h5"></path>
-              <path d="M12 7v5l4 2"></path>
-            </svg>
-            {{ succeeded.length > 1 ? 'Track All Applications' : 'Track application' }}
-          }
-        </button>
-      } @else {
-        <button
-          type="button"
-          (click)="onFinishWithoutTracking()"
-          class="flex flex-1 items-center justify-center gap-2 rounded-2xl border border-slate-200 bg-white py-3 text-sm font-semibold text-slate-700 shadow-sm transition hover:bg-slate-50"
-        >
+      <button (click)="trackAllApplications()"
+        [disabled]="isTracking() || tracked()"
+        class="flex flex-1 items-center justify-center gap-2 rounded-2xl py-3 text-sm font-semibold transition-all disabled:opacity-50"
+        [class.bg-gradient-to-r]="!tracked()"
+        [class.from-accent-purple]="!tracked()"
+        [class.to-primary]="!tracked()"
+        [class.text-white]="!tracked()"
+        [class.shadow-md]="!tracked()"
+        [class.bg-success-softer]="tracked()"
+        [class.text-success-strong]="tracked()">
+        @if (isTracking()) {
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2" class="animate-spin">
+            <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+          </svg>
+          Saving...
+        } @else if (tracked()) {
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
           Done
-        </button>
-      }
+        } @else {
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          Done
+        }
+      </button>
     </div>
   }
 

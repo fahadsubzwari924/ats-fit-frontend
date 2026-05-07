@@ -1,7 +1,8 @@
-import { Component, inject, OnInit, signal, viewChild } from '@angular/core';
+import { Component, computed, inject, OnInit, signal } from '@angular/core';
 import { NgClass } from '@angular/common';
 import { FormBuilder, FormGroup, Validators } from '@angular/forms';
 import { MatDialogRef } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { JobService } from '@features/apply-new-job/services/job.service';
@@ -27,6 +28,7 @@ import { QuotaState } from '@core/states/quota.state';
     StepTemplateSelectComponent,
     StepResultsComponent,
     QuotaAlertBannerComponent,
+    MatTooltipModule,
   ],
   templateUrl: './tailor-apply-modal.component.html',
   styleUrl: './tailor-apply-modal.component.scss',
@@ -40,7 +42,9 @@ export class TailorApplyModalComponent implements OnInit {
   readonly dialogRef = inject(MatDialogRef<TailorApplyModalComponent>);
 
   protected readonly TAILOR_FEATURES: FeatureType[] = [FeatureType.RESUME_GENERATION];
-  protected readonly quotaBanner = viewChild(QuotaAlertBannerComponent);
+  readonly isTailorQuotaExhausted = computed(() =>
+    this.quotaState.firstExhausted(this.TAILOR_FEATURES)() !== null
+  );
 
   form!: FormGroup;
   currentStep = signal<TailorApplyStep>(1);
@@ -81,6 +85,8 @@ export class TailorApplyModalComponent implements OnInit {
         this.simulateProgress([75, 100]);
         await new Promise((r) => setTimeout(r, 600));
         this.isProcessing.set(false);
+        resume.jobPosition = this.form.value.jobPosition ?? '';
+        resume.companyName = this.form.value.companyName ?? '';
         this.tailoredResume.set(resume);
         this.currentStep.set(3);
         this.quotaState.notifyFeatureConsumed(FeatureType.RESUME_GENERATION);

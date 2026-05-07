@@ -2,9 +2,9 @@
 const FEATURE_USAGE_BAR_PALETTE = ['#2563EB', '#7C3AED', '#0891B2'] as const;
 
 const FEATURE_USAGE_LABEL_OVERRIDES: Record<string, string> = {
-  resume_generation: 'Resume Generations',
-  cover_letter: 'Cover Letters',
-  resume_batch_generation: 'Batch Resume Generations',
+  resume_generation: 'Tailored resumes',
+  cover_letter: 'Cover letters',
+  resume_batch_generation: 'Batch jobs',
 };
 
 const FEATURE_USAGE_COLOR_OVERRIDES: Record<string, string> = {

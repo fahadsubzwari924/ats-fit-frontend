@@ -1,11 +1,25 @@
-import { Component, DestroyRef, inject, OnInit, signal, viewChild } from '@angular/core';
+import {
+  Component,
+  DestroyRef,
+  computed,
+  effect,
+  inject,
+  OnInit,
+  signal,
+} from '@angular/core';
 import { MatDialogRef } from '@angular/material/dialog';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { BatchJobInputComponent } from './components/batch-job-input/batch-job-input.component';
 import { BatchResultsComponent } from './components/batch-results/batch-results.component';
-import { BatchTailoringService } from './services/batch-tailoring.service';
+import { BatchProcessingViewComponent } from './components/batch-processing-view/batch-processing-view.component';
+import { BatchTailoringFlowController } from './state/batch-tailoring-flow.controller';
+import { BatchTailoringV2State } from './state/batch-tailoring-v2.state';
 import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
+import { BlobDownloadService } from '@shared/services/blob-download.service';
+import { UserState } from '@core/states/user.state';
+import { generateResumeFilename } from '@core/utils/download-filename.util';
 import { ResumeTemplate } from '@features/resume-tailoring/models/resume-template.model';
 import { QuotaAlertBannerComponent } from '@shared/components/quota-alert-banner/quota-alert-banner.component';
 import { FeatureType } from '@core/enums/feature-type.enum';
@@ -13,116 +27,156 @@ import { QuotaState } from '@core/states/quota.state';
 import {
   BatchGenerateRequest,
   BatchGenerateResponse,
-  BatchJobInput,
   BatchTailoringStep,
 } from './models/batch-tailoring.model';
+import type { BatchJobLiveState } from './models/batch-tailoring-v2.model';
 import { TailoringModalCloseResult } from './models/tailoring-modal-close-result.model';
-
-const ESTIMATED_SECONDS_PER_JOB = 40; // ~2 minutes for 3 jobs (120 seconds total)
 
 @Component({
   selector: 'app-batch-tailoring-modal',
   standalone: true,
-  imports: [BatchJobInputComponent, BatchResultsComponent, QuotaAlertBannerComponent],
+  imports: [
+    BatchJobInputComponent,
+    BatchResultsComponent,
+    BatchProcessingViewComponent,
+    QuotaAlertBannerComponent,
+    MatTooltipModule,
+  ],
   templateUrl: './batch-tailoring-modal.component.html',
+  providers: [BatchTailoringV2State, BatchTailoringFlowController],
 })
 export class BatchTailoringModalComponent implements OnInit {
-  private readonly batchService = inject(BatchTailoringService);
   private readonly resumeService = inject(ResumeService);
   private readonly snackbar = inject(SnackbarService);
   private readonly destroyRef = inject(DestroyRef);
   private readonly quotaState = inject(QuotaState);
+  private readonly downloader = inject(BlobDownloadService);
+  private readonly userState = inject(UserState);
   readonly dialogRef = inject(MatDialogRef<BatchTailoringModalComponent>);
+
+  readonly flow = inject(BatchTailoringFlowController);
+  readonly batchV2State = inject(BatchTailoringV2State);
 
   step = signal<BatchTailoringStep>('input');
   templates = signal<ResumeTemplate[]>([]);
   batchResponse = signal<BatchGenerateResponse | null>(null);
   jobCount = signal(2);
-  estimatedSeconds = signal(0);
-  elapsedSeconds = signal(0);
-  private timerInterval: ReturnType<typeof setInterval> | null = null;
 
-  protected readonly BATCH_FEATURES: FeatureType[] = [FeatureType.RESUME_BATCH_GENERATION];
-  protected readonly quotaBanner = viewChild(QuotaAlertBannerComponent);
+  /**
+   * Guard against repeat firing of the quota-consumed notification (which
+   * triggers a `/users/me` round-trip). Without this flag, any reactive
+   * downstream signal write that re-runs the effect after a terminal
+   * transition would refetch the user repeatedly. Reset by `onGenerate` for
+   * a fresh batch run.
+   */
+  private quotaNotifiedForRun = false;
+
+  protected readonly BATCH_FEATURES: FeatureType[] = [
+    FeatureType.RESUME_BATCH_GENERATION,
+  ];
+  readonly isBatchQuotaExhausted = computed(
+    () => this.quotaState.firstExhausted(this.BATCH_FEATURES)() !== null,
+  );
+
+  constructor() {
+    // Drive `step` and the surfaced response/error from the flow controller's
+    // status signal. The controller owns SSE/polling lifecycle; the modal is
+    // a thin shell that reflects status into UI state.
+    effect(() => {
+      const status = this.flow.status();
+      if (status === 'completed') {
+        const response = this.flow.response();
+        if (response) {
+          this.batchResponse.set(response);
+          this.step.set('results');
+          if (!this.quotaNotifiedForRun) {
+            this.quotaNotifiedForRun = true;
+            this.quotaState.notifyFeatureConsumed(
+              FeatureType.RESUME_BATCH_GENERATION,
+            );
+          }
+        }
+      } else if (status === 'failed') {
+        const err = this.flow.error();
+        if (err) this.snackbar.showError(err);
+        this.step.set('input');
+      }
+    });
+  }
 
   ngOnInit(): void {
-    this.resumeService.getResumeTemplates().pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe((templates) => this.templates.set(templates));
+    this.resumeService
+      .getResumeTemplates()
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe((templates) => this.templates.set(templates));
   }
 
   onGenerate(payload: BatchGenerateRequest): void {
     this.jobCount.set(payload.jobs.length);
-    this.estimatedSeconds.set(payload.jobs.length * ESTIMATED_SECONDS_PER_JOB);
-    this.elapsedSeconds.set(0);
-    this.step.set('generating');
-    this.startTimer();
-
-    this.batchService.generateBatch(payload).pipe(
-      takeUntilDestroyed(this.destroyRef),
-    ).subscribe({
-      next: (response) => {
-        this.stopTimer();
-        this.batchResponse.set(this.attachJobDescriptions(response, payload.jobs));
-        this.step.set('results');
-        this.quotaState.notifyFeatureConsumed(FeatureType.RESUME_BATCH_GENERATION);
-      },
-      error: (err) => {
-        this.stopTimer();
-        this.step.set('input');
-        this.snackbar.showError(
-          err?.error?.message ?? 'Batch generation failed. Please try again.',
-        );
-      },
-    });
+    this.step.set('processing');
+    this.quotaNotifiedForRun = false;
+    this.flow.start(payload);
   }
 
-  private startTimer(): void {
-    this.timerInterval = setInterval(() => {
-      this.elapsedSeconds.update((s) => s + 1);
-    }, 1000);
-  }
+  onDownloadJob(job: BatchJobLiveState): void {
+    const result = job.result;
+    if (!result) return;
+    const filename =
+      result.filename ?? generateResumeFilename(this.userState.currentUser()?.fullName ?? '', job.jobPosition ?? '');
 
-  private stopTimer(): void {
-    if (this.timerInterval) {
-      clearInterval(this.timerInterval);
-      this.timerInterval = null;
+    // Snapshot replays from the `/status` endpoint do NOT include `pdfContent`
+    // (only the live `job_completed` SSE event does), so fall back to fetching
+    // the PDF from the backend by `resumeGenerationId`. Without this the
+    // download button silently no-ops on reconnect/replay paths.
+    if (result.pdfContent) {
+      this.downloader.downloadFromBase64(
+        result.pdfContent,
+        filename,
+        'application/pdf',
+      );
+      return;
     }
+
+    if (result.resumeGenerationId) {
+      this.resumeService
+        .downloadResumeById(result.resumeGenerationId)
+        .pipe(takeUntilDestroyed(this.destroyRef))
+        .subscribe({
+          next: (blob) => this.downloader.download(blob, filename),
+          error: () =>
+            this.snackbar.showError(
+              'Could not download this resume. Please try again.',
+            ),
+        });
+      return;
+    }
+
+    this.snackbar.showError('Resume not yet available for download.');
   }
 
-  private attachJobDescriptions(
-    response: BatchGenerateResponse,
-    jobs: BatchJobInput[],
-  ): BatchGenerateResponse {
-    return {
-      ...response,
-      results: response.results.map((r, i) => ({
-        ...r,
-        jobDescription: jobs[i]?.jobDescription ?? r.jobDescription ?? '',
-      })),
-    };
+  onSeeChanges(_job: BatchJobLiveState): void {
+    // The comparison view is handled by batch-results component.
+    // No-op until the processing view has a comparison panel.
   }
 
-  get progressPercent(): number {
-    const est = this.estimatedSeconds();
-    if (!est) return 0;
-    return Math.min(95, Math.round((this.elapsedSeconds() / est) * 100));
-  }
-
-  get remainingSeconds(): number {
-    return Math.max(0, this.estimatedSeconds() - this.elapsedSeconds());
+  onRetry(_job: BatchJobLiveState): void {
+    this.snackbar.showError(
+      'Retry not yet available — please re-run via Tailor Another Set.',
+    );
   }
 
   onTailorAnother(): void {
     this.batchResponse.set(null);
     this.step.set('input');
+    this.flow.reset();
   }
 
   close(): void {
-    this.stopTimer();
     const summary = this.batchResponse()?.summary;
     const shouldRefresh =
-      this.step() === 'results' && summary !== undefined && summary.succeeded > 0;
+      this.step() === 'results' &&
+      summary !== undefined &&
+      summary.succeeded > 0;
     const result: TailoringModalCloseResult | undefined = shouldRefresh
       ? { refreshDashboard: true, tailoringCompleted: true }
       : undefined;

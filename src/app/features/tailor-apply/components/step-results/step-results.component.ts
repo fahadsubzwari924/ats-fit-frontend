@@ -20,6 +20,7 @@ import { DownloadFileName } from '@core/enums/download-file-name.enum';
 import { QuotaLockedButtonComponent } from '@shared/components/quota-locked-button/quota-locked-button.component';
 import { QuotaState } from '@core/states/quota.state';
 import { FeatureType } from '@core/enums/feature-type.enum';
+import { UserState } from '@core/states/user.state';
 
 type ActivePanel = 'none' | 'comparison' | 'coverLetter';
 
@@ -58,6 +59,7 @@ export class StepResultsComponent {
   private readonly snackbar = inject(SnackbarService);
   private readonly coverLetterService = inject(CoverLetterService);
   private readonly quotaState = inject(QuotaState);
+  protected readonly userState = inject(UserState);
 
   tailoredResume = input.required<TailoredResume>();
 
