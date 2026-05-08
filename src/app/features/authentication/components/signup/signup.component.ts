@@ -132,7 +132,11 @@ export class SignupComponent implements OnInit {
           // (onboardingGuard on the dashboard layout handles the /onboarding redirect for new users)
           const code = this.route.snapshot.queryParamMap.get('code');
           if (code) {
-            this.router.navigateByUrl(`/beta/redeem?code=${encodeURIComponent(code)}`);
+            const email = this.route.snapshot.queryParamMap.get('email');
+            const redeemUrl = email
+              ? `/beta/redeem?code=${encodeURIComponent(code)}&email=${encodeURIComponent(email)}`
+              : `/beta/redeem?code=${encodeURIComponent(code)}`;
+            this.router.navigateByUrl(redeemUrl);
           } else {
             this.router.navigateByUrl(AppRoutes.DASHBOARD);
           }

@@ -112,11 +112,15 @@ export class SigninComponent implements OnInit, OnDestroy {
           this.userState.setUser(response.user);
           const returnUrl = this.route.snapshot.queryParamMap.get('returnUrl');
           const code = this.route.snapshot.queryParamMap.get('code');
+          const email = this.route.snapshot.queryParamMap.get('email');
           this.betaApiService.getStatus().subscribe({
             next: (status) => {
               this.betaState.setStatus(status);
               if (code) {
-                this.router.navigateByUrl(`/beta/redeem?code=${encodeURIComponent(code)}`);
+                const redeemUrl = email
+                  ? `/beta/redeem?code=${encodeURIComponent(code)}&email=${encodeURIComponent(email)}`
+                  : `/beta/redeem?code=${encodeURIComponent(code)}`;
+                this.router.navigateByUrl(redeemUrl);
               } else if (returnUrl && returnUrl.startsWith('/')) {
                 this.router.navigateByUrl(returnUrl);
               } else if (status.status === 'pending') {
@@ -127,7 +131,10 @@ export class SigninComponent implements OnInit, OnDestroy {
             },
             error: () => {
               if (code) {
-                this.router.navigateByUrl(`/beta/redeem?code=${encodeURIComponent(code)}`);
+                const redeemUrl = email
+                  ? `/beta/redeem?code=${encodeURIComponent(code)}&email=${encodeURIComponent(email)}`
+                  : `/beta/redeem?code=${encodeURIComponent(code)}`;
+                this.router.navigateByUrl(redeemUrl);
               } else {
                 const fallback = returnUrl && returnUrl.startsWith('/') ? returnUrl : AppRoutes.DASHBOARD;
                 this.router.navigateByUrl(fallback);
