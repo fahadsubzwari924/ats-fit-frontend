@@ -1,7 +1,9 @@
 import { computed, Injectable, signal } from '@angular/core';
 import {
+  ProcessingStatusEnum,
   ProfileState,
   ResumeProfileStatus,
+  TailoringModeEnum,
 } from '@features/dashboard/models/resume-profile.model';
 
 @Injectable({
@@ -18,17 +20,17 @@ export class ResumeProfileState {
     const s = this._profileStatus();
     if (!s) return 'no_resume';
     if (!s.hasResume) return 'no_resume';
-    if (s.processingStatus === 'queued' || s.processingStatus === 'processing') {
+    if (s.processingStatus === ProcessingStatusEnum.QUEUED || s.processingStatus === ProcessingStatusEnum.PROCESSING) {
       return 'processing';
     }
-    if (s.processingStatus === 'failed') return 'failed';
+    if (s.processingStatus === ProcessingStatusEnum.FAILED) return 'failed';
 
     // Precision-ready only when the API says precision AND an enriched profile exists.
     // Do not treat "zero questions" as complete — that means generation/pipeline not done yet.
     const precisionProfileReady =
-      s.tailoringMode === 'precision' &&
+      s.tailoringMode === TailoringModeEnum.PRECISION &&
       s.enrichedProfileId != null &&
-      s.processingStatus === 'completed';
+      s.processingStatus === ProcessingStatusEnum.COMPLETED;
 
     if (precisionProfileReady) return 'complete';
 
@@ -43,7 +45,7 @@ export class ResumeProfileState {
     }
 
     // Extraction finished but no question rows yet, or still on standard tailoring only.
-    if (s.processingStatus === 'completed') return 'awaiting_precision_questions';
+    if (s.processingStatus === ProcessingStatusEnum.COMPLETED) return 'awaiting_precision_questions';
 
     return 'no_resume';
   });
@@ -66,6 +68,26 @@ export class ResumeProfileState {
     if (!s || s.questionsTotal === 0) return 0;
     return Math.max(0, s.questionsTotal - s.questionsAnswered);
   });
+
+  /** True when the active extract is processing AND a previous archived extract exists */
+  readonly replacementInProgress = computed(
+    () => this._profileStatus()?.replacementInProgress ?? false,
+  );
+
+  /** Whether the current processing state is from a replacement (vs initial upload) */
+  readonly isReplacement = computed(
+    () =>
+      this.profileState() === 'processing' &&
+      (this._profileStatus()?.replacementInProgress ?? false),
+  );
+
+  readonly lastArchivedExtractId = computed(
+    () => this._profileStatus()?.lastArchivedExtractId ?? null,
+  );
+
+  readonly replacementQuota = computed(
+    () => this._profileStatus()?.quota ?? null,
+  );
 
   setProfileStatus(status: ResumeProfileStatus | null): void {
     this._profileStatus.set(status);

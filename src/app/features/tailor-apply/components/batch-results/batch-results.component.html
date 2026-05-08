@@ -79,20 +79,20 @@
           @if (result.status === 'success') {
             <p class="text-xs text-slate-500 mt-0.5">
               @if (
-                result.matchScoreBefore != null &&
-                result.matchScoreAfter != null &&
+                result.matchScoreBefore !== undefined &&
+                result.matchScoreAfter !== undefined &&
                 result.matchScoreAfter > result.matchScoreBefore
               ) {
                 <span class="text-slate-400">{{ result.matchScoreBefore }}%</span>
                 <span class="text-slate-300 mx-1" aria-hidden="true">→</span>
                 <span class="text-success-strong font-semibold">{{ result.matchScoreAfter }}% match</span>
-              } @else if (result.matchScoreAfter != null) {
+              } @else if (result.matchScoreAfter !== undefined) {
                 <span class="text-success-strong font-semibold">{{ result.matchScoreAfter }}% match</span>
               }
-              @if (result.matchScoreAfter != null && result.sectionsChanged != null) {
+              @if (result.matchScoreAfter !== undefined && result.sectionsChanged !== undefined) {
                 <span class="text-slate-300 mx-1.5" aria-hidden="true">·</span>
               }
-              @if (result.sectionsChanged != null) {
+              @if (result.sectionsChanged !== undefined) {
                 <span>{{ result.sectionsChanged }} section{{ result.sectionsChanged !== 1 ? 's' : '' }} updated</span>
               }
             </p>

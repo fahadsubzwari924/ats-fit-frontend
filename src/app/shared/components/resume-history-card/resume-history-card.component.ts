@@ -14,6 +14,9 @@ export class ResumeHistoryCardComponent {
   items = input<ResumeHistoryItem[]>([]);
   loading = input<boolean>(false);
   downloadingId = input<string | null>(null);
+  /** When true, disables the empty-state "Create your first one" CTA. */
+  createDisabled = input<boolean>(false);
+  createDisabledReason = input<string>('');
 
   viewAllClicked = output<void>();
   createFirstClicked = output<void>();

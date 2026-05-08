@@ -139,7 +139,12 @@ export class QuestionsDrawerComponent {
     this.editingQuestionId.set(null);
     const prevAnswered = this.answeredQ();
     const total = this.totalQ();
-    const newAnswered = prevAnswered + 1;
+    const previousQuestion = this.groups()
+      .flatMap((g) => g.questions)
+      .find((q) => q.id === payload.questionId);
+    // Editing an already-answered question must NOT increment the count.
+    const wasAnswered = previousQuestion?.isAnswered ?? false;
+    const newAnswered = wasAnswered ? prevAnswered : prevAnswered + 1;
 
     // Optimistic update
     this.groups.update((list) =>
@@ -163,21 +168,23 @@ export class QuestionsDrawerComponent {
           if (res.enrichedProfileId) {
             this.profileState.setEnrichedProfileId(res.enrichedProfileId);
           } else if (newAnswered === total) {
+            // First completion OR edit-after-completion: backend re-enqueues
+            // enrichment so the precision profile reflects the latest answers.
             this.profileQuestionsService.startEnrichmentPolling();
           }
         },
         error: () => {
           this.saveError.set('Failed to save. Please try again.');
-          this.groups.update((list) =>
-            list.map((g) => ({
-              ...g,
-              questions: g.questions.map((q) =>
-                q.id === payload.questionId
-                  ? { ...q, userResponse: null, isAnswered: false }
-                  : q
-              ),
-            }))
-          );
+          if (previousQuestion) {
+            this.groups.update((list) =>
+              list.map((g) => ({
+                ...g,
+                questions: g.questions.map((q) =>
+                  q.id === payload.questionId ? { ...previousQuestion } : q
+                ),
+              }))
+            );
+          }
           this.profileState.updateQuestionAnswered(prevAnswered, prevAnswered / total);
         },
       });

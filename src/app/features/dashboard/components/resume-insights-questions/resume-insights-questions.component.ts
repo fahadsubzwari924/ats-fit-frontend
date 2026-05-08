@@ -8,6 +8,8 @@ import { EmployerQuestionGroup } from '@features/dashboard/models/profile-questi
 import { EmployerQuestionGroupComponent } from './employer-question-group/employer-question-group.component';
 import { ModalService } from '@shared/services/modal.service';
 import { TailorApplyModalComponent } from '@features/tailor-apply/tailor-apply-modal.component';
+import { SnackbarService } from '@shared/services/snackbar.service';
+import { RESUME_REPLACEMENT_COPY } from '@core/constants/resume-replacement.constants';
 
 const ENRICHMENT_POLL_INTERVAL_MS = 4000;
 const ENRICHMENT_POLL_MAX_ATTEMPTS = 15;
@@ -24,6 +26,7 @@ export class ResumeInsightsQuestionsComponent {
   private readonly profileState = inject(ResumeProfileState);
   private readonly modalService = inject(ModalService);
   private readonly destroyRef = inject(DestroyRef);
+  private readonly snackbar = inject(SnackbarService);
 
   private enrichmentPollSub: Subscription | null = null;
 
@@ -69,6 +72,17 @@ export class ResumeInsightsQuestionsComponent {
     this.allAnswered() && !this.isProfileComplete() && !this.isEnriching()
   );
 
+  readonly isReplacement = this.profileState.isReplacement;
+
+  readonly enrichingCopy = computed(() => {
+    const set = this.wasReplacement()
+      ? RESUME_REPLACEMENT_COPY.state.replacement
+      : RESUME_REPLACEMENT_COPY.state.initial;
+    return { title: set.enrichingTitle, subtitle: set.enrichingSubtitle };
+  });
+
+  private readonly wasReplacement = signal(false);
+
   constructor() {
     this.loadQuestions();
 
@@ -80,6 +94,19 @@ export class ResumeInsightsQuestionsComponent {
       );
       if (index !== -1) {
         this.expandedIndex.set(index);
+      }
+    });
+
+    effect(() => {
+      if (this.isReplacement()) {
+        this.wasReplacement.set(true);
+      }
+    });
+
+    effect(() => {
+      if (this.isProfileComplete() && this.wasReplacement()) {
+        this.wasReplacement.set(false);
+        this.snackbar.showSuccess(RESUME_REPLACEMENT_COPY.state.replacement.completeToast);
       }
     });
   }
@@ -107,7 +134,12 @@ export class ResumeInsightsQuestionsComponent {
     this.editingQuestionId.set(null);
     const prevAnswered = this.answeredCount();
     const total = this.totalQuestions();
-    const newAnswered = prevAnswered + 1;
+    const previousQuestion = this.groups()
+      .flatMap((g) => g.questions)
+      .find((q) => q.id === payload.questionId);
+    // Editing an already-answered question must NOT increment the count.
+    const wasAnswered = previousQuestion?.isAnswered ?? false;
+    const newAnswered = wasAnswered ? prevAnswered : prevAnswered + 1;
     // Optimistic update
     this.groups.update((list) =>
       list.map((g) => ({
@@ -134,16 +166,16 @@ export class ResumeInsightsQuestionsComponent {
         },
         error: () => {
           this.saveError.set('Failed to save, please try again.');
-          this.groups.update((list) =>
-            list.map((g) => ({
-              ...g,
-              questions: g.questions.map((q) =>
-                q.id === payload.questionId
-                  ? { ...q, userResponse: null, isAnswered: false }
-                  : q
-              ),
-            }))
-          );
+          if (previousQuestion) {
+            this.groups.update((list) =>
+              list.map((g) => ({
+                ...g,
+                questions: g.questions.map((q) =>
+                  q.id === payload.questionId ? { ...previousQuestion } : q
+                ),
+              }))
+            );
+          }
           this.profileState.updateQuestionAnswered(prevAnswered, prevAnswered / total);
         },
       });

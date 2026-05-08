@@ -1,4 +1,5 @@
-import { Component, effect, inject, input, signal, OnDestroy } from '@angular/core';
+import { Component, computed, effect, inject, input, output, signal, OnDestroy } from '@angular/core';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { Messages } from '@core/enums/messages.enum';
 import { ResponseStatus } from '@core/enums/response-status.enum';
 import { IResumeUpload } from '@features/dashboard/enums/resume-upload.interface';
@@ -7,25 +8,30 @@ import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { UserState } from '@core/states/user.state';
 import { BillingNavigationService } from '@shared/services/billing-navigation.service';
+import { ModalService } from '@shared/services/modal.service';
 import { UpgradePromptCopy } from '@core/constants/upgrade-prompt-copy';
+import { UpgradeFeatureDialogComponent } from '@shared/components/upgrade-feature-dialog/upgrade-feature-dialog.component';
+import { ReplaceResumeModalComponent } from '../../replace-resume-modal/replace-resume-modal.component';
 import { saveAs } from 'file-saver';
 import { Subscription } from 'rxjs';
 
 @Component({
   selector: 'app-tailore-resume-upload',
-  imports: [],
+  imports: [MatTooltipModule],
   templateUrl: './tailore-resume-upload.component.html',
   styleUrl: './tailore-resume-upload.component.scss',
 })
 export class TailoreResumeUploadComponent implements OnDestroy {
   /** `preview` shows locked upsell for freemium; `full` is interactive (premium). */
   mode = input<'full' | 'preview'>('full');
+  readonly replacementSubmitted = output<void>();
 
   // Injections
   private resumeService = inject(ResumeService);
   private snackbarService = inject(SnackbarService);
   private userState = inject(UserState);
   private billingNav = inject(BillingNavigationService);
+  private readonly modal = inject(ModalService);
 
   readonly upgradeCopy = UpgradePromptCopy;
 
@@ -33,6 +39,7 @@ export class TailoreResumeUploadComponent implements OnDestroy {
   public isProcessing = signal<boolean>(false);
   public progress = signal<number>(0);
   public uploadedResumes = signal<UploadedResume[]>(this.userState.uploadedResumes());
+  readonly hasActiveResume = computed(() => this.uploadedResumes().length > 0);
 
   // Subscriptions
   private subscriptions: Subscription[] = [];
@@ -140,6 +147,20 @@ export class TailoreResumeUploadComponent implements OnDestroy {
     if (resume?.s3Url) {
       saveAs(resume.s3Url, resume.fileName);
     }
+  }
+
+  handleReplaceResume(): void {
+    if (!this.userState.isPremiumUser()) {
+      this.modal.openModal(UpgradeFeatureDialogComponent);
+      return;
+    }
+    this.modal.openModal(ReplaceResumeModalComponent)
+      .afterClosed()
+      .subscribe((result) => {
+        if (result === 'submitted') {
+          this.replacementSubmitted.emit();
+        }
+      });
   }
 
   goToPlans(): void {
