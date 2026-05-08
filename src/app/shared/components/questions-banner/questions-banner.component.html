@@ -1,36 +1,50 @@
 @if (visible()) {
-  <div @slideDown class="bg-[#EFF6FF] border-b border-[#BFDBFE]">
+  <div @slideDown
+    [class]="mode() === 'review'
+      ? 'bg-[#F0FDF4] border-b border-[#BBF7D0]'
+      : 'bg-[#EFF6FF] border-b border-[#BFDBFE]'">
     <div class="max-w-[1280px] mx-auto px-6 py-2.5 flex items-center justify-between gap-4">
-      <div class="flex items-center gap-3">
-        <div class="w-7 h-7 rounded-full bg-[#2563EB] flex items-center justify-center flex-shrink-0">
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            stroke-width="2"
-            stroke-linecap="round"
-            stroke-linejoin="round"
-            class="text-white">
-            <circle cx="12" cy="12" r="10"></circle>
-            <path d="M12 8v4"></path>
-            <path d="M12 16h.01"></path>
-          </svg>
+      <div class="flex items-center gap-3 min-w-0">
+        <div
+          class="w-7 h-7 rounded-full flex items-center justify-center flex-shrink-0"
+          [class]="mode() === 'review' ? 'bg-[#16A34A]' : 'bg-[#2563EB]'">
+          @if (mode() === 'review') {
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+              <polyline points="20 6 9 17 4 12"></polyline>
+            </svg>
+          } @else {
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+              stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-white">
+              <circle cx="12" cy="12" r="10"></circle>
+              <path d="M12 8v4"></path>
+              <path d="M12 16h.01"></path>
+            </svg>
+          }
         </div>
-        <p class="text-[13px] font-semibold text-[#1E40AF]">
-          Resume analyzed —
-          <span class="text-[#2563EB]">questions remaining</span>
-          <span class="font-normal text-[#3B82F6] ml-2 text-[12px]">Answering unlocks precision tailoring</span>
-        </p>
+        @if (mode() === 'review') {
+          <p class="text-[13px] font-semibold text-[#15803D] truncate">
+            Profile answers complete
+            <span class="font-normal text-[#16A34A] ml-2 text-[12px]">
+              {{ answeredCount() }} of {{ totalCount() }} answered — update anytime to refine precision
+            </span>
+          </p>
+        } @else {
+          <p class="text-[13px] font-semibold text-[#1E40AF] truncate">
+            Resume analyzed —
+            <span class="text-[#2563EB]">questions remaining</span>
+            <span class="font-normal text-[#3B82F6] ml-2 text-[12px]">Answering unlocks precision tailoring</span>
+          </p>
+        }
       </div>
-      <div class="flex items-center gap-3">
+      <div class="flex items-center gap-3 flex-shrink-0">
         <button
           type="button"
           (click)="answerClicked.emit()"
-          class="flex items-center gap-1.5 px-3.5 py-1.5 bg-[#2563EB] text-white text-[12.5px] font-semibold rounded-lg hover:bg-[#1D4ED8] transition-colors whitespace-nowrap cursor-pointer">
-          Answer Questions
+          [class]="mode() === 'review'
+            ? 'flex items-center gap-1.5 px-3.5 py-1.5 bg-white border border-[#BBF7D0] text-[#15803D] text-[12.5px] font-semibold rounded-lg hover:bg-[#F0FDF4] hover:border-[#86EFAC] transition-colors whitespace-nowrap cursor-pointer'
+            : 'flex items-center gap-1.5 px-3.5 py-1.5 bg-[#2563EB] text-white text-[12.5px] font-semibold rounded-lg hover:bg-[#1D4ED8] transition-colors whitespace-nowrap cursor-pointer'">
+          {{ mode() === 'review' ? 'View / Edit Answers' : 'Answer Questions' }}
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
             <path d="m9 18 6-6-6-6"></path>
           </svg>

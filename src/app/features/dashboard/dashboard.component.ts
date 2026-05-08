@@ -26,7 +26,10 @@ import { ResumeProfileState } from '@core/states/resume-profile.state';
 import { AppliedJob } from '@features/apply-new-job/models/applied-job.model';
 import { JobApplication } from '@features/apply-new-job/models/job-application.model';
 import { FeatureUsage } from '@core/models/user/feature-usage.model';
-import { ResumeProfileStatus } from '@features/dashboard/models/resume-profile.model';
+import {
+  ProcessingStatusEnum,
+  ResumeProfileStatus,
+} from '@features/dashboard/models/resume-profile.model';
 import { ResumeHistoryItem } from '@features/dashboard/models/resume-history.model';
 import { TailoringModalCloseResult } from '@features/tailor-apply/models/tailoring-modal-close-result.model';
 import { Messages } from '@core/enums/messages.enum';
@@ -39,6 +42,7 @@ import { QuestionsBannerComponent } from '@shared/components/questions-banner/qu
 import { ResumeHistoryCardComponent } from '@shared/components/resume-history-card/resume-history-card.component';
 import { UpgradeFeatureDialogComponent } from '@shared/components/upgrade-feature-dialog/upgrade-feature-dialog.component';
 import { DashboardPostTailorUpgradeBannerComponent } from '@features/dashboard/components/dashboard-post-tailor-upgrade-banner/dashboard-post-tailor-upgrade-banner.component';
+import { ExtractionFailedBannerComponent } from '@features/dashboard/components/extraction-failed-banner/extraction-failed-banner.component';
 
 const POLL_INTERVAL_MS = 5000;
 const POST_TAILOR_UPGRADE_SUPPRESS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -57,6 +61,7 @@ const POLL_MAX_ATTEMPTS = 24;
     QuestionsBannerComponent,
     ResumeHistoryCardComponent,
     DashboardPostTailorUpgradeBannerComponent,
+    ExtractionFailedBannerComponent,
     BetaExpiryModalComponent,
   ],
   templateUrl: './dashboard.component.html',
@@ -65,7 +70,16 @@ const POLL_MAX_ATTEMPTS = 24;
 export class DashboardComponent implements OnInit {
   readonly userState = inject(UserState);
   readonly hasResume = computed(() => (this.userState.uploadedResumes()?.length ?? 0) > 0);
-  private profileStateService = inject(ResumeProfileState);
+  protected profileStateService = inject(ResumeProfileState);
+  /** True while resume is being processed (initial upload or replacement) — blocks tailoring. */
+  readonly tailoringDisabled = computed(
+    () => this.profileStateService.profileState() === 'processing',
+  );
+  readonly tailoringDisabledReason = computed(() =>
+    this.profileStateService.replacementInProgress()
+      ? 'Resume replacement is processing. Please wait until it finishes.'
+      : 'Resume is being processed. Please wait until it finishes.',
+  );
   private destroyRef = inject(DestroyRef);
   private modalService = inject(ModalService);
   private jobService = inject(JobService);
@@ -98,7 +112,18 @@ export class DashboardComponent implements OnInit {
   get showQuestionsBanner(): boolean {
     const status = this.profileStateService.profileStatus();
     if (!status) return false;
-    return status.questionsTotal > 0 && status.questionsAnswered < status.questionsTotal;
+    if (status.questionsTotal === 0) return false;
+    // Hide while resume is still being processed — user can't act on questions yet.
+    const ps = this.profileStateService.profileState();
+    if (ps === 'processing' || ps === 'no_resume' || ps === 'failed') return false;
+    return true;
+  }
+
+  /** `pending` while answers remain; `review` once all answered (lets user view/edit anytime). */
+  get questionsBannerMode(): 'pending' | 'review' {
+    const status = this.profileStateService.profileStatus();
+    if (!status) return 'pending';
+    return status.questionsAnswered >= status.questionsTotal ? 'review' : 'pending';
   }
 
   ngOnInit(): void {
@@ -111,7 +136,7 @@ export class DashboardComponent implements OnInit {
     this.profileQuestionsService.getProfileStatus().pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
       next: (status) => {
         this.profileStateService.setProfileStatus(status);
-        if (status.processingStatus === 'queued' || status.processingStatus === 'processing') {
+        if (status.processingStatus === ProcessingStatusEnum.QUEUED || status.processingStatus === ProcessingStatusEnum.PROCESSING) {
           this.startProfileStatusPolling();
         }
         this.autoTriggerEnrichmentIfNeeded(status);
@@ -171,8 +196,8 @@ export class DashboardComponent implements OnInit {
           attempts++;
 
           const justCompleted =
-            prevProcessingStatus === 'processing' &&
-            status.processingStatus === 'completed' &&
+            prevProcessingStatus === ProcessingStatusEnum.PROCESSING &&
+            status.processingStatus === ProcessingStatusEnum.COMPLETED &&
             status.questionsTotal > 0 &&
             !this.hasAutoOpenedDrawer();
 
@@ -186,16 +211,16 @@ export class DashboardComponent implements OnInit {
 
           const timedOut =
             attempts >= POLL_MAX_ATTEMPTS &&
-            status.processingStatus !== 'completed' &&
-            status.processingStatus !== 'failed';
+            status.processingStatus !== ProcessingStatusEnum.COMPLETED &&
+            status.processingStatus !== ProcessingStatusEnum.FAILED;
 
           if (timedOut) {
             this.profileStateService.setPollingTimedOut(true);
           }
 
           const done =
-            status.processingStatus === 'completed' ||
-            status.processingStatus === 'failed' ||
+            status.processingStatus === ProcessingStatusEnum.COMPLETED ||
+            status.processingStatus === ProcessingStatusEnum.FAILED ||
             attempts >= POLL_MAX_ATTEMPTS;
           return !done;
         }, true)
@@ -205,6 +230,15 @@ export class DashboardComponent implements OnInit {
 
   onRetryProcessing(): void {
     this.profileStateService.setPollingTimedOut(false);
+    this.startProfileStatusPolling();
+  }
+
+  onRestoreCompleted(): void {
+    this.loadProfileStatus();
+  }
+
+  onReplacementSubmitted(): void {
+    this.loadProfileStatus();
     this.startProfileStatusPolling();
   }
 
@@ -336,6 +370,11 @@ export class DashboardComponent implements OnInit {
       return;
     }
 
+    if (this.tailoringDisabled()) {
+      this.snackbarService.showWarning(this.tailoringDisabledReason());
+      return;
+    }
+
     this.modalService
       .openModal(TailorApplyModalComponent, undefined, { width: '620px', maxWidth: '95vw', panelClass: 'tailor-modal-panel' })
       .afterClosed()
@@ -348,6 +387,11 @@ export class DashboardComponent implements OnInit {
     if (!this.hasResume()) {
       this.snackbarService.showError('Please upload your resume first to use Resume Tailoring.');
       this.scrollToResumeManager();
+      return;
+    }
+
+    if (this.tailoringDisabled()) {
+      this.snackbarService.showWarning(this.tailoringDisabledReason());
       return;
     }
 

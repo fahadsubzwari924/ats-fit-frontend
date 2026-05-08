@@ -1,0 +1,118 @@
+<div class="bg-white rounded-2xl shadow-xl w-[480px] max-w-[90vw]">
+
+  <!-- Header -->
+  <div class="flex items-center justify-between px-6 pt-5 pb-4 border-b border-slate-100">
+    <h2 class="text-lg font-bold text-slate-900">{{ copy.title }}</h2>
+    <button
+      type="button"
+      (click)="cancel()"
+      class="w-8 h-8 flex items-center justify-center rounded-lg hover:bg-slate-100 text-slate-400 hover:text-slate-600 transition-colors"
+      aria-label="Close">
+      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <line x1="18" y1="6" x2="6" y2="18"></line>
+        <line x1="6" y1="6" x2="18" y2="18"></line>
+      </svg>
+    </button>
+  </div>
+
+  <!-- Body -->
+  <div class="px-6 py-5 space-y-4">
+
+    <p class="text-sm text-slate-600">{{ copy.introLine }}</p>
+
+    <!-- Impact bullets -->
+    <ul class="space-y-2">
+      @for (b of copy.bullets; track b.text) {
+        <li class="flex items-center gap-2 text-sm text-slate-700">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" class="text-primary flex-shrink-0">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          {{ b.text }}
+        </li>
+      }
+    </ul>
+
+    <!-- Answers warning -->
+    @if (questionsAnswered() > 0) {
+      <div class="flex items-start gap-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2.5">
+        <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-amber-600 flex-shrink-0 mt-0.5" aria-hidden="true">
+          <path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3Z"/>
+          <path d="M12 9v4"/><path d="M12 17h.01"/>
+        </svg>
+        <p class="text-sm text-amber-800 font-medium">{{ copy.answersWarning(questionsAnswered()) }}</p>
+      </div>
+    }
+
+    <!-- Quota info -->
+    @if (replacementQuota(); as q) {
+      <div class="flex items-center gap-2 rounded-lg bg-primary-soft border border-primary-soft-border px-3 py-2">
+        <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="text-primary flex-shrink-0" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/>
+        </svg>
+        <p class="text-xs text-primary-darkest">{{ copy.quotaLine(q.used, q.limit, (q.resetsAt | date:'mediumDate') ?? '') }}</p>
+      </div>
+    }
+
+    <!-- File dropzone -->
+    <label
+      tabindex="0"
+      role="button"
+      aria-label="Choose a PDF or DOCX file to upload"
+      class="block border-2 border-dashed border-slate-200 hover:border-blue-300 rounded-lg p-6 text-center cursor-pointer transition-all duration-200 hover:bg-blue-50/50"
+      (keydown.enter)="fileInput.click()"
+      (keydown.space)="fileInput.click()">
+      <input
+        #fileInput
+        type="file"
+        class="hidden"
+        [accept]="limits.ALLOWED_MIME_TYPES.join(',')"
+        (change)="onFileSelected(asFileInput($event.target)?.files?.[0] ?? null)"
+      />
+      <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="mx-auto mb-2 text-slate-400">
+        <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+        <polyline points="17 8 12 3 7 8"></polyline>
+        <line x1="12" x2="12" y1="3" y2="15"></line>
+      </svg>
+      @if (selectedFile()) {
+        <span class="text-sm text-primary font-medium block truncate max-w-full">{{ selectedFile()!.name }}</span>
+      } @else {
+        <span class="text-sm text-slate-500">{{ copy.fileDropHint }}</span>
+      }
+    </label>
+
+    <!-- Inline error -->
+    @if (inlineError()) {
+      <div class="flex items-center gap-1.5 rounded bg-red-50 border border-red-100 px-3 py-2 text-sm text-red-600">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="flex-shrink-0" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/>
+        </svg>
+        {{ inlineError() }}
+      </div>
+    }
+
+  </div>
+
+  <!-- Footer actions -->
+  <div class="flex items-center justify-end gap-2 px-6 pb-5 pt-2">
+    <button
+      type="button"
+      (click)="cancel()"
+      class="inline-flex items-center justify-center h-9 px-4 rounded-lg text-sm font-medium text-slate-600 hover:bg-slate-100 transition-colors">
+      {{ copy.cancel }}
+    </button>
+    <button
+      type="button"
+      [disabled]="!canSubmit()"
+      (click)="submit()"
+      class="inline-flex items-center justify-center gap-1.5 h-9 px-4 rounded-lg text-sm font-semibold bg-primary text-primary-foreground hover:bg-primary-hover transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+      @if (submitting()) {
+        <svg class="animate-spin h-3.5 w-3.5" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+          <circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle>
+          <path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+        </svg>
+      }
+      {{ submitting() ? 'Replacing...' : copy.cta }}
+    </button>
+  </div>
+
+</div>

@@ -10,6 +10,7 @@ import { FeatureUsage } from '@core/models/user/feature-usage.model';
 import { TailoredResume } from '@features/resume-tailoring/models/tailored-resume.model';
 import { ResumeTemplate } from '@features/resume-tailoring/models/resume-template.model';
 import { ResumeHistoryItem } from '@features/dashboard/models/resume-history.model';
+import { ReplaceResumeResponse, RestoreArchivedResumeResponse } from '@core/models/resume-replacement.model';
 // Interfaces
 import { IResumeUpload } from '@features/dashboard/enums/resume-upload.interface';
 
@@ -129,6 +130,30 @@ export class ResumeService {
   public deleteResume(resumeId: string): Observable<ApiResponse<unknown>> {
     return this._http.delete<ApiResponse<unknown>>(
       API_ROUTES.createAPIRoute(`${API_ROUTES.USER.DELETE_RESUME}/${resumeId}`)
+    );
+  }
+
+  public replaceResume(
+    formData: FormData,
+    idempotencyKey?: string,
+  ): Observable<ReplaceResumeResponse> {
+    const headers: Record<string, string> = {};
+    if (idempotencyKey) {
+      headers['idempotency-key'] = idempotencyKey;
+    }
+    return this._http.post<ReplaceResumeResponse>(
+      API_ROUTES.createAPIRoute(API_ROUTES.USER.REPLACE_RESUME),
+      formData,
+      { headers },
+    );
+  }
+
+  public restoreArchivedResume(
+    archivedExtractId: string,
+  ): Observable<RestoreArchivedResumeResponse> {
+    return this._http.post<RestoreArchivedResumeResponse>(
+      API_ROUTES.createAPIRoute(API_ROUTES.USER.RESTORE_ARCHIVED_RESUME),
+      { archivedExtractId },
     );
   }
 

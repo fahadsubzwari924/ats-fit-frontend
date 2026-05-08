@@ -1,16 +1,30 @@
 <div class="min-h-screen bg-[#F8FAFC]">
   <app-dashboard-hero [userName]="userState.currentUser()?.fullName" [resumeCount]="resumeHistory().length"
+    [tailoringDisabled]="tailoringDisabled()" [tailoringDisabledReason]="tailoringDisabledReason()"
     (tailorClicked)="openTailorModal()" (quickTailorClicked)="openBatchTailoringModal()"
     (resumeHistoryClicked)="openResumeHistoryModal()">
   </app-dashboard-hero>
 
-  <app-questions-banner [visible]="showQuestionsBanner" (answerClicked)="onScrollToQuestions()">
+  <app-questions-banner [visible]="showQuestionsBanner"
+    [mode]="questionsBannerMode"
+    [answeredCount]="profileStateService.questionsAnswered()"
+    [totalCount]="profileStateService.questionsTotal()"
+    (answerClicked)="onScrollToQuestions()">
   </app-questions-banner>
 
   @if (showPostTailorUpgradeNudge()) {
     <div class="max-w-[1280px] mx-auto px-6 pt-4">
       <app-dashboard-post-tailor-upgrade-banner (dismissed)="onPostTailorUpgradeDismissed()">
       </app-dashboard-post-tailor-upgrade-banner>
+    </div>
+  }
+
+  @if (profileStateService.profileState() === 'failed' && profileStateService.replacementInProgress()) {
+    <div class="max-w-[1280px] mx-auto px-6 pt-4">
+      <app-extraction-failed-banner
+        (restoreCompleted)="onRestoreCompleted()"
+        (replacementSubmitted)="onReplacementSubmitted()">
+      </app-extraction-failed-banner>
     </div>
   }
 
@@ -33,11 +47,16 @@
         </div>
 
         <app-resume-history-card [items]="resumeHistory()" [loading]="resumeHistoryLoading()"
-          [downloadingId]="downloadingId()" (viewAllClicked)="openResumeHistoryModal()"
+          [downloadingId]="downloadingId()"
+          [createDisabled]="tailoringDisabled()" [createDisabledReason]="tailoringDisabledReason()"
+          (viewAllClicked)="openResumeHistoryModal()"
           (createFirstClicked)="openTailorModal()" (downloadItem)="downloadHistoryItem($event)">
         </app-resume-history-card>
 
-        <app-tailore-resume-upload [mode]="userState.isPremiumUser() ? 'full' : 'preview'"></app-tailore-resume-upload>
+        <app-tailore-resume-upload
+          [mode]="userState.isPremiumUser() ? 'full' : 'preview'"
+          (replacementSubmitted)="onRestoreCompleted()">
+        </app-tailore-resume-upload>
       </div>
 
       <div class="space-y-5">

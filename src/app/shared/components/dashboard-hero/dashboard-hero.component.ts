@@ -1,12 +1,13 @@
 import { ChangeDetectionStrategy, Component, computed, inject, input, output } from '@angular/core';
 import { DatePipe } from '@angular/common';
+import { MatTooltipModule } from '@angular/material/tooltip';
 import { FeatureType } from '@core/enums/feature-type.enum';
 import { QuotaState } from '@core/states/quota.state';
 
 @Component({
   selector: 'app-dashboard-hero',
   standalone: true,
-  imports: [DatePipe],
+  imports: [DatePipe, MatTooltipModule],
   templateUrl: './dashboard-hero.component.html',
   styleUrl: './dashboard-hero.component.scss',
   changeDetection: ChangeDetectionStrategy.OnPush,
@@ -16,6 +17,9 @@ export class DashboardHeroComponent {
 
   userName = input<string | null | undefined>(undefined);
   resumeCount = input<number>(0);
+  /** When true, disables Tailor + Quick Tailor entry buttons (e.g. resume replacement processing). */
+  tailoringDisabled = input<boolean>(false);
+  tailoringDisabledReason = input<string>('');
 
   tailorClicked = output<void>();
   quickTailorClicked = output<void>();

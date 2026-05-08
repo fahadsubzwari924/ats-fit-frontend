@@ -31,6 +31,8 @@ export const API_ROUTES = {
     ME: 'users/me',
     UPLOAD_RESUME: 'users/upload-resume',
     DELETE_RESUME: 'users/delete-resume',
+    REPLACE_RESUME: 'users/replace-resume',
+    RESTORE_ARCHIVED_RESUME: 'users/restore-archived-resume',
     FEATURE_USAGE: 'users/feature-usage',
     RESUME_PROFILE_STATUS: 'users/resume-profile-status',
     ONBOARDING_COMPLETE: 'users/onboarding/complete',

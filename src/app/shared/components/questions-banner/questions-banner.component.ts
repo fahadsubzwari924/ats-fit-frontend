@@ -1,6 +1,8 @@
 import { animate, style, transition, trigger } from '@angular/animations';
 import { Component, input, output } from '@angular/core';
 
+export type QuestionsBannerMode = 'pending' | 'review';
+
 @Component({
   selector: 'app-questions-banner',
   standalone: true,
@@ -17,5 +19,9 @@ import { Component, input, output } from '@angular/core';
 })
 export class QuestionsBannerComponent {
   visible = input<boolean>(false);
+  /** `pending` = unanswered remaining; `review` = all answered, user can view/edit. */
+  mode = input<QuestionsBannerMode>('pending');
+  answeredCount = input<number>(0);
+  totalCount = input<number>(0);
   answerClicked = output<void>();
 }

@@ -63,18 +63,18 @@
       }
       @case ('completed') {
         <p class="text-xs text-slate-500 mt-0.5">
-          @if (job().result?.matchScoreBefore != null && job().result?.matchScoreAfter != null
+          @if (job().result?.matchScoreBefore !== undefined && job().result?.matchScoreAfter !== undefined
                && job().result!.matchScoreAfter! > job().result!.matchScoreBefore!) {
             <span class="text-slate-400">{{ job().result!.matchScoreBefore }}%</span>
             <span class="text-slate-300 mx-1" aria-hidden="true">→</span>
             <span class="text-success-strong font-semibold">{{ job().result!.matchScoreAfter }}% match</span>
-          } @else if (job().result?.matchScoreAfter != null) {
+          } @else if (job().result?.matchScoreAfter !== undefined) {
             <span class="text-success-strong font-semibold">{{ job().result!.matchScoreAfter }}% match</span>
           }
-          @if (job().result?.matchScoreAfter != null && job().result?.sectionsChanged != null) {
+          @if (job().result?.matchScoreAfter !== undefined && job().result?.sectionsChanged !== undefined) {
             <span class="text-slate-300 mx-1.5" aria-hidden="true">·</span>
           }
-          @if (job().result?.sectionsChanged != null) {
+          @if (job().result?.sectionsChanged !== undefined) {
             <span>{{ job().result!.sectionsChanged }} section{{ job().result!.sectionsChanged !== 1 ? 's' : '' }} updated</span>
           }
         </p>

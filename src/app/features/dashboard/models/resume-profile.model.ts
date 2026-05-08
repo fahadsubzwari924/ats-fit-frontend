@@ -22,6 +22,9 @@ export interface ResumeProfileStatus {
   profileCompleteness: number;
   enrichedProfileId: string | null;
   tailoringMode: TailoringMode;
+  replacementInProgress?: boolean;
+  lastArchivedExtractId?: string | null;
+  quota?: import('@core/models/resume-replacement.model').ReplacementQuota | null;
 }
 
 /**
@@ -50,3 +53,18 @@ export const ProfileStateEnum = {
   AWAITING_PRECISION_QUESTIONS: 'awaiting_precision_questions',
   COMPLETE: 'complete',
 } as const satisfies Record<string, ProfileState>;
+
+export const ProcessingStatusEnum = {
+  NONE: 'none',
+  QUEUED: 'queued',
+  PROCESSING: 'processing',
+  COMPLETED: 'completed',
+  FAILED: 'failed',
+} as const satisfies Record<string, ProcessingStatus>;
+
+export const TailoringModeEnum = {
+  NONE: 'none',
+  STANDARD: 'standard',
+  ENHANCED: 'enhanced',
+  PRECISION: 'precision',
+} as const satisfies Record<string, TailoringMode>;

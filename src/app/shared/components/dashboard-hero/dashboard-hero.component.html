@@ -83,8 +83,11 @@
     <div class="grid grid-cols-3 gap-4 mt-6">
       <button
         type="button"
+        [disabled]="tailoringDisabled()"
+        [matTooltip]="tailoringDisabled() ? tailoringDisabledReason() : ''"
+        matTooltipPosition="above"
         (click)="tailorClicked.emit()"
-        class="group flex items-center gap-3 rounded-xl px-5 py-4 text-left transition-all duration-200 hero-cta-btn">
+        class="group flex items-center gap-3 rounded-xl px-5 py-4 text-left transition-all duration-200 hero-cta-btn disabled:opacity-50 disabled:cursor-not-allowed">
         <div
           class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-white"
           style="background: rgba(255,255,255,0.15)">
@@ -126,8 +129,11 @@
 
       <button
         type="button"
+        [disabled]="tailoringDisabled()"
+        [matTooltip]="tailoringDisabled() ? tailoringDisabledReason() : ''"
+        matTooltipPosition="above"
         (click)="quickTailorClicked.emit()"
-        class="group flex items-center gap-3 rounded-xl px-5 py-4 text-left transition-all duration-200 hero-cta-btn">
+        class="group flex items-center gap-3 rounded-xl px-5 py-4 text-left transition-all duration-200 hero-cta-btn disabled:opacity-50 disabled:cursor-not-allowed">
         <div
           class="w-10 h-10 rounded-lg flex items-center justify-center flex-shrink-0 text-white"
           style="background: rgba(255,255,255,0.15)">
