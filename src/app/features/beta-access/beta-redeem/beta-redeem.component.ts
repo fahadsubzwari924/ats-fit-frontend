@@ -62,6 +62,7 @@ export class BetaRedeemComponent implements OnInit {
 
   public readonly isSubmitting = signal(false);
   public readonly errorMessage = signal<string | null>(null);
+  public readonly inviteeEmail = signal<string | null>(null);
 
   public readonly currentUser = this.userState.currentUser;
 
@@ -73,6 +74,14 @@ export class BetaRedeemComponent implements OnInit {
     const code = this.route.snapshot.queryParamMap.get('code');
     if (code) {
       this.redeemForm.get('code')?.setValue(code.toUpperCase());
+    }
+    const email = this.route.snapshot.queryParamMap.get('email');
+    if (email) {
+      try {
+        this.inviteeEmail.set(decodeURIComponent(email));
+      } catch {
+        this.inviteeEmail.set(email);
+      }
     }
   }
 
