@@ -15,11 +15,14 @@ export const publicGuard: CanActivateFn = (route, _state) => {
   }
 
   const code = route.queryParamMap.get('code');
+  const email = route.queryParamMap.get('email');
   const returnUrl = route.queryParamMap.get('returnUrl');
 
   let destination = AppRoutes.DASHBOARD;
   if (code) {
-    destination = `/beta/redeem?code=${encodeURIComponent(code)}`;
+    destination = email
+      ? `/beta/redeem?code=${encodeURIComponent(code)}&email=${encodeURIComponent(email)}`
+      : `/beta/redeem?code=${encodeURIComponent(code)}`;
   } else if (returnUrl && returnUrl.startsWith('/')) {
     destination = returnUrl;
   }
