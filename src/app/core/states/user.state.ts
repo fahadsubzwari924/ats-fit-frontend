@@ -1,5 +1,12 @@
 import { Platform } from '@angular/cdk/platform';
-import { computed, inject, Injectable, signal } from '@angular/core';
+import {
+  computed,
+  EnvironmentInjector,
+  inject,
+  Injectable,
+  runInInjectionContext,
+  signal,
+} from '@angular/core';
 import { Observable, tap } from 'rxjs';
 import { UploadedResume } from '@core/models/user/uploaded-resumes.model';
 import { User } from '@core/models/user/user.model';
@@ -15,6 +22,9 @@ export class UserState {
   // Injection
   private storageService = inject(StorageService);
   private userApiService = inject(UserApiService);
+  // Captured at construction so we can lazily resolve `BetaState` inside an
+  // RxJS callback without violating the injection-context rule (NG0203).
+  private envInjector = inject(EnvironmentInjector);
 
   private platform = new Platform();
 
@@ -114,8 +124,14 @@ export class UserState {
       next: (user) => {
         this._currentUser.set(user);
         this.saveToStorage();
-        // Lazily inject BetaState to avoid any potential circular dependency
-        inject(BetaState).loadStatus();
+        // `inject()` is only valid inside an Angular injection context; the
+        // RxJS `next` callback runs outside that context, so we hop back into
+        // one explicitly via `runInInjectionContext`. Avoids the NG0203 error
+        // and keeps the lazy-injection intent (no constructor cycle with
+        // BetaState ↔ UserState).
+        runInInjectionContext(this.envInjector, () => {
+          inject(BetaState).loadStatus();
+        });
       },
       error: (err: { status?: number }) => {
         // 401/403/404 = session invalid or user deleted.

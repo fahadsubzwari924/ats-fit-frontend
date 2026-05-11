@@ -1,0 +1,76 @@
+<section
+  class="billing-activation"
+  [class.billing-activation--success]="isSuccess()"
+  [class.billing-activation--timeout]="isTimeout()"
+  [attr.aria-live]="ariaLive()"
+  role="status"
+>
+  <div class="billing-activation__inner">
+    <!-- Status glyph: pulses while pending, solid check on success, clock on timeout -->
+    <div class="billing-activation__glyph" aria-hidden="true">
+      @if (isPending()) {
+        <span class="billing-activation__glyph-ring"></span>
+        <span class="billing-activation__glyph-ring billing-activation__glyph-ring--delayed"></span>
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          @if (isConfirming()) {
+            <path d="M12 22c5.523 0 10-4.477 10-10S17.523 2 12 2 2 6.477 2 12s4.477 10 10 10z" />
+            <path d="m9 12 2 2 4-4" />
+          } @else {
+            <circle cx="12" cy="12" r="3" />
+            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z" />
+          }
+        </svg>
+      } @else if (isSuccess()) {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M20 6 9 17l-5-5" />
+        </svg>
+      } @else if (isTimeout()) {
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <circle cx="12" cy="12" r="10" />
+          <polyline points="12 6 12 12 16 14" />
+        </svg>
+      }
+    </div>
+
+    <h2 class="billing-activation__headline">{{ headline() }}</h2>
+    <p class="billing-activation__subhead">{{ subhead() }}</p>
+
+    @if (isPending()) {
+      <div class="billing-activation__progress" aria-hidden="true">
+        <div class="billing-activation__progress-fill"></div>
+      </div>
+      <p class="billing-activation__helper">{{ helperText() }}</p>
+    }
+
+    @if (isSuccess()) {
+      <ul class="billing-activation__highlights">
+        @for (item of highlights; track item) {
+          <li>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">
+              <path d="M20 6 9 17l-5-5" />
+            </svg>
+            <span>{{ item }}</span>
+          </li>
+        }
+      </ul>
+
+      <div class="billing-activation__actions">
+        <button type="button" class="billing-btn billing-btn--primary" (click)="continueClick.emit()">
+          {{ cta.CONTINUE }}
+        </button>
+      </div>
+    }
+
+    @if (isTimeout()) {
+      <p class="billing-activation__helper">{{ helperText() }}</p>
+      <div class="billing-activation__actions">
+        <button type="button" class="billing-btn billing-btn--primary" (click)="refreshClick.emit()">
+          {{ cta.REFRESH }}
+        </button>
+        <button type="button" class="billing-activation__link-btn" (click)="supportClick.emit()">
+          {{ cta.SUPPORT }}
+        </button>
+      </div>
+    }
+  </div>
+</section>

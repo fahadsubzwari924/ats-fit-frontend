@@ -1177,3 +1177,204 @@
 .billing-svg-icon--green {
   color: var(--ats-green-500);
 }
+
+// ─── Post-checkout activation card ──────────────────────────────────────────
+// Replaces the billing tabs while we poll /users/me waiting on the LS webhook
+// to flip user.plan = premium. Four discrete states share one surface so
+// transitions stay visually anchored rather than reflowing the layout.
+.billing-activation {
+  background: #fff;
+  border-radius: var(--ats-radius-card);
+  border: 1px solid var(--ats-slate-200);
+  box-shadow: var(--ats-shadow-card);
+  overflow: hidden;
+  animation: fade-in 0.35s ease both;
+}
+
+.billing-activation__inner {
+  padding: 2.5rem 2rem;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  gap: 0.75rem;
+  max-width: 32rem;
+  margin: 0 auto;
+}
+
+.billing-activation__glyph {
+  position: relative;
+  width: 3.5rem;
+  height: 3.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 9999px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  margin-bottom: 0.25rem;
+
+  svg {
+    width: 1.75rem;
+    height: 1.75rem;
+    position: relative;
+    z-index: 1;
+  }
+}
+
+.billing-activation__glyph-ring {
+  position: absolute;
+  inset: 0;
+  border-radius: 9999px;
+  border: 2px solid var(--color-primary-soft-border);
+  opacity: 0;
+  animation: billing-activation-pulse 2s ease-out infinite;
+}
+
+.billing-activation__glyph-ring--delayed {
+  animation-delay: 0.8s;
+}
+
+@keyframes billing-activation-pulse {
+  0% {
+    transform: scale(0.85);
+    opacity: 0.9;
+  }
+  100% {
+    transform: scale(1.6);
+    opacity: 0;
+  }
+}
+
+.billing-activation--success .billing-activation__glyph {
+  background: var(--color-success-softer);
+  color: var(--color-success-strong);
+}
+
+.billing-activation--timeout .billing-activation__glyph {
+  background: hsl(38 95% 95%);
+  color: hsl(28 80% 38%);
+}
+
+.billing-activation__headline {
+  margin: 0;
+  font-size: 1.25rem;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+  color: var(--ats-slate-900);
+}
+
+.billing-activation__subhead {
+  margin: 0;
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  color: var(--ats-slate-700);
+  max-width: 28rem;
+}
+
+.billing-activation__helper {
+  margin: 0;
+  font-size: 0.8125rem;
+  line-height: 1.5;
+  color: var(--ats-slate-500);
+  max-width: 26rem;
+}
+
+.billing-activation__progress {
+  width: 100%;
+  max-width: 22rem;
+  height: 0.375rem;
+  background: var(--ats-slate-100);
+  border-radius: 9999px;
+  overflow: hidden;
+  margin-top: 0.75rem;
+  margin-bottom: 0.25rem;
+}
+
+.billing-activation__progress-fill {
+  height: 100%;
+  width: 40%;
+  background: linear-gradient(
+    90deg,
+    transparent 0%,
+    var(--color-primary) 40%,
+    var(--color-primary) 60%,
+    transparent 100%
+  );
+  border-radius: inherit;
+  animation: billing-activation-progress 1.6s ease-in-out infinite;
+}
+
+@keyframes billing-activation-progress {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+.billing-activation__highlights {
+  list-style: none;
+  margin: 0.75rem 0 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.5rem;
+  width: 100%;
+  max-width: 24rem;
+
+  li {
+    display: flex;
+    align-items: center;
+    gap: 0.625rem;
+    font-size: 0.875rem;
+    font-weight: 500;
+    color: var(--ats-slate-800);
+    text-align: left;
+
+    svg {
+      flex-shrink: 0;
+      width: 0.875rem;
+      height: 0.875rem;
+      padding: 0.125rem;
+      border-radius: 9999px;
+      background: var(--color-success-softer);
+      color: var(--color-success-strong);
+    }
+  }
+}
+
+.billing-activation__actions {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  margin-top: 1rem;
+}
+
+.billing-activation__link-btn {
+  background: none;
+  border: 0;
+  padding: 0.5rem 0.75rem;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: var(--ats-slate-700);
+  cursor: pointer;
+  border-radius: var(--ats-radius-btn);
+  transition: background-color 0.15s ease;
+
+  &:hover {
+    background: var(--ats-slate-100);
+    color: var(--ats-slate-900);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .billing-activation,
+  .billing-activation__glyph-ring,
+  .billing-activation__progress-fill {
+    animation: none;
+  }
+}
