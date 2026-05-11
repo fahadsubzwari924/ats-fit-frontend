@@ -5,11 +5,19 @@
     [nextRenewalLabel]="renewalHeadline()"
     (tabChange)="setActiveTab($event)" />
   <div class="billing-page__container">
-    @if (activeTab() === BillingTab.OVERVIEW) {
-      <app-overview-tab />
-    }
-@if (activeTab() === BillingTab.HISTORY) {
-      <app-history-tab />
+    @if (isActivating()) {
+      <app-billing-activation-card
+        [state]="activationState()"
+        (continueClick)="dismissActivation()"
+        (refreshClick)="onActivationRefresh()"
+        (supportClick)="onActivationSupport()" />
+    } @else {
+      @if (activeTab() === BillingTab.OVERVIEW) {
+        <app-overview-tab />
+      }
+      @if (activeTab() === BillingTab.HISTORY) {
+        <app-history-tab />
+      }
     }
   </div>
 </div>
