@@ -5,6 +5,20 @@
   [attr.aria-busy]="loading ? true : null"
   (click)="handleClick()">
 
+  @if (!loading && icon && iconAlign === 'left') {
+    <span [innerHTML]="getIconSvg()"></span>
+  }
+
+  <ng-content></ng-content>
+
+  @if (buttonText) {
+    <span>{{ buttonText }}</span>
+  }
+
+  @if (!loading && icon && iconAlign === 'right') {
+    <span [innerHTML]="getIconSvg()"></span>
+  }
+
   @if (loading) {
     @if (loadingIndicator === 'dots') {
       <span class="app-btn-loading-dots" aria-hidden="true">
@@ -18,20 +32,6 @@
         </path>
       </svg>
     }
-  }
-
-  @if (!loading && icon && iconAlign === 'left') {
-    <span [innerHTML]="getIconSvg()"></span>
-  }
-
-  <ng-content></ng-content>
-
-  @if (buttonText) {
-    <span>{{ buttonText }}</span>
-  }
-
-  @if (!loading && icon && iconAlign === 'right') {
-    <span [innerHTML]="getIconSvg()"></span>
   }
 
 </button>

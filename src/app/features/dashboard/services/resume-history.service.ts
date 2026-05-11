@@ -7,6 +7,10 @@ import {
   PaginatedHistoryResponse,
   ResumeHistoryDetail,
 } from '@features/dashboard/models/resume-history.model';
+import {
+  DownloadedResume,
+  extractDownloadedResume,
+} from '@core/utils/download-response.util';
 
 export interface HistoryQueryParams {
   page?: number;
@@ -46,10 +50,12 @@ export class ResumeHistoryService {
       .pipe(map((res) => res.data as ResumeHistoryDetail));
   }
 
-  downloadResume(generationId: string): Observable<Blob> {
-    return this.http.get(
-      API_ROUTES.createAPIRoute(`${API_ROUTES.RESUME.DOWNLOAD}/${generationId}`),
-      { responseType: 'blob' },
-    );
+  downloadResume(generationId: string): Observable<DownloadedResume> {
+    return this.http
+      .get(
+        API_ROUTES.createAPIRoute(`${API_ROUTES.RESUME.DOWNLOAD}/${generationId}`),
+        { responseType: 'blob', observe: 'response' },
+      )
+      .pipe(map((response) => extractDownloadedResume(response)));
   }
 }

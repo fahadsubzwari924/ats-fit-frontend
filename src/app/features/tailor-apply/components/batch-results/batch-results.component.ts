@@ -1,7 +1,6 @@
 import { Component, DestroyRef, inject, input, output, signal } from '@angular/core';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { saveAs } from 'file-saver';
-import { generateResumeFilename } from '@core/utils/download-filename.util';
 import JSZip from 'jszip';
 import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
@@ -13,7 +12,6 @@ import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { trackedApplicationAppliedAtIso } from '@features/applications/lib/date-input-helpers';
 import { ResumeComparisonComponent } from '@features/tailor-apply/components/resume-comparison/resume-comparison.component';
-import { UserState } from '@core/states/user.state';
 
 @Component({
   selector: 'app-batch-results',
@@ -26,7 +24,6 @@ export class BatchResultsComponent {
   private readonly resumeService = inject(ResumeService);
   private readonly jobService = inject(JobService);
   private readonly snackbar = inject(SnackbarService);
-  private readonly userState = inject(UserState);
   private readonly destroyRef = inject(DestroyRef);
 
   batchResponse = input.required<BatchGenerateResponse>();
@@ -50,14 +47,19 @@ export class BatchResultsComponent {
   }
 
   /**
-   * Resolves a PDF blob for a result. Inline `pdfContent` (v1 sync path) wins
-   * when available; otherwise fetches by `resumeGenerationId` (v2 async path,
-   * where SSE deliberately omits the base64 payload). Resolves to `null` if
-   * neither source is available or the HTTP fetch fails.
+   * Resolves a PDF blob + server-provided filename for a result. Inline
+   * `pdfContent` (live SSE path) wins when available, paired with the
+   * filename from the live event. Otherwise fetches by `resumeGenerationId`
+   * (snapshot/replay path) and uses the X-Filename header. Resolves to `null`
+   * if neither source is available or the HTTP fetch fails.
    */
-  private resolvePdfBlob(result: BatchJobResult) {
+  private resolvePdfBlob(
+    result: BatchJobResult,
+  ) {
     const inline = this.batchService.buildBlob(result);
-    if (inline) return of(inline);
+    if (inline) {
+      return of({ blob: inline, filename: result.filename ?? 'Resume.pdf' });
+    }
     if (!result.resumeGenerationId) return of(null);
     return this.resumeService.downloadResumeById(result.resumeGenerationId).pipe(
       catchError(() => of(null)),
@@ -71,17 +73,13 @@ export class BatchResultsComponent {
     this.resolvePdfBlob(result)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: (blob) => {
-          if (!blob) {
+        next: (payload) => {
+          if (!payload) {
             this.snackbar.showError('PDF not available for this result.');
             this.downloadingIndex.set(null);
             return;
           }
-          const filename = generateResumeFilename(
-            this.userState.currentUser()?.fullName ?? '',
-            result.jobPosition ?? '',
-          );
-          saveAs(blob, filename);
+          saveAs(payload.blob, payload.filename);
           this.downloadingIndex.set(null);
         },
         error: () => {
@@ -96,11 +94,18 @@ export class BatchResultsComponent {
     if (!items.length) return;
     this.isZipping.set(true);
 
-    forkJoin(items.map((r) => this.resolvePdfBlob(r).pipe(map((blob) => ({ result: r, blob })))))
+    forkJoin(
+      items.map((r) =>
+        this.resolvePdfBlob(r).pipe(map((payload) => ({ result: r, payload }))),
+      ),
+    )
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
         next: async (entries) => {
-          const usable = entries.filter((e): e is { result: BatchJobResult; blob: Blob } => e.blob !== null);
+          const usable = entries.filter(
+            (e): e is { result: BatchJobResult; payload: { blob: Blob; filename: string } } =>
+              e.payload !== null,
+          );
           if (!usable.length) {
             this.snackbar.showError('No PDFs available to bundle. Please try individual downloads.');
             this.isZipping.set(false);
@@ -108,12 +113,18 @@ export class BatchResultsComponent {
           }
           try {
             const zip = new JSZip();
-            for (const { result, blob } of usable) {
-              const filename = generateResumeFilename(
-                this.userState.currentUser()?.fullName ?? '',
-                result.jobPosition ?? '',
+            // Disambiguate entries that resolve to the same filename (e.g. two
+            // "Software Engineer" jobs at different companies). Without this,
+            // JSZip silently overwrites earlier entries and the ZIP ends up
+            // with fewer files than the user expected.
+            const usedNames = new Map<string, number>();
+            for (const { result, payload } of usable) {
+              const finalName = this.disambiguateZipName(
+                payload.filename,
+                result,
+                usedNames,
               );
-              zip.file(filename, blob);
+              zip.file(finalName, payload.blob);
             }
             const content = await zip.generateAsync({ type: 'blob' });
             const ts = new Date().toISOString().slice(0, 19).replace('T', '_').replace(/:/g, '-');
@@ -134,6 +145,37 @@ export class BatchResultsComponent {
           this.isZipping.set(false);
         },
       });
+  }
+
+  /**
+   * If `name` has already been used in this ZIP, append `_<companyName>` (or
+   * a numeric suffix if the company name does not disambiguate) before the
+   * extension. Tracks usage in-place via `usedNames`.
+   */
+  private disambiguateZipName(
+    name: string,
+    result: BatchJobResult,
+    usedNames: Map<string, number>,
+  ): string {
+    if (!usedNames.has(name)) {
+      usedNames.set(name, 1);
+      return name;
+    }
+    const dotIndex = name.lastIndexOf('.');
+    const base = dotIndex > 0 ? name.slice(0, dotIndex) : name;
+    const ext = dotIndex > 0 ? name.slice(dotIndex) : '';
+    const sanitizedCompany = (result.companyName ?? '')
+      .trim()
+      .replace(/[^a-zA-Z0-9\s]/g, '')
+      .replace(/\s+/g, '_');
+    let candidate = sanitizedCompany ? `${base}_${sanitizedCompany}${ext}` : '';
+    if (!candidate || usedNames.has(candidate)) {
+      const count = (usedNames.get(name) ?? 1) + 1;
+      usedNames.set(name, count);
+      candidate = `${base}_${count}${ext}`;
+    }
+    usedNames.set(candidate, 1);
+    return candidate;
   }
 
   openComparison(id: string): void {

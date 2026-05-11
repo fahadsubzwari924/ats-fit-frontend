@@ -18,8 +18,6 @@ import { BatchTailoringV2State } from './state/batch-tailoring-v2.state';
 import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { BlobDownloadService } from '@shared/services/blob-download.service';
-import { UserState } from '@core/states/user.state';
-import { generateResumeFilename } from '@core/utils/download-filename.util';
 import { ResumeTemplate } from '@features/resume-tailoring/models/resume-template.model';
 import { QuotaAlertBannerComponent } from '@shared/components/quota-alert-banner/quota-alert-banner.component';
 import { FeatureType } from '@core/enums/feature-type.enum';
@@ -51,7 +49,6 @@ export class BatchTailoringModalComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly quotaState = inject(QuotaState);
   private readonly downloader = inject(BlobDownloadService);
-  private readonly userState = inject(UserState);
   readonly dialogRef = inject(MatDialogRef<BatchTailoringModalComponent>);
 
   readonly flow = inject(BatchTailoringFlowController);
@@ -121,17 +118,17 @@ export class BatchTailoringModalComponent implements OnInit {
   onDownloadJob(job: BatchJobLiveState): void {
     const result = job.result;
     if (!result) return;
-    const filename =
-      result.filename ?? generateResumeFilename(this.userState.currentUser()?.fullName ?? '', job.jobPosition ?? '');
 
     // Snapshot replays from the `/status` endpoint do NOT include `pdfContent`
     // (only the live `job_completed` SSE event does), so fall back to fetching
     // the PDF from the backend by `resumeGenerationId`. Without this the
     // download button silently no-ops on reconnect/replay paths.
     if (result.pdfContent) {
+      // `result.filename` is server-generated and now guaranteed for both
+      // live SSE and snapshot/replay paths (see BatchTailoringV2Service.toResult).
       this.downloader.downloadFromBase64(
         result.pdfContent,
-        filename,
+        result.filename ?? 'Resume.pdf',
         'application/pdf',
       );
       return;
@@ -142,7 +139,7 @@ export class BatchTailoringModalComponent implements OnInit {
         .downloadResumeById(result.resumeGenerationId)
         .pipe(takeUntilDestroyed(this.destroyRef))
         .subscribe({
-          next: (blob) => this.downloader.download(blob, filename),
+          next: ({ blob, filename }) => this.downloader.download(blob, filename),
           error: () =>
             this.snackbar.showError(
               'Could not download this resume. Please try again.',

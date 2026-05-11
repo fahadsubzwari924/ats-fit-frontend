@@ -12,7 +12,6 @@ import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import { debounceTime, distinctUntilChanged, Subject, switchMap } from 'rxjs';
 import { saveAs } from 'file-saver';
-import { generateResumeFilename } from '@core/utils/download-filename.util';
 
 import {
   ResumeHistoryService,
@@ -175,8 +174,7 @@ export class ResumeHistoryModalComponent implements OnInit {
     this.historyService.downloadResume(item.id).pipe(
       takeUntilDestroyed(this.destroyRef),
     ).subscribe({
-      next: (blob) => {
-        const filename = generateResumeFilename(this.userState.currentUser()?.fullName ?? '', item.jobPosition ?? '');
+      next: ({ blob, filename }) => {
         saveAs(blob, filename);
         this.downloadingId.set(null);
       },
