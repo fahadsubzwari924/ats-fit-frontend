@@ -9,6 +9,9 @@
     <app-onboarding-left-panel />
     <main class="onboarding-layout__right">
       <app-onboarding-upload-panel
+        [isUploading]="isUploading()"
+        [uploadingFileName]="uploadedFileName()"
+        [uploadingFileSizeKb]="uploadedFileSizeKb()"
         (fileSelected)="onFileSelected($event)"
       />
     </main>

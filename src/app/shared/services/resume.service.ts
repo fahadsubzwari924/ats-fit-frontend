@@ -13,6 +13,10 @@ import { ResumeHistoryItem } from '@features/dashboard/models/resume-history.mod
 import { ReplaceResumeResponse, RestoreArchivedResumeResponse } from '@core/models/resume-replacement.model';
 // Interfaces
 import { IResumeUpload } from '@features/dashboard/enums/resume-upload.interface';
+import {
+  DownloadedResume,
+  extractDownloadedResume,
+} from '@core/utils/download-response.util';
 
 @Injectable({
   providedIn: 'root',
@@ -180,10 +184,12 @@ export class ResumeService {
       .pipe(map((res) => (Array.isArray(res?.data) ? res.data : [])));
   }
 
-  public downloadResumeById(generationId: string): Observable<Blob> {
-    return this._http.get(
-      API_ROUTES.createAPIRoute(`${API_ROUTES.RESUME.DOWNLOAD}/${generationId}`),
-      { responseType: 'blob' }
-    );
+  public downloadResumeById(generationId: string): Observable<DownloadedResume> {
+    return this._http
+      .get(
+        API_ROUTES.createAPIRoute(`${API_ROUTES.RESUME.DOWNLOAD}/${generationId}`),
+        { responseType: 'blob', observe: 'response' },
+      )
+      .pipe(map((response) => extractDownloadedResume(response)));
   }
 }

@@ -37,6 +37,13 @@ export class OnboardingComponent {
 
   readonly step = signal<OnboardingStep>('upload');
   readonly uploadedFile = signal<File | null>(null);
+  /**
+   * Drives the in-place uploading state on the upload panel. Set true the
+   * moment the request leaves the browser, cleared on success/failure. The
+   * panel uses this to swap the drop zone for a file-context loading view
+   * and to ignore further drag/drop/click events during the in-flight upload.
+   */
+  readonly isUploading = signal(false);
 
   readonly uploadedFileName = computed(() => this.uploadedFile()?.name ?? null);
   readonly uploadedFileSizeKb = computed(() => {
@@ -46,6 +53,7 @@ export class OnboardingComponent {
 
   onFileSelected(file: File): void {
     this.uploadedFile.set(file);
+    this.isUploading.set(true);
 
     this.onboardingService.uploadResume(file).subscribe({
       next: () => {
@@ -58,9 +66,11 @@ export class OnboardingComponent {
           enrichedProfileId: null,
           tailoringMode: 'none',
         });
+        this.isUploading.set(false);
         this.step.set('submitted');
       },
       error: (err) => {
+        this.isUploading.set(false);
         this.uploadedFile.set(null);
         this.snackbar.showError(err?.error?.message ?? 'Upload failed. Please try again.');
       },

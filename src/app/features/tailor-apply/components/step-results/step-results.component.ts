@@ -16,7 +16,6 @@ import { CoverLetterResult } from '@features/resume-tailoring/models/cover-lette
 import { saveAs } from 'file-saver';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { Messages } from '@core/enums/messages.enum';
-import { DownloadFileName } from '@core/enums/download-file-name.enum';
 import { QuotaLockedButtonComponent } from '@shared/components/quota-locked-button/quota-locked-button.component';
 import { QuotaState } from '@core/states/quota.state';
 import { FeatureType } from '@core/enums/feature-type.enum';
@@ -83,7 +82,12 @@ export class StepResultsComponent {
       this.snackbar.showWarning(Messages.NO_RESUME_AVAILABLE);
       return;
     }
-    saveAs(resume.blob, resume.filename || DownloadFileName.TAILORED_RESUME);
+    // `resume.filename` is the server-generated name parsed from the
+    // `X-Filename` response header. Falling back to a literal `Resume.pdf`
+    // would silently break the standard `{Name}_{JobPosition}.pdf` format;
+    // if the header is ever missing, that is a backend bug and must be fixed
+    // there — not papered over here.
+    saveAs(resume.blob, resume.filename || 'Resume.pdf');
     this.download.emit();
   }
 

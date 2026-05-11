@@ -154,7 +154,6 @@ export class TailorApplyModalComponent implements OnInit {
     };
     this.jobService.applyNewJobs(payload).subscribe({
       next: () => {
-        this.snackbar.showSuccess('Application tracked!');
         this.dialogRef.close(afterTailorClose);
       },
       error: (err) => {

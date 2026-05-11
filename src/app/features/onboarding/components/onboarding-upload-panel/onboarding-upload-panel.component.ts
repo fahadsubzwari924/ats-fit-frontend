@@ -6,6 +6,7 @@ import {
   Output,
   signal,
   ViewChild,
+  input,
 } from '@angular/core';
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
@@ -26,20 +27,28 @@ export class OnboardingUploadPanelComponent {
 
   @Output() readonly fileSelected = new EventEmitter<File>();
 
+  /** Parent-driven flag: an upload is currently in flight. */
+  readonly isUploading = input<boolean>(false);
+  readonly uploadingFileName = input<string | null>(null);
+  readonly uploadingFileSizeKb = input<number | null>(null);
+
   readonly isDragging = signal(false);
   readonly validationError = signal<string | null>(null);
 
   onDragOver(event: DragEvent): void {
     event.preventDefault();
+    if (this.isUploading()) return;
     this.isDragging.set(true);
   }
 
   onDragLeave(): void {
+    if (this.isUploading()) return;
     this.isDragging.set(false);
   }
 
   onDrop(event: DragEvent): void {
     event.preventDefault();
+    if (this.isUploading()) return;
     this.isDragging.set(false);
     const file = event.dataTransfer?.files[0];
     if (file) this.processFile(file);
@@ -48,11 +57,12 @@ export class OnboardingUploadPanelComponent {
   onFileInputChange(event: Event): void {
     const input = event.target as HTMLInputElement;
     const file = input.files?.[0];
-    if (file) this.processFile(file);
+    if (file && !this.isUploading()) this.processFile(file);
     input.value = '';
   }
 
   openFilePicker(): void {
+    if (this.isUploading()) return;
     this.fileInputRef.nativeElement.click();
   }
 
