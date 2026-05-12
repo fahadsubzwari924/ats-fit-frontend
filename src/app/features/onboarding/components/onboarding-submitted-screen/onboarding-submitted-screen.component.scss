@@ -307,3 +307,92 @@
   color: #2563eb;
   flex-shrink: 0;
 }
+
+/* ----------------------------------------------------------------------- */
+/* Responsive overrides — desktop-first.                                   */
+/* ----------------------------------------------------------------------- */
+@media (max-width: 639px) {
+  .submitted-screen {
+    padding: 1.5rem 1rem;
+  }
+
+  .submitted-screen__logo {
+    margin-bottom: 1.5rem;
+  }
+
+  /* Card */
+  .submitted-screen__card-header {
+    padding: 1.25rem;
+    gap: 0.875rem;
+  }
+
+  .submitted-screen__success-icon {
+    width: 2.5rem;
+    height: 2.5rem;
+    border-radius: 0.875rem;
+    font-size: 1rem;
+  }
+
+  .submitted-screen__card-title {
+    font-size: 1.125rem;
+  }
+
+  .submitted-screen__card-status {
+    font-size: 0.75rem;
+  }
+
+  .submitted-screen__card-body {
+    padding: 1.25rem;
+  }
+
+  /* File chip */
+  .submitted-screen__file-chip {
+    padding: 0.625rem 0.75rem;
+    gap: 0.625rem;
+    margin-bottom: 1rem;
+  }
+
+  .submitted-screen__file-icon {
+    width: 1.75rem;
+    height: 1.75rem;
+  }
+
+  /* Tasks */
+  .submitted-screen__task {
+    padding: 0.625rem 0.75rem;
+    gap: 0.625rem;
+  }
+
+  .submitted-screen__task-text {
+    font-size: 0.75rem;
+  }
+
+  .submitted-screen__task-time {
+    font-size: 0.6875rem;
+  }
+
+  /* Notification strip */
+  .submitted-screen__notification {
+    padding: 0.625rem 0.75rem;
+    gap: 0.625rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .submitted-screen__notification-text {
+    font-size: 0.7rem;
+  }
+
+  /* CTA */
+  .submitted-screen__cta {
+    padding: 0.875rem;
+    font-size: 0.875rem;
+    border-radius: 1rem;
+  }
+
+  /* Hints — two-up grid is too cramped on phones, switch to a single column.
+     Each hint is still useful but no longer competes for horizontal space. */
+  .submitted-screen__hints {
+    grid-template-columns: 1fr;
+    gap: 0.5rem;
+  }
+}

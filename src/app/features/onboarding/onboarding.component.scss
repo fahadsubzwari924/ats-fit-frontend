@@ -17,3 +17,19 @@
     min-height: 100vh;
   }
 }
+
+// ── Mobile / tablet stack ───────────────────────────────────────────────────
+// Below lg the two panels stack vertically: branded hero on top, upload below.
+// `min-height` is released so the page scrolls naturally instead of creating
+// nested scroll containers.
+@media (max-width: 1023px) {
+  .onboarding-layout {
+    flex-direction: column;
+    min-height: auto;
+
+    &__right {
+      min-height: auto;
+      overflow-y: visible;
+    }
+  }
+}

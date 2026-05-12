@@ -13,11 +13,12 @@ import {
 } from '@angular/forms';
 import { ActivatedRoute, Router, RouterModule } from '@angular/router';
 import { CommonModule } from '@angular/common';
-import { finalize } from 'rxjs';
+import { catchError, finalize, of, switchMap, tap } from 'rxjs';
 
 import { BetaApiService } from '@shared/services/beta-api.service';
 import { BetaState } from '@core/states/beta.state';
 import { UserState } from '@core/states/user.state';
+import { UserApiService } from '@shared/services/user-api.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { AppRoutes } from '@core/constants/app-routes.contant';
 import { BetaStatus } from '@core/models/beta/beta-status.model';
@@ -58,6 +59,7 @@ export class BetaRedeemComponent implements OnInit {
   private readonly betaApiService = inject(BetaApiService);
   private readonly betaState = inject(BetaState);
   private readonly userState = inject(UserState);
+  private readonly userApiService = inject(UserApiService);
   private readonly snackbar = inject(SnackbarService);
 
   public readonly isSubmitting = signal(false);
@@ -108,29 +110,44 @@ export class BetaRedeemComponent implements OnInit {
 
     const code: string = this.redeemForm.getRawValue().code as string;
 
+    // Redemption is a two-stage flow:
+    //   1) POST /beta/redeem — backend flips is_beta_user + beta_access_until
+    //      inside a single transaction. By the time the response lands, the
+    //      DB row already reflects premium-equivalent access.
+    //   2) GET /users/me — pull the fresh user (now isPremium=true via
+    //      resolveEffectivePlan on the server) so every UI consumer of
+    //      userState.currentUser() — header chip, resume-replacement gate,
+    //      hero quota strip, beta banner — renders the correct premium
+    //      surface from first paint after the dashboard mounts.
+    //
+    // We chain (2) via switchMap so navigation only happens after the
+    // refresh resolves. Without this, the dashboard renders with a stale
+    // freemium user and only self-corrects on a hard refresh — the exact
+    // bug reported by beta invitees.
     this.betaApiService
       .redeemCode(code)
       .pipe(
+        tap((result) => this.applyBetaStatus(result)),
+        switchMap(() =>
+          this.userApiService.getCurrentUser().pipe(
+            // If /users/me fails for any reason, do NOT block the redemption
+            // celebration — the redeem itself already succeeded server-side.
+            // Worst case the user sees stale state until the next refresh,
+            // which is the pre-fix behavior. Better than blocking on a
+            // transient GET.
+            catchError(() => of(null)),
+          ),
+        ),
         finalize(() => {
           this.isSubmitting.set(false);
           this.redeemForm.enable({ emitEvent: false });
         }),
       )
       .subscribe({
-        next: (result) => {
-          const msPerDay = 1000 * 60 * 60 * 24;
-          const daysRemaining = result.betaAccessUntil
-            ? Math.ceil((new Date(result.betaAccessUntil).getTime() - Date.now()) / msPerDay)
-            : null;
-          const updatedStatus = new BetaStatus({
-            isBetaUser: true,
-            status: 'active',
-            betaAccessUntil: result.betaAccessUntil,
-            foundingRateLocked: result.foundingRateLocked,
-            daysRemaining,
-            postExpiryOffer: null,
-          });
-          this.betaState.setStatus(updatedStatus);
+        next: (freshUser) => {
+          if (freshUser) {
+            this.userState.setUser(freshUser);
+          }
           this.snackbar.showSuccess('Beta access activated! Welcome aboard.');
           this.router.navigateByUrl(AppRoutes.DASHBOARD);
         },
@@ -143,5 +160,26 @@ export class BetaRedeemComponent implements OnInit {
           this.errorMessage.set(message);
         },
       });
+  }
+
+  private applyBetaStatus(result: {
+    betaAccessUntil: Date;
+    foundingRateLocked: boolean;
+  }): void {
+    const msPerDay = 1000 * 60 * 60 * 24;
+    const daysRemaining = result.betaAccessUntil
+      ? Math.ceil(
+          (new Date(result.betaAccessUntil).getTime() - Date.now()) / msPerDay,
+        )
+      : null;
+    const updatedStatus = new BetaStatus({
+      isBetaUser: true,
+      status: 'active',
+      betaAccessUntil: result.betaAccessUntil,
+      foundingRateLocked: result.foundingRateLocked,
+      daysRemaining,
+      postExpiryOffer: null,
+    });
+    this.betaState.setStatus(updatedStatus);
   }
 }

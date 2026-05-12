@@ -309,3 +309,98 @@
     opacity: 0.6;
   }
 }
+
+/* ----------------------------------------------------------------------- */
+/* Responsive overrides — desktop-first.                                   */
+/* At <lg the panel stacks below the branded hero, so it no longer needs   */
+/* to fill 100vh nor vertically center its content.                        */
+/* ----------------------------------------------------------------------- */
+@media (max-width: 1023px) {
+  :host {
+    min-height: auto;
+  }
+
+  .upload-panel {
+    padding: 2.5rem 1.5rem;
+    justify-content: flex-start;
+  }
+}
+
+@media (max-width: 639px) {
+  .upload-panel {
+    padding: 2rem 1.25rem;
+  }
+
+  .upload-panel__heading {
+    margin-bottom: 1.25rem;
+  }
+
+  .upload-panel__title {
+    font-size: 1.5rem;
+  }
+
+  /* Trust signals: compress padding/text so all three remain readable in a
+     single row on standard phones (~375px+). */
+  .upload-panel__signals {
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+  }
+
+  .upload-panel__signal {
+    padding: 0.5rem 0.5rem;
+    font-size: 0.65rem;
+    gap: 0.25rem;
+  }
+
+  .upload-panel__dropzone,
+  .upload-panel__uploading {
+    padding: 2rem 1.25rem;
+    border-radius: 1.25rem;
+  }
+
+  .upload-panel__icon-wrap,
+  .upload-panel__uploading-icon-wrap {
+    width: 3rem;
+    height: 3rem;
+    margin-bottom: 1rem;
+  }
+
+  .upload-panel__drop-title,
+  .upload-panel__uploading-title {
+    font-size: 0.9375rem;
+  }
+
+  .upload-panel__drop-sub,
+  .upload-panel__uploading-sub {
+    font-size: 0.75rem;
+  }
+
+  /* Format pill can run out of room with three labels and dividers — let it
+     wrap so the dropzone never overflows horizontally. */
+  .upload-panel__formats {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 0.4rem;
+    font-size: 0.6875rem;
+    padding: 0.4rem 0.75rem;
+  }
+
+  .upload-panel__uploading-chip-name {
+    max-width: 9rem;
+  }
+}
+
+/* Very small phones (older iPhones, Galaxy A0x): three trust signals in a
+   row become unreadable. Stack them instead. */
+@media (max-width: 380px) {
+  .upload-panel__signals {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .upload-panel__signal {
+    flex: 0 0 auto;
+    width: 100%;
+    font-size: 0.7rem;
+  }
+}

@@ -1,7 +1,7 @@
 <div class="relative flex flex-col h-full" style="max-height:90vh;">
 
   <!-- Header -->
-  <div class="flex items-center justify-between px-6 pt-6 pb-4 border-b border-slate-100 shrink-0">
+  <div class="flex items-center justify-between px-4 sm:px-6 pt-5 sm:pt-6 pb-4 border-b border-slate-100 shrink-0">
     <div>
       <h2 class="text-lg font-bold text-slate-900">Tailor Resume</h2>
       <p class="text-xs text-slate-500 mt-0.5">AI-powered optimization for your next role</p>
@@ -18,7 +18,7 @@
 
   <!-- Quota banner — Layer 2: only on form steps, never on results -->
   @if (currentStep() !== 3) {
-    <div class="px-6 pt-4 shrink-0">
+    <div class="px-4 sm:px-6 pt-4 shrink-0">
       <app-quota-alert-banner [features]="TAILOR_FEATURES" />
     </div>
   }
@@ -26,7 +26,7 @@
   @if (!isTailorQuotaExhausted()) {
     <!-- Step indicator (steps 1-2; step 3 is results) -->
     @if (currentStep() < 3) {
-      <div class="px-6 pt-4 pb-2 shrink-0">
+      <div class="px-4 sm:px-6 pt-4 pb-2 shrink-0">
         <div class="flex items-center gap-1.5">
           @for (step of [1, 2]; track step) {
             <button
@@ -61,7 +61,7 @@
     }
 
     <!-- Content area (scrollable) -->
-    <div class="flex-1 overflow-y-auto px-6 py-5">
+    <div class="flex-1 overflow-y-auto px-4 sm:px-6 py-5">
 
       @switch (currentStep()) {
         @case (1) {
@@ -94,7 +94,7 @@
 
     </div>
   } @else {
-    <div class="flex-1 flex items-end justify-center px-6 pb-6">
+    <div class="flex-1 flex items-end justify-center px-4 sm:px-6 pb-6">
       <button (click)="closeModal()"
         class="text-sm font-medium text-slate-500 hover:text-slate-700 transition-colors px-4 py-2">
         Close
