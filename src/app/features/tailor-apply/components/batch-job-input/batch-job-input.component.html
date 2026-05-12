@@ -64,7 +64,7 @@
         <!-- Expanded fields -->
         @if (expandedIndex() === i) {
           <div class="px-4 pb-4 space-y-3 border-t border-slate-100 pt-3">
-            <div class="grid grid-cols-2 gap-3">
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
               <div>
                 <label class="block text-xs font-medium text-slate-600 mb-1" [attr.for]="'batch-job-position-' + i">Job Position *</label>
                 <input [id]="'batch-job-position-' + i" formControlName="jobPosition" type="text" placeholder="e.g. Senior Frontend Engineer"

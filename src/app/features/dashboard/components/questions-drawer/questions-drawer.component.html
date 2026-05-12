@@ -10,12 +10,14 @@
 </div>
 
 <!-- ── Drawer panel ──────────────────────────────────────────────────────── -->
+<!-- Full-width on mobile (acts as a fullscreen sheet), capped at 500px once
+     the viewport is wide enough to comfortably keep the underlying dashboard
+     visible alongside the drawer. -->
 <div
-  class="fixed top-0 right-0 h-full z-50 bg-white flex flex-col"
+  class="fixed top-0 right-0 h-full z-50 bg-white flex flex-col w-full max-w-[500px]"
   role="dialog"
   aria-modal="true"
   aria-label="Enhance Your Resume"
-  [style.width]="'500px'"
   [style.boxShadow]="'-8px 0 40px rgba(0,0,0,0.12)'"
   [style.transform]="open() ? 'translateX(0)' : 'translateX(100%)'"
   [style.transition]="'transform 0.3s cubic-bezier(0.32,0.72,0,1)'">

@@ -1,7 +1,7 @@
 @if (visible()) {
   <div class="profile-card bg-white rounded-2xl border border-[#E2E8F0] overflow-hidden"
        [class.card-glow]="questionsJustArrived()">
-    <div class="px-5 py-4 flex items-start gap-4">
+    <div class="px-4 sm:px-5 py-4 flex items-start gap-3 sm:gap-4">
       <!-- Icon -->
       <div class="w-10 h-10 rounded-xl bg-[#EFF6FF] border border-[#BFDBFE] flex items-center justify-center flex-shrink-0">
         <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24"
@@ -14,7 +14,7 @@
 
       <!-- Content -->
       <div class="flex-1 min-w-0">
-        <div class="flex items-center justify-between mb-1">
+        <div class="flex flex-wrap items-center justify-between gap-x-3 gap-y-1 mb-1">
           <h2 class="font-semibold text-[14px] text-[#0F172A]">Resume Profile</h2>
 
           @switch (profileState()) {

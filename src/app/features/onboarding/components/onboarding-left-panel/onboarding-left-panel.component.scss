@@ -164,3 +164,62 @@
   line-height: 1.5;
 }
 
+// ── Mobile / tablet ─────────────────────────────────────────────────────────
+// At <lg the host stops being a 42% column and becomes a full-width compact
+// hero above the upload panel. min-height is released so the panel is only
+// as tall as its content (the dropzone below must remain visible without a
+// scroll).
+@media (max-width: 1023px) {
+  :host {
+    width: 100%;
+    min-height: auto;
+  }
+
+  .onboarding-left {
+    padding: 2rem 1.5rem;
+  }
+
+  .onboarding-left__body {
+    padding-block: 1.5rem;
+  }
+
+  .onboarding-left__logo {
+    margin-bottom: 1.25rem;
+  }
+
+  .onboarding-left__headline {
+    font-size: 1.5rem;
+  }
+
+  // Decorative blobs were sized for a tall 100vh column; pull them inward
+  // and shrink so they don't bleed across the now-shorter hero.
+  :host::before {
+    width: 12rem;
+    height: 12rem;
+    top: 0;
+    right: -25%;
+  }
+
+  :host::after {
+    width: 9rem;
+    height: 9rem;
+    bottom: 0;
+    left: -20%;
+  }
+}
+
+@media (max-width: 639px) {
+  .onboarding-left {
+    padding: 1.5rem 1.25rem;
+  }
+
+  .onboarding-left__headline {
+    font-size: 1.375rem;
+  }
+
+  .onboarding-left__list {
+    margin-top: 1.25rem;
+    margin-bottom: 1.5rem;
+  }
+}
+
