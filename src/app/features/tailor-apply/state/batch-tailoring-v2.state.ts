@@ -5,6 +5,7 @@ import type {
   BatchSnapshot,
   BatchV2SseEventName,
 } from '../models/batch-tailoring-v2.model';
+import { normalizeBatchJobError } from '@shared/services/resume.service';
 
 /**
  * Component-scoped state machine for the v2 batch tailoring run.
@@ -39,7 +40,16 @@ export class BatchTailoringV2State {
   });
 
   applySnapshot(snap: BatchSnapshot): void {
-    this._snapshot.set(snap);
+    // Normalize raw `error` payloads (envelope OR legacy plain string) onto
+    // every failed job before storing the snapshot — downstream surfaces only
+    // ever read the canonical `BatchJobError` shape.
+    this._snapshot.set({
+      ...snap,
+      jobs: snap.jobs.map((job) => {
+        const normalized = normalizeBatchJobError((job as { error?: unknown }).error);
+        return normalized ? { ...job, error: normalized } : { ...job, error: undefined };
+      }),
+    });
   }
 
   applyEvent(eventName: BatchV2SseEventName, data: unknown): void {
@@ -47,7 +57,7 @@ export class BatchTailoringV2State {
 
     switch (eventName) {
       case 'snapshot':
-        this._snapshot.set(data as BatchSnapshot);
+        this.applySnapshot(data as BatchSnapshot);
         break;
       case 'job_started': {
         const e = data as { jobIndex: number };
@@ -61,12 +71,20 @@ export class BatchTailoringV2State {
       }
       case 'job_completed': {
         const e = data as { jobIndex: number; result: BatchJobLiveState['result'] };
-        this.patchJob(e.jobIndex, { state: 'completed', result: e.result });
+        // A successful retry transitions the row back out of `failed` — clear
+        // the prior error envelope so the UI re-renders as a success row.
+        this.patchJob(e.jobIndex, { state: 'completed', result: e.result, error: undefined });
         break;
       }
       case 'job_failed': {
-        const e = data as { jobIndex: number; error: string };
-        this.patchJob(e.jobIndex, { state: 'failed', error: e.error });
+        // BE now ships `JobFailedEvent.error: BatchJobError` (typed envelope).
+        // Legacy/mid-deploy variants may still emit a plain string — the
+        // normalizer flattens both shapes onto `BatchJobError`.
+        const e = data as { jobIndex: number; error: unknown };
+        this.patchJob(e.jobIndex, {
+          state: 'failed',
+          error: normalizeBatchJobError(e.error),
+        });
         break;
       }
       case 'batch_completed': {

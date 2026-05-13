@@ -69,6 +69,7 @@
         <app-batch-processing-view
           [state]="batchV2State"
           [connectionStatus]="flow.connectionStatus"
+          [retryingJobIds]="retryingJobIds()"
           (download)="onDownloadJob($event)"
           (seeChanges)="onSeeChanges($event)"
           (retry)="onRetry($event)" />
@@ -78,7 +79,9 @@
         @if (batchResponse()) {
           <app-batch-results
             [batchResponse]="batchResponse()!"
+            [retryingJobIds]="retryingJobIds()"
             (tailorAnother)="onTailorAnother()"
+            (retry)="onRetryResult($event)"
             (finishWithTracking)="close()">
           </app-batch-results>
         }

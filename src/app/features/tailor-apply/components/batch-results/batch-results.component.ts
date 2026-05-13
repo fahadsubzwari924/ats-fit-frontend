@@ -31,9 +31,51 @@ export class BatchResultsComponent {
   private readonly destroyRef = inject(DestroyRef);
 
   batchResponse = input.required<BatchGenerateResponse>();
+  /**
+   * Set of job UUIDs currently in flight to the retry endpoint. Owned by the
+   * modal so the spinner state persists across modal-level re-renders.
+   */
+  retryingJobIds = input<ReadonlySet<string>>(new Set());
   tailorAnother = output<void>();
+  /**
+   * Emitted when the user taps "Retry this resume" on a failed row. The modal
+   * owns the retry POST + the in-flight set; this component is presentational.
+   */
+  retry = output<BatchJobResult>();
   /** Emitted after applications are successfully tracked — signals the modal to close. */
   finishWithTracking = output<void>();
+
+  /** Mirrors the BE-side `MAX_MANUAL_RETRIES`. */
+  private readonly MAX_MANUAL_RETRIES = 2;
+
+  /** True when the row hit the manual-retry hard cap. */
+  isRetryLimitReached(result: BatchJobResult): boolean {
+    return (result.retryCount ?? 0) >= this.MAX_MANUAL_RETRIES;
+  }
+
+  /**
+   * Surface the retry button only when the BE-classified envelope marks the
+   * row retryable AND the user hasn't already burned both retries AND we
+   * have a `jobId` to target.
+   */
+  shouldShowRetry(result: BatchJobResult): boolean {
+    if (result.status !== 'failed') return false;
+    if (!result.jobId) return false;
+    if (!result.error?.retryable) return false;
+    return !this.isRetryLimitReached(result);
+  }
+
+  isRetryInFlight(result: BatchJobResult): boolean {
+    const id = result.jobId;
+    if (!id) return false;
+    return this.retryingJobIds().has(id);
+  }
+
+  onRetry(result: BatchJobResult): void {
+    if (!this.shouldShowRetry(result)) return;
+    if (this.isRetryInFlight(result)) return;
+    this.retry.emit(result);
+  }
 
   activeComparisonId = signal<string | null>(null);
   /**

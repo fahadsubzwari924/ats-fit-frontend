@@ -15,6 +15,12 @@ import type { BatchConnectionStatus } from '../../services/batch-tailoring-event
 export class BatchProcessingViewComponent {
   readonly state = input.required<BatchTailoringV2State>();
   readonly connectionStatus = input.required<Signal<BatchConnectionStatus>>();
+  /**
+   * Set of job UUIDs currently being retried. Threaded down from the modal so
+   * the spinner state on each card stays in sync with the parent's request
+   * lifecycle (the parent owns the writable signal).
+   */
+  readonly retryingJobIds = input<ReadonlySet<string>>(new Set());
 
   readonly download = output<BatchJobLiveState>();
   readonly seeChanges = output<BatchJobLiveState>();

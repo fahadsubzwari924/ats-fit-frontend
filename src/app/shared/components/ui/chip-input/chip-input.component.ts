@@ -325,8 +325,9 @@ export class ChipInputComponent implements ControlValueAccessor, OnDestroy {
 
   onBlur(): void {
     this.isFocused = false;
-    // Use a brief timeout so mousedown on a dropdown item fires first
+    // Delay so mousedown on a dropdown item fires before we commit + close
     this.blurTimeout = setTimeout(() => {
+      this.commitInput();
       this.closeDropdown();
       this.notifyTouched();
     }, 150);
