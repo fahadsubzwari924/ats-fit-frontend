@@ -484,7 +484,7 @@ export class ApplicationDetailDrawerComponent implements OnDestroy {
     if (jd.job_position) {
       payload.job_position = jd.job_position;
     }
-    if (jd.job_url != null) {
+    if (jd.job_url) {
       payload.job_url = jd.job_url;
     }
     if (jd.job_location != null) {
@@ -547,13 +547,13 @@ export class ApplicationDetailDrawerComponent implements OnDestroy {
     if (ct.recruiter_name != null) {
       payload.recruiter_name = ct.recruiter_name;
     }
-    if (ct.recruiter_email != null) {
+    if (ct.recruiter_email) {
       payload.recruiter_email = ct.recruiter_email;
     }
     if (ct.hiring_manager_name != null) {
       payload.hiring_manager_name = ct.hiring_manager_name;
     }
-    if (ct.hiring_manager_email != null) {
+    if (ct.hiring_manager_email) {
       payload.hiring_manager_email = ct.hiring_manager_email;
     }
 

@@ -206,14 +206,23 @@ export class BatchTailoringFlowController {
         j.state === 'completed' && j.result
           ? {
               ...j.result,
+              jobId: j.jobId,
               status: 'success' as const,
               jobDescription: payload.jobs[i]?.jobDescription ?? '',
+              retryCount: j.retryCount,
             }
           : {
+              jobId: j.jobId,
               jobPosition: j.jobPosition,
               companyName: j.companyName,
               status: 'failed' as const,
-              error: j.error ?? 'Failed',
+              // Already-normalized envelope (snapshot/SSE handler ran through
+              // `normalizeBatchJobError`). Keep `errorMessage` populated with
+              // the userMessage too so any straggling legacy reader still
+              // shows something — new templates ignore it.
+              error: j.error,
+              errorMessage: j.error?.userMessage,
+              retryCount: j.retryCount,
               jobDescription: payload.jobs[i]?.jobDescription ?? '',
             },
       ),

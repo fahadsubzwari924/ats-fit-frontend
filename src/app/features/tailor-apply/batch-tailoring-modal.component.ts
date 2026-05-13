@@ -7,6 +7,7 @@ import {
   OnInit,
   signal,
 } from '@angular/core';
+import { HttpErrorResponse } from '@angular/common/http';
 import { MatDialogRef } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
@@ -25,6 +26,7 @@ import { QuotaState } from '@core/states/quota.state';
 import {
   BatchGenerateRequest,
   BatchGenerateResponse,
+  BatchJobResult,
   BatchTailoringStep,
 } from './models/batch-tailoring.model';
 import type { BatchJobLiveState } from './models/batch-tailoring-v2.model';
@@ -58,6 +60,17 @@ export class BatchTailoringModalComponent implements OnInit {
   templates = signal<ResumeTemplate[]>([]);
   batchResponse = signal<BatchGenerateResponse | null>(null);
   jobCount = signal(2);
+
+  /**
+   * Set of job UUIDs currently in flight to the retry endpoint. Owned by the
+   * modal so it stays in sync across both the processing view and the
+   * results view (a retry tapped during processing must keep its spinner
+   * even if the modal transitions to `results` mid-flight).
+   *
+   * SSE is the source of truth for `state` / `error` transitions — this
+   * signal exists purely as a UI affordance for the spinner.
+   */
+  readonly retryingJobIds = signal<ReadonlySet<string>>(new Set());
 
   /**
    * Guard against repeat firing of the quota-consumed notification (which
@@ -156,10 +169,73 @@ export class BatchTailoringModalComponent implements OnInit {
     // No-op until the processing view has a comparison panel.
   }
 
-  onRetry(_job: BatchJobLiveState): void {
-    this.snackbar.showError(
-      'Retry not yet available — please re-run via Tailor Another Set.',
-    );
+  /** Retry from the processing-view (job-card surface). */
+  onRetry(job: BatchJobLiveState): void {
+    this.retryByJobId(job.jobId);
+  }
+
+  /** Retry from the consolidated batch-results surface. */
+  onRetryResult(result: BatchJobResult): void {
+    this.retryByJobId(result.jobId);
+  }
+
+  /**
+   * Wire one retry POST. The BE re-enqueues the job and pushes the actual
+   * state transitions back over SSE — we intentionally DO NOT mutate row
+   * state here. The local `retryingJobIds` set is a pure UI affordance for
+   * the spinner; it clears as soon as the HTTP response resolves.
+   *
+   * Error mapping mirrors the BE contract (Task E):
+   *   429 + `ERR_RETRY_LIMIT_EXCEEDED` → limit toast (and a no-op going
+   *     forward — the button will re-render in its "limit reached" state on
+   *     the next snapshot).
+   *   409 + `ERR_JOB_NOT_RETRYABLE`    → "can no longer be retried" toast.
+   *   anything else                    → generic "couldn't retry" toast.
+   */
+  private retryByJobId(jobId: string | undefined): void {
+    if (!jobId) {
+      this.snackbar.showError("Couldn't retry. Please try again.");
+      return;
+    }
+    const batchId = this.flow.response()?.batchId
+      ?? this.batchV2State.snapshot()?.batchId;
+    if (!batchId) {
+      this.snackbar.showError("Couldn't retry. Please try again.");
+      return;
+    }
+
+    const next = new Set(this.retryingJobIds());
+    next.add(jobId);
+    this.retryingJobIds.set(next);
+
+    this.resumeService
+      .retryBatchJob(batchId, jobId)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: () => this.removeRetryingJobId(jobId),
+        error: (err: HttpErrorResponse) => {
+          this.removeRetryingJobId(jobId);
+          this.snackbar.showError(this.retryErrorMessage(err));
+        },
+      });
+  }
+
+  private removeRetryingJobId(jobId: string): void {
+    const next = new Set(this.retryingJobIds());
+    next.delete(jobId);
+    this.retryingJobIds.set(next);
+  }
+
+  private retryErrorMessage(err: HttpErrorResponse): string {
+    const body = err?.error as { code?: string; message?: string } | undefined;
+    const code = typeof body?.code === 'string' ? body.code : '';
+    if (err?.status === 429 || code === 'ERR_RETRY_LIMIT_EXCEEDED') {
+      return "You've reached the retry limit for this resume — start a new batch to try again.";
+    }
+    if (err?.status === 409 || code === 'ERR_JOB_NOT_RETRYABLE') {
+      return 'This resume can no longer be retried.';
+    }
+    return "Couldn't retry. Please try again.";
   }
 
   onTailorAnother(): void {

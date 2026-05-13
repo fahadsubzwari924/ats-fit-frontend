@@ -37,6 +37,7 @@
     @for (job of state().snapshot()?.jobs ?? []; track job.index) {
       <app-batch-job-card
         [job]="job"
+        [retryingJobIds]="retryingJobIds()"
         (download)="download.emit($event)"
         (seeChanges)="seeChanges.emit($event)"
         (retry)="retry.emit($event)" />

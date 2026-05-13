@@ -19,6 +19,8 @@ export const API_ROUTES = {
     COVER_LETTER_DOWNLOAD: (generationId: string) =>
       `resume-tailoring/cover-letter/${generationId}/download`,
     BATCH_GENERATE: 'resume-tailoring/batch-generate',
+    BATCH_V2_RETRY_JOB: (batchId: string, jobId: string) =>
+      `resume-tailoring/batch/v2/${batchId}/jobs/${jobId}/retry`,
   },
   JOBS: {
     APPLICATIONS: 'job-applications',
