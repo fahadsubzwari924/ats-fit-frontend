@@ -1,4 +1,5 @@
 import { TailoringMode } from '@features/dashboard/models/resume-profile.model';
+import type { MatchScoreBlock } from '@shared/types/match-score-block.model';
 
 export class TailoredResume {
   public blob: Blob;
@@ -12,7 +13,7 @@ export class TailoredResume {
   public achievementsQuantified: number;
   /** @deprecated Always null — use matchScore instead */
   public optimizationConfidence: number | null;
-  public matchScore: { before: number; after: number; delta: number } | null;
+  public matchScore: MatchScoreBlock | null;
   public atsChecks: { passed: number; total: number } | null;
   public bulletsQuantified: { before: number; after: number; total: number } | null;
 
@@ -27,7 +28,7 @@ export class TailoredResume {
     sectionsOptimized?: number;
     achievementsQuantified?: number;
     optimizationConfidence?: number | null;
-    matchScore?: { before: number; after: number; delta: number } | null;
+    matchScore?: MatchScoreBlock | null;
     atsChecks?: { passed: number; total: number } | null;
     bulletsQuantified?: { before: number; after: number; total: number } | null;
   }) {

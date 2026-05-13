@@ -18,6 +18,8 @@ import { BatchTailoringModalComponent } from '@features/tailor-apply/batch-tailo
 import { ResumeHistoryModalComponent } from '@features/dashboard/components/resume-history/resume-history-modal.component';
 import { JobService } from '@features/apply-new-job/services/job.service';
 import { ResumeService } from '@shared/services/resume.service';
+import { CoverLetterService } from '@shared/services/cover-letter.service';
+import { ApiErrorService } from '@shared/services/api-error.service';
 import { ModalService } from '@shared/services/modal.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { ProfileQuestionsService } from '@features/dashboard/services/profile-questions.service';
@@ -83,6 +85,8 @@ export class DashboardComponent implements OnInit {
   private modalService = inject(ModalService);
   private jobService = inject(JobService);
   private resumeService = inject(ResumeService);
+  private coverLetterService = inject(CoverLetterService);
+  private apiErrorService = inject(ApiErrorService);
   private snackbarService = inject(SnackbarService);
   private profileQuestionsService = inject(ProfileQuestionsService);
   private storageService = inject(StorageService);
@@ -97,6 +101,7 @@ export class DashboardComponent implements OnInit {
   public resumeHistory = signal<ResumeHistoryItem[]>([]);
   public resumeHistoryLoading = signal(false);
   public downloadingId = signal<string | null>(null);
+  public downloadingCoverLetterId = signal<string | null>(null);
 
   /** Shown after a successful tailor when user is not premium and has not dismissed recently. */
   showPostTailorUpgradeNudge = signal(false);
@@ -436,6 +441,29 @@ export class DashboardComponent implements OnInit {
       error: () => {
         this.snackbarService.showError('Download failed. Please try again.');
         this.downloadingId.set(null);
+      },
+    });
+  }
+
+  /**
+   * Quota-free download of an existing cover-letter PDF for a recent tailored
+   * resume. The card only emits this event when item.hasCoverLetter is true,
+   * but we still defend against double-clicks via the per-row spinner state.
+   */
+  public downloadHistoryItemCoverLetter(item: ResumeHistoryItem): void {
+    if (this.downloadingCoverLetterId() === item.id) return;
+    this.downloadingCoverLetterId.set(item.id);
+    this.coverLetterService.downloadPdf(item.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
+      next: ({ blob, filename }) => {
+        saveAs(blob, filename);
+        this.downloadingCoverLetterId.set(null);
+      },
+      error: (err) => {
+        this.downloadingCoverLetterId.set(null);
+        const parsed = this.apiErrorService.parse(err, {
+          defaultMessage: 'Could not download cover letter. Please try again.',
+        });
+        this.snackbarService.showError(parsed.message);
       },
     });
   }

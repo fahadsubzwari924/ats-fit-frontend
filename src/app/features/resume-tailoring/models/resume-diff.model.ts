@@ -56,7 +56,18 @@ export interface KeywordCoverageAnalysis {
   originalMatches: string[];
   newlyAdded: string[];
   stillMissing: string[];
+  /**
+   * @deprecated Use the canonical `MatchScoreBlock.before` instead. The
+   * backend still emits this for keyword-list rendering, but its numeric
+   * value is no longer the source of truth for the headline match score —
+   * that lives on `matchScore.before`, plumbed through the resume-comparison
+   * component as an `@Input()`.
+   */
   coverageOriginal: number;
+  /**
+   * @deprecated Use the canonical `MatchScoreBlock.after` instead. Same
+   * rationale as `coverageOriginal`.
+   */
   coverageOptimized: number;
 }
 

@@ -2,7 +2,7 @@
 
   <!-- Logo -->
   <div class="submitted-screen__logo">
-    <img src="/logos/transparent_blue_logo.svg" alt="ATS Fit" style="height:32px;width:auto;">
+    <img src="/logos/transparent_blue_logo.svg" alt="Tairly" style="height:32px;width:auto;">
   </div>
 
   <!-- Card -->
@@ -23,16 +23,16 @@
 
       <!-- File chip -->
       @if (fileName) {
-        <div class="submitted-screen__file-chip">
-          <span class="submitted-screen__file-icon">&#128196;</span>
-          <div class="submitted-screen__file-info">
-            <p class="submitted-screen__file-name">{{ fileName }}</p>
-            <p class="submitted-screen__file-meta">
-              {{ fileSizeKb !== null ? fileSizeKb + ' KB' : '' }} &middot; Queued for analysis
-            </p>
-          </div>
-          <span class="submitted-screen__file-check">&#10003;</span>
+      <div class="submitted-screen__file-chip">
+        <span class="submitted-screen__file-icon">&#128196;</span>
+        <div class="submitted-screen__file-info">
+          <p class="submitted-screen__file-name">{{ fileName }}</p>
+          <p class="submitted-screen__file-meta">
+            {{ fileSizeKb !== null ? fileSizeKb + ' KB' : '' }} &middot; Queued for analysis
+          </p>
         </div>
+        <span class="submitted-screen__file-check">&#10003;</span>
+      </div>
       }
 
       <!-- Background tasks -->
@@ -65,11 +65,7 @@
       </div>
 
       <!-- CTA -->
-      <button
-        class="submitted-screen__cta"
-        (click)="goToDashboard.emit()"
-        type="button"
-      >
+      <button class="submitted-screen__cta" (click)="goToDashboard.emit()" type="button">
         Go to Dashboard &rarr;
       </button>
 

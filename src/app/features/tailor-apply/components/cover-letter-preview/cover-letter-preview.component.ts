@@ -1,9 +1,9 @@
-import { Component, input, output } from '@angular/core';
+import { Component, inject, input, output, signal } from '@angular/core';
 import { CoverLetterResult } from '@features/resume-tailoring/models/cover-letter.model';
+import { CoverLetterService } from '@shared/services/cover-letter.service';
 import { saveAs } from 'file-saver';
 import { SnackbarService } from '@shared/services/snackbar.service';
-import { inject } from '@angular/core';
-import { generateResumeFilename } from '@core/utils/download-filename.util';
+import { ApiErrorService } from '@shared/services/api-error.service';
 
 @Component({
   selector: 'app-cover-letter-preview',
@@ -13,11 +13,21 @@ import { generateResumeFilename } from '@core/utils/download-filename.util';
 })
 export class CoverLetterPreviewComponent {
   private readonly snackbar = inject(SnackbarService);
+  private readonly coverLetterService = inject(CoverLetterService);
+  private readonly apiErrorService = inject(ApiErrorService);
 
   coverLetter = input.required<CoverLetterResult>();
+  /**
+   * Required for server-side PDF rendering. The component does not have
+   * enough context to produce a faithful PDF on its own — the backend owns
+   * the template so byte-output is consistent with the tailored-resume PDF.
+   */
+  resumeGenerationId = input.required<string>();
   jobPosition = input<string>('');
   candidateName = input<string>('');
   dismissed = output<void>();
+
+  readonly isDownloading = signal(false);
 
   get fullText(): string {
     const cl = this.coverLetter()?.coverLetter;
@@ -34,16 +44,37 @@ export class CoverLetterPreviewComponent {
   }
 
   onCopyText(): void {
-    navigator.clipboard.writeText(this.fullText).then(() => {
-      this.snackbar.showSuccess('Cover letter copied to clipboard!');
-    }).catch(() => {
-      this.snackbar.showError('Failed to copy. Please select and copy manually.');
-    });
+    navigator.clipboard
+      .writeText(this.fullText)
+      .then(() => {
+        this.snackbar.showSuccess('Cover letter copied to clipboard!');
+      })
+      .catch(() => {
+        this.snackbar.showError('Failed to copy. Please select and copy manually.');
+      });
   }
 
-  onDownloadText(): void {
-    const filename = generateResumeFilename(this.candidateName(), this.jobPosition(), 'Cover_Letter', 'txt');
-    const blob = new Blob([this.fullText], { type: 'text/plain;charset=utf-8' });
-    saveAs(blob, filename);
+  onDownloadPdf(): void {
+    if (this.isDownloading()) return;
+    const id = this.resumeGenerationId();
+    if (!id) {
+      this.snackbar.showError('Could not download cover letter — missing resume reference.');
+      return;
+    }
+
+    this.isDownloading.set(true);
+    this.coverLetterService.downloadPdf(id).subscribe({
+      next: ({ blob, filename }) => {
+        saveAs(blob, filename);
+        this.isDownloading.set(false);
+      },
+      error: (err) => {
+        this.isDownloading.set(false);
+        const parsed = this.apiErrorService.parse(err, {
+          defaultMessage: 'Could not download cover letter. Please try again.',
+        });
+        this.snackbar.showError(parsed.message);
+      },
+    });
   }
 }

@@ -11,6 +11,7 @@ import { InlineAlertComponent } from '@shared/components/ui/inline-alert/inline-
 import { AuthService } from '@features/authentication/services/auth.service';
 import { StorageService } from '@shared/services/storage.service';
 import { BetaApiService } from '@shared/services/beta-api.service';
+import { ApiErrorService } from '@shared/services/api-error.service';
 // States
 import { UserState } from '@core/states/user.state';
 import { BetaState } from '@core/states/beta.state';
@@ -36,6 +37,7 @@ export class SigninComponent implements OnInit, OnDestroy {
   private userState = inject(UserState);
   private betaApiService = inject(BetaApiService);
   private betaState = inject(BetaState);
+  private apiErrorService = inject(ApiErrorService);
 
   public signinForm!: FormGroup;
   public passwordFieldType = signal<string>(InputType.PASSWORD);
@@ -143,9 +145,10 @@ export class SigninComponent implements OnInit, OnDestroy {
           });
         },
         error: (error) => {
-          this.errorMessage.set(
-            error?.error?.message || error?.message || Messages.LOGIN_FAILED,
-          );
+          const parsed = this.apiErrorService.parse(error, {
+            defaultMessage: Messages.LOGIN_FAILED,
+          });
+          this.errorMessage.set(parsed.message);
           console.error('Login failed', error);
         },
       });

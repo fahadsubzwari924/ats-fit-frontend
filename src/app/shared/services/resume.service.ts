@@ -17,6 +17,8 @@ import {
   DownloadedResume,
   extractDownloadedResume,
 } from '@core/utils/download-response.util';
+import type { MatchScoreBlock } from '@shared/types/match-score-block.model';
+import { classifyMatchScoreBlock } from '@shared/utils/match-score-classifier.util';
 
 @Injectable({
   providedIn: 'root',
@@ -59,15 +61,7 @@ export class ResumeService {
             sectionsOptimized: Number(response.headers.get('x-sections-optimized') ?? 0),
             achievementsQuantified: Number(response.headers.get('x-achievements-quantified') ?? 0),
             optimizationConfidence: null,
-            matchScore: (() => {
-              const after = response.headers.get('x-match-score-after');
-              if (after === null) return null;
-              return {
-                before: Number(response.headers.get('x-match-score-before') ?? 0),
-                after: Number(after),
-                delta: Number(response.headers.get('x-match-score-delta') ?? 0),
-              };
-            })(),
+            matchScore: this.parseMatchScoreFromHeaders(response.headers),
             atsChecks: (() => {
               const passed = response.headers.get('x-ats-checks-passed');
               if (passed === null) return null;
@@ -89,6 +83,41 @@ export class ResumeService {
           return new TailoredResume(data);
         })
       );
+  }
+
+  /**
+   * Extracts the canonical `MatchScoreBlock` from the resume generation
+   * response headers.
+   *
+   * Preference order:
+   *   1. `X-Match-Score` — JSON-encoded canonical block (preferred path).
+   *   2. Per-field fallback (`x-match-score-before/after/delta`) +
+   *      `classifyMatchScoreBlock` to synthesize the missing classifier
+   *      fields locally. Used only while older BE instances are still in
+   *      rotation. TODO: remove after BE v2.3 stable.
+   */
+  private parseMatchScoreFromHeaders(
+    headers: { get(name: string): string | null },
+  ): MatchScoreBlock | null {
+    const unified = headers.get('x-match-score');
+    if (unified) {
+      try {
+        const parsed = JSON.parse(unified) as MatchScoreBlock;
+        // Trust the BE shape — the unified header is the canonical contract.
+        return parsed;
+      } catch {
+        // Malformed header — fall through to the per-field path so the user
+        // still sees a score rather than a missing card.
+      }
+    }
+
+    const afterHeader = headers.get('x-match-score-after');
+    if (afterHeader === null) return null;
+    const before = Number(headers.get('x-match-score-before') ?? 0);
+    const after = Number(afterHeader);
+    const deltaHeader = headers.get('x-match-score-delta');
+    const delta = deltaHeader !== null ? Number(deltaHeader) : undefined;
+    return classifyMatchScoreBlock(before, after, delta);
   }
 
   public getResumeTemplates(): Observable<ResumeTemplate[]> {

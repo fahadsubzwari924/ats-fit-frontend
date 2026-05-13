@@ -11,6 +11,7 @@
     </button>
     <app-resume-comparison
       [resumeGenerationId]="activeComparisonId()!"
+      [matchScore]="activeComparisonMatchScore()"
       (dismissed)="closeComparison()">
     </app-resume-comparison>
   </div>
@@ -78,18 +79,17 @@
           </p>
           @if (result.status === 'success') {
             <p class="text-xs text-slate-500 mt-0.5">
-              @if (
-                result.matchScoreBefore !== undefined &&
-                result.matchScoreAfter !== undefined &&
-                result.matchScoreAfter > result.matchScoreBefore
-              ) {
-                <span class="text-slate-400">{{ result.matchScoreBefore }}%</span>
+              @if (result.matchScore; as ms) {
+                <!--
+                  Always render before → after. Color of the `after` chip is
+                  driven by the BE-supplied `statusColor` so muted/low-fit
+                  cases look semantically distinct without any FE thresholds.
+                -->
+                <span class="text-slate-400">{{ ms.before }}%</span>
                 <span class="text-slate-300 mx-1" aria-hidden="true">→</span>
-                <span class="text-success-strong font-semibold">{{ result.matchScoreAfter }}% match</span>
-              } @else if (result.matchScoreAfter !== undefined) {
-                <span class="text-success-strong font-semibold">{{ result.matchScoreAfter }}% match</span>
+                <span class="font-semibold" [class]="statusColorClass(ms.statusColor)">{{ ms.after }}% match</span>
               }
-              @if (result.matchScoreAfter !== undefined && result.sectionsChanged !== undefined) {
+              @if (result.matchScore && result.sectionsChanged !== undefined) {
                 <span class="text-slate-300 mx-1.5" aria-hidden="true">·</span>
               }
               @if (result.sectionsChanged !== undefined) {
@@ -107,7 +107,7 @@
           <div class="flex items-center gap-1.5 shrink-0">
             <!-- See what changed (only if diff is available) -->
             @if (result.resumeGenerationId) {
-              <button (click)="openComparison(result.resumeGenerationId)"
+              <button (click)="openComparison(result)"
                 class="h-8 px-2.5 rounded-xl border border-primary-soft-border text-xs font-medium text-primary hover:bg-primary-soft transition-all flex items-center gap-1">
                 <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none"
                   stroke="currentColor" stroke-width="2">

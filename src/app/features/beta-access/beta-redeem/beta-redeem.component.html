@@ -93,7 +93,9 @@
                 @if (redeemForm.get('code')?.hasError('required')) {
                   Please enter your beta invite code.
                 } @else if (redeemForm.get('code')?.hasError('minlength')) {
-                  Code is too short. Double-check your invite email.
+                  This code is too short. Double-check your invite email.
+                } @else if (redeemForm.get('code')?.hasError('pattern')) {
+                  Codes look like <strong>BETA-XXXXXXXX</strong>. Copy the full code from your invite email.
                 }
               </p>
             }

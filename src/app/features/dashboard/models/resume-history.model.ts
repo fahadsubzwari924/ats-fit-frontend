@@ -1,3 +1,5 @@
+import type { MatchScoreBlock } from '@shared/types/match-score-block.model';
+
 export interface ResumeHistoryItem {
   id: string;
   companyName: string;
@@ -10,7 +12,7 @@ export interface ResumeHistoryItem {
   createdAt: string | Date;
   canDownload: boolean;
   hasCoverLetter: boolean;
-  matchScore: { before: number; after: number; delta: number } | null;
+  matchScore: MatchScoreBlock | null;
   atsChecks: { passed: number; total: number } | null;
 }
 
@@ -40,7 +42,19 @@ export interface ResumeDiffSummary {
   }[];
   /** Present only when version === 2 (programmatic diff). */
   keywordAnalysis?: {
+    /**
+     * @deprecated Use the canonical `matchScore` block on the parent
+     * `ResumeHistoryItem` (or `ResumeHistoryDetail`) instead. The backend
+     * still emits this field for keyword-list rendering, but its numeric
+     * value is no longer the source of truth for match scoring — that lives
+     * on `matchScore.before`.
+     */
     coverageOriginal: number;
+    /**
+     * @deprecated Use the canonical `matchScore` block instead. Same
+     * rationale as `coverageOriginal` above — the numbers here may diverge
+     * from the headline score since they predate the unified scorer.
+     */
     coverageOptimized: number;
     newlyAdded: string[];
     stillMissing: string[];

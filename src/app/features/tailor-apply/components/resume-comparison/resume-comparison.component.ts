@@ -14,6 +14,7 @@ import {
   SectionDiff,
   isEnhancedDiff,
 } from '@features/resume-tailoring/models/resume-diff.model';
+import type { MatchScoreBlock } from '@shared/types/match-score-block.model';
 import { ResumeDiffService } from '@shared/services/resume-diff.service';
 import { ResumeDiffHighlightService } from '@shared/services/resume-diff-highlight.service';
 import { DiffStepShellComponent } from '@shared/components/resume-diff/diff-step-shell/diff-step-shell.component';
@@ -41,6 +42,14 @@ export class ResumeComparisonComponent implements OnInit {
   private readonly highlightService = inject(ResumeDiffHighlightService);
 
   resumeGenerationId = input.required<string>();
+  /**
+   * Canonical match-score block sourced from the parent surface (history
+   * detail, single-tailoring result, or batch result). When provided, the
+   * "Job match & keywords" step renders these numbers and headline directly
+   * with no in-template arithmetic. Optional during the BE → FE transition;
+   * once every parent always plumbs it through, this can become required.
+   */
+  matchScore = input<MatchScoreBlock | null>(null);
   dismissed = output<void>();
 
   diff = signal<ResumeDiff | EnhancedResumeDiff | null>(null);
@@ -92,20 +101,31 @@ export class ResumeComparisonComponent implements OnInit {
     );
   });
 
+  /**
+   * Improvement delta surfaced in the Step 1 overview prose. Reads the canonical
+   * BE-supplied `matchScore.delta` directly — no FE arithmetic, no fallback to
+   * the now-deprecated `keywordAnalysis.coverage*` fields.
+   */
   readonly coverageImprovement = computed<number>(() => {
-    const d = this.enhancedDiff();
-    if (!d) return 0;
-    return d.keywordAnalysis.coverageOptimized - d.keywordAnalysis.coverageOriginal;
+    return this.matchScore()?.delta ?? 0;
   });
 
+  /**
+   * Progress-bar width for the "Before" coverage stripe. Reads
+   * `matchScore.before` straight from the parent-supplied block.
+   */
   readonly coverageBarWidthOrig = computed(() => {
-    const d = this.enhancedDiff();
-    return d ? `${d.keywordAnalysis.coverageOriginal}%` : '0%';
+    const ms = this.matchScore();
+    return ms ? `${ms.before}%` : '0%';
   });
 
+  /**
+   * Progress-bar width for the "After" coverage stripe. Reads `matchScore.after`
+   * straight from the parent-supplied block.
+   */
   readonly coverageBarWidthOpt = computed(() => {
-    const d = this.enhancedDiff();
-    return d ? `${d.keywordAnalysis.coverageOptimized}%` : '0%';
+    const ms = this.matchScore();
+    return ms ? `${ms.after}%` : '0%';
   });
 
   /**

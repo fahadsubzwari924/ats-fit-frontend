@@ -4,7 +4,7 @@
   <div class="upload-panel__heading anim-fade">
     <h1 class="upload-panel__title">Your resume powers everything</h1>
     <p class="upload-panel__subtitle">
-      Upload once — ATS Fit analyzes it and uses it to precision-tailor every application you create.
+      Upload once — Tairly analyzes it and uses it to precision-tailor every application you create.
     </p>
   </div>
 
@@ -25,103 +25,76 @@
   </div>
 
   @if (isUploading()) {
-    <!-- In-place uploading state — replaces the drop zone while the request
+  <!-- In-place uploading state — replaces the drop zone while the request
          is in flight. Keeps the user's context (left panel, headings, trust
          signals) so the page does not jump or feel hijacked. -->
-    <div
-      class="upload-panel__uploading anim-float2"
-      role="status"
-      aria-live="polite"
-      aria-busy="true"
-    >
-      <div class="upload-panel__uploading-icon-wrap">
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          width="22"
-          height="22"
-          viewBox="0 0 24 24"
-          fill="none"
-          stroke="currentColor"
-          stroke-width="2"
-          class="upload-panel__uploading-spinner"
-          aria-hidden="true"
-        >
-          <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
-        </svg>
-      </div>
+  <div class="upload-panel__uploading anim-float2" role="status" aria-live="polite" aria-busy="true">
+    <div class="upload-panel__uploading-icon-wrap">
+      <svg xmlns="http://www.w3.org/2000/svg" width="22" height="22" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" class="upload-panel__uploading-spinner" aria-hidden="true">
+        <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+      </svg>
+    </div>
 
-      <p class="upload-panel__uploading-title">Uploading your resume…</p>
-      <p class="upload-panel__uploading-sub">
-        Securely transferring your file. Hang tight — this only takes a few seconds.
-      </p>
+    <p class="upload-panel__uploading-title">Uploading your resume…</p>
+    <p class="upload-panel__uploading-sub">
+      Securely transferring your file. Hang tight — this only takes a few seconds.
+    </p>
 
-      <!-- File chip: confirms the right file is being uploaded -->
-      @if (uploadingFileName()) {
-        <div class="upload-panel__uploading-chip">
-          <span class="upload-panel__uploading-chip-icon" aria-hidden="true">&#128196;</span>
-          <span class="upload-panel__uploading-chip-name">{{ uploadingFileName() }}</span>
-          @if (uploadingFileSizeKb() !== null) {
-            <span class="upload-panel__uploading-chip-meta">{{ uploadingFileSizeKb() }} KB</span>
-          }
-        </div>
+    <!-- File chip: confirms the right file is being uploaded -->
+    @if (uploadingFileName()) {
+    <div class="upload-panel__uploading-chip">
+      <span class="upload-panel__uploading-chip-icon" aria-hidden="true">&#128196;</span>
+      <span class="upload-panel__uploading-chip-name">{{ uploadingFileName() }}</span>
+      @if (uploadingFileSizeKb() !== null) {
+      <span class="upload-panel__uploading-chip-meta">{{ uploadingFileSizeKb() }} KB</span>
       }
-
-      <!-- Indeterminate progress: honest about not knowing exact progress,
-           while still communicating that work is happening. -->
-      <div class="upload-panel__uploading-bar" aria-hidden="true">
-        <div class="upload-panel__uploading-bar-fill"></div>
-      </div>
     </div>
-  } @else {
-    <!-- Drop zone -->
-    <div
-      class="upload-panel__dropzone anim-float2"
-      [class.upload-panel__dropzone--active]="isDragging()"
-      (dragover)="onDragOver($event)"
-      (dragleave)="onDragLeave()"
-      (drop)="onDrop($event)"
-      (click)="openFilePicker()"
-      role="button"
-      tabindex="0"
-      (keydown.enter)="openFilePicker()"
-      (keydown.space)="openFilePicker(); $event.preventDefault()"
-      aria-label="Upload resume file"
-    >
-      <div class="upload-panel__icon-wrap" [class.upload-panel__icon-wrap--active]="isDragging()">
-        <span class="upload-panel__icon">&#8679;</span>
-      </div>
-
-      <p class="upload-panel__drop-title">
-        {{ isDragging() ? 'Release to upload' : 'Drop your resume here' }}
-      </p>
-      <p class="upload-panel__drop-sub">or click to browse from your computer</p>
-
-      <div class="upload-panel__formats">
-        <span>PDF</span>
-        <span class="upload-panel__formats-divider"></span>
-        <span>Word (.docx)</span>
-        <span class="upload-panel__formats-divider"></span>
-        <span>Max 5 MB</span>
-      </div>
-
-      <input
-        #fileInput
-        type="file"
-        accept=".pdf,.docx"
-        class="upload-panel__file-input"
-        (change)="onFileInputChange($event)"
-      />
-    </div>
-
-    <!-- Validation error -->
-    @if (validationError(); as err) {
-      <p class="upload-panel__error">{{ err }}</p>
     }
+
+    <!-- Indeterminate progress: honest about not knowing exact progress,
+           while still communicating that work is happening. -->
+    <div class="upload-panel__uploading-bar" aria-hidden="true">
+      <div class="upload-panel__uploading-bar-fill"></div>
+    </div>
+  </div>
+  } @else {
+  <!-- Drop zone -->
+  <div class="upload-panel__dropzone anim-float2" [class.upload-panel__dropzone--active]="isDragging()"
+    (dragover)="onDragOver($event)" (dragleave)="onDragLeave()" (drop)="onDrop($event)" (click)="openFilePicker()"
+    role="button" tabindex="0" (keydown.enter)="openFilePicker()"
+    (keydown.space)="openFilePicker(); $event.preventDefault()" aria-label="Upload resume file">
+    <div class="upload-panel__icon-wrap" [class.upload-panel__icon-wrap--active]="isDragging()">
+      <span class="upload-panel__icon">&#8679;</span>
+    </div>
+
+    <p class="upload-panel__drop-title">
+      {{ isDragging() ? 'Release to upload' : 'Drop your resume here' }}
+    </p>
+    <p class="upload-panel__drop-sub">or click to browse from your computer</p>
+
+    <div class="upload-panel__formats">
+      <span>PDF</span>
+      <span class="upload-panel__formats-divider"></span>
+      <span>Word (.docx)</span>
+      <span class="upload-panel__formats-divider"></span>
+      <span>Max 5 MB</span>
+    </div>
+
+    <input #fileInput type="file" accept=".pdf,.docx" class="upload-panel__file-input"
+      (change)="onFileInputChange($event)" />
+  </div>
+
+  <!-- Validation error -->
+  @if (validationError(); as err) {
+  <p class="upload-panel__error">{{ err }}</p>
+  }
   }
 
   <!-- Privacy micro-copy -->
   <p class="upload-panel__privacy anim-float3">
-    <span aria-hidden="true">&#128274;</span> Stored securely &nbsp;&middot;&nbsp; Never shared &nbsp;&middot;&nbsp; Deleted on request
+    <span aria-hidden="true">&#128274;</span> Stored securely &nbsp;&middot;&nbsp; Never shared &nbsp;&middot;&nbsp;
+    Deleted on request
   </p>
 
 </div>

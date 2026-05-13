@@ -1,4 +1,4 @@
-import { Component, forwardRef, input, output, computed, effect, signal, OnDestroy } from '@angular/core';
+import { Component, forwardRef, input, output, effect, signal, OnDestroy } from '@angular/core';
 import {
   AbstractControl,
   FormControl,
@@ -61,15 +61,23 @@ export class InputFieldComponent implements OnDestroy {
 
   private subscriptions$ = new Subscription();
 
-  public errorMessages = computed(() => {
+  public errorMessages(): string[] {
     if (!this.control.errors || !(this.control.touched || this.control.dirty)) {
       return [];
     }
     return Object.keys(this.control.errors).map((errorKey) => {
+      // Backend-issued field errors (set via control.setErrors({ server: '...' }))
+      // are passed through verbatim — they are already user-facing copy.
+      if (errorKey === 'server') {
+        const serverMessage = this.control.errors?.['server'];
+        if (typeof serverMessage === 'string' && serverMessage.length > 0) {
+          return serverMessage;
+        }
+      }
       const customValidator = this.customValidators().find((v) => v.errorKey === errorKey);
       return customValidator ? customValidator.errorMessage : this.getDefaultErrorMessage(errorKey);
     });
-  });
+  }
 
   constructor() {
     effect(() => {
@@ -122,15 +130,19 @@ export class InputFieldComponent implements OnDestroy {
   }
 
   private getDefaultErrorMessage(errorKey: string): string {
+    const label = this.label() || 'This field';
+    const requiredMinLength = this.control.errors?.['minlength']?.requiredLength;
+    const requiredMaxLength = this.control.errors?.['maxlength']?.requiredLength;
+
     const errorMessagesMap: Record<string, string> = {
-      required: `${this.label()} is required`,
-      email: `Please enter a valid email address`,
-      minlength: `Minimum leng th is ${this.control.errors?.['minlength']?.requiredLength} characters`,
-      maxlength: `Maximum length is ${this.control.errors?.['maxlength']?.requiredLength} characters`,
-      pattern: `${this.label()} does not match the required pattern`,
+      required: `${label} is required.`,
+      email: 'Please enter a valid email address.',
+      minlength: `${label} must be at least ${requiredMinLength} characters.`,
+      maxlength: `${label} must be no more than ${requiredMaxLength} characters.`,
+      pattern: `${label} format is invalid.`,
     };
 
-    return errorMessagesMap[errorKey] || `Invalid ${this.label()}`;
+    return errorMessagesMap[errorKey] || `${label} is invalid.`;
   }
 
   emitCustomEvent(event: Event): void {

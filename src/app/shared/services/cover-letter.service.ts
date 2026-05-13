@@ -7,6 +7,10 @@ import {
   CoverLetterResult,
   GenerateCoverLetterRequest,
 } from '@features/resume-tailoring/models/cover-letter.model';
+import {
+  DownloadedResume,
+  extractDownloadedResume,
+} from '@core/utils/download-response.util';
 
 @Injectable({
   providedIn: 'root',
@@ -36,6 +40,22 @@ export class CoverLetterService {
         ),
       )
       .pipe(map((res) => res.data as CoverLetterResult));
+  }
+
+  /**
+   * Stream the cover letter PDF for a given resume generation. The backend
+   * renders it on demand from the structured cover-letter content stored at
+   * generation time — no quota is consumed by the download itself.
+   */
+  downloadPdf(resumeGenerationId: string): Observable<DownloadedResume> {
+    return this._http
+      .get(
+        API_ROUTES.createAPIRoute(
+          API_ROUTES.RESUME.COVER_LETTER_DOWNLOAD(resumeGenerationId),
+        ),
+        { responseType: 'blob', observe: 'response' },
+      )
+      .pipe(map((response) => extractDownloadedResume(response)));
   }
 
   generateStandalone(

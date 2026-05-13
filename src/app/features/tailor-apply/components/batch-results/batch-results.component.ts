@@ -12,6 +12,10 @@ import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { trackedApplicationAppliedAtIso } from '@features/applications/lib/date-input-helpers';
 import { ResumeComparisonComponent } from '@features/tailor-apply/components/resume-comparison/resume-comparison.component';
+import type {
+  MatchScoreBlock,
+  StatusColor,
+} from '@shared/types/match-score-block.model';
 
 @Component({
   selector: 'app-batch-results',
@@ -32,6 +36,12 @@ export class BatchResultsComponent {
   finishWithTracking = output<void>();
 
   activeComparisonId = signal<string | null>(null);
+  /**
+   * Match-score block of the result currently being compared. Captured at
+   * open time so the comparison view renders the same numbers as the result
+   * row without re-fetching.
+   */
+  activeComparisonMatchScore = signal<MatchScoreBlock | null>(null);
 
   downloadingIndex = signal<number | null>(null);
   isZipping = signal(false);
@@ -178,12 +188,28 @@ export class BatchResultsComponent {
     return candidate;
   }
 
-  openComparison(id: string): void {
-    this.activeComparisonId.set(id);
+  openComparison(result: BatchJobResult): void {
+    if (!result.resumeGenerationId) return;
+    this.activeComparisonId.set(result.resumeGenerationId);
+    this.activeComparisonMatchScore.set(result.matchScore ?? null);
   }
 
   closeComparison(): void {
     this.activeComparisonId.set(null);
+    this.activeComparisonMatchScore.set(null);
+  }
+
+  /**
+   * Maps the BE-supplied semantic status color to the Tailwind palette used in
+   * the batch results surface. Mirrors the helper in batch-job-card.
+   */
+  statusColorClass(color: StatusColor): string {
+    const map: Record<StatusColor, string> = {
+      success: 'text-success-strong',
+      warning: 'text-amber-600',
+      muted: 'text-slate-500',
+    };
+    return map[color];
   }
 
   trackAllApplications(): void {
