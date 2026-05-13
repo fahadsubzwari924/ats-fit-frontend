@@ -26,10 +26,15 @@ export class ProfileQuestionItemComponent {
 
   onToggle(): void {
     if (this.isEditing()) {
-      this.draftResponse.set('');
+      // Preserve the in-progress draft — user may return to continue typing.
+      // Only a successful save or explicit skip should clear it.
       this.cancelEdit.emit();
     } else {
-      this.draftResponse.set(this.question().userResponse ?? '');
+      // Seed from the previously saved answer only when the user hasn't started
+      // typing anything yet for this session; otherwise restore the draft.
+      if (!this.draftResponse()) {
+        this.draftResponse.set(this.question().userResponse ?? '');
+      }
       this.startEdit.emit();
     }
   }
@@ -43,6 +48,8 @@ export class ProfileQuestionItemComponent {
   }
 
   onSkip(): void {
+    // Explicit skip abandons the draft intentionally.
+    this.draftResponse.set('');
     this.skipQuestion.emit(this.question().id);
   }
 
@@ -52,7 +59,7 @@ export class ProfileQuestionItemComponent {
   }
 
   onCancelEdit(): void {
-    this.draftResponse.set('');
+    // Same as onToggle cancel — keep the draft intact.
     this.cancelEdit.emit();
   }
 

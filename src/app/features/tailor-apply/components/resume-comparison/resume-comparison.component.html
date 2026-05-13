@@ -105,24 +105,32 @@
             [stepIndex]="stepNumberFor('rd-match')"
             title="Job match &amp; keywords"
             subtitle="Coverage vs. the job description, plus what was added or still missing.">
-            <div class="rd-coverage-row">
-              <div class="rd-coverage-label">
-                <span class="rd-coverage-label__text">Before</span>
-                <span class="rd-coverage-label__pct">{{ enhancedDiff()!.keywordAnalysis.coverageOriginal }}%</span>
+            <!--
+              Numeric labels come from the BE-supplied `matchScore` block — the
+              same single source of truth used by every other surface. We
+              render the rows only when `matchScore` is plumbed through; the
+              keyword list below stays available either way.
+            -->
+            @if (matchScore(); as ms) {
+              <div class="rd-coverage-row">
+                <div class="rd-coverage-label">
+                  <span class="rd-coverage-label__text">Before</span>
+                  <span class="rd-coverage-label__pct">{{ ms.before }}%</span>
+                </div>
+                <div class="rd-coverage-track">
+                  <div class="rd-coverage-fill rd-coverage-fill--before" [style.width]="coverageBarWidthOrig()"></div>
+                </div>
               </div>
-              <div class="rd-coverage-track">
-                <div class="rd-coverage-fill rd-coverage-fill--before" [style.width]="coverageBarWidthOrig()"></div>
+              <div class="rd-coverage-row">
+                <div class="rd-coverage-label">
+                  <span class="rd-coverage-label__text">After</span>
+                  <span class="rd-coverage-label__pct text-success">{{ ms.after }}%</span>
+                </div>
+                <div class="rd-coverage-track">
+                  <div class="rd-coverage-fill rd-coverage-fill--after" [style.width]="coverageBarWidthOpt()"></div>
+                </div>
               </div>
-            </div>
-            <div class="rd-coverage-row">
-              <div class="rd-coverage-label">
-                <span class="rd-coverage-label__text">After</span>
-                <span class="rd-coverage-label__pct text-success">{{ enhancedDiff()!.keywordAnalysis.coverageOptimized }}%</span>
-              </div>
-              <div class="rd-coverage-track">
-                <div class="rd-coverage-fill rd-coverage-fill--after" [style.width]="coverageBarWidthOpt()"></div>
-              </div>
-            </div>
+            }
             @if (enhancedDiff()!.keywordAnalysis.newlyAdded.length) {
               <p class="rd-tag-group__label rd-tag-group__label--added">Newly reflected in your resume</p>
               <div class="rd-tag-row">

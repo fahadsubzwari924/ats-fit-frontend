@@ -20,23 +20,32 @@ import { BetaState } from '@core/states/beta.state';
 import { UserState } from '@core/states/user.state';
 import { UserApiService } from '@shared/services/user-api.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
+import { ApiErrorService } from '@shared/services/api-error.service';
 import { AppRoutes } from '@core/constants/app-routes.contant';
 import { BetaStatus } from '@core/models/beta/beta-status.model';
 
 import { ButtonComponent } from '@shared/components/ui/button/button.component';
 import { InlineAlertComponent } from '@shared/components/ui/inline-alert/inline-alert.component';
 
-const ERROR_CODE_MAP: Record<string, string> = {
+// Backend-issued error codes (see ats-fit-backend/src/modules/beta-access/constants/beta-error-codes.ts)
+// mapped to user-facing copy. Adding a new code here is enough — the service
+// handles whether it arrives via `code` or `message` on the wire.
+const BETA_ERROR_COPY: Readonly<Record<string, string>> = {
   BETA_CODE_NOT_FOUND: 'This code is invalid. Double-check your invite email.',
-  BETA_INVALID_CODE_FORMAT: 'This code is invalid. Double-check your invite email.',
-  BETA_CODE_EXPIRED: 'This code has expired. Contact support.',
-  BETA_CODE_ALREADY_REDEEMED: "Code already redeemed. You're all set!",
-  BETA_EMAIL_MISMATCH: 'This code belongs to a different email address.',
-  BETA_RATE_LIMITED: 'Too many attempts. Please wait 10 minutes.',
-  BETA_CODE_REVOKED: 'This code has been revoked. Contact support.',
+  BETA_INVALID_CODE_FORMAT:
+    'Invalid code format. Codes look like BETA-XXXXXXXX — copy the full code from your invite email.',
+  BETA_CODE_EXPIRED: 'This code has expired. Please contact support for a new invite.',
+  BETA_CODE_ALREADY_REDEEMED: "This code has already been redeemed. You're all set!",
+  BETA_EMAIL_MISMATCH:
+    'This code belongs to a different email address. Sign in with the email your invite was sent to.',
+  BETA_RATE_LIMITED:
+    'Too many attempts. For your security, please wait 10 minutes before trying again.',
+  BETA_CODE_REVOKED: 'This code has been revoked. Please contact support.',
 };
 
-const DEFAULT_ERROR = 'Something went wrong. Please try again.';
+const BETA_REDEEM_DEFAULT_ERROR =
+  'We could not redeem your code right now. Please try again in a moment.';
+const BETA_CODE_PATTERN = /^BETA-[A-Z2-9]{8}$/;
 
 @Component({
   selector: 'app-beta-redeem',
@@ -61,6 +70,7 @@ export class BetaRedeemComponent implements OnInit {
   private readonly userState = inject(UserState);
   private readonly userApiService = inject(UserApiService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly apiErrorService = inject(ApiErrorService);
 
   public readonly isSubmitting = signal(false);
   public readonly errorMessage = signal<string | null>(null);
@@ -69,7 +79,14 @@ export class BetaRedeemComponent implements OnInit {
   public readonly currentUser = this.userState.currentUser;
 
   public readonly redeemForm: FormGroup = this.fb.group({
-    code: ['', [Validators.required, Validators.minLength(4)]],
+    code: [
+      '',
+      [
+        Validators.required,
+        Validators.minLength(4),
+        Validators.pattern(BETA_CODE_PATTERN),
+      ],
+    ],
   });
 
   public ngOnInit(): void {
@@ -152,12 +169,11 @@ export class BetaRedeemComponent implements OnInit {
           this.router.navigateByUrl(AppRoutes.DASHBOARD);
         },
         error: (err) => {
-          const code: string =
-            (err?.error?.message as string) ||
-            (err?.error?.error as string) ||
-            '';
-          const message = ERROR_CODE_MAP[code] ?? DEFAULT_ERROR;
-          this.errorMessage.set(message);
+          const parsed = this.apiErrorService.parse(err, {
+            codeMap: BETA_ERROR_COPY,
+            defaultMessage: BETA_REDEEM_DEFAULT_ERROR,
+          });
+          this.errorMessage.set(parsed.message);
         },
       });
   }

@@ -17,20 +17,6 @@
         <p class="text-xs text-slate-400 mt-0.5">
           {{ activeComparisonItem()?.jobPosition }} &#64; {{ activeComparisonItem()?.companyName }}
         </p>
-      } @else if (activeCoverLetterId()) {
-        <div class="flex items-center gap-2">
-          <button type="button" (click)="closeCoverLetter()"
-            class="flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-primary transition-colors">
-            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2.5">
-              <polyline points="15 18 9 12 15 6"></polyline>
-            </svg>
-            Back to history
-          </button>
-        </div>
-        <p class="text-xs text-slate-400 mt-0.5">
-          Cover Letter · {{ activeCoverLetterItem()?.jobPosition }} &#64; {{ activeCoverLetterItem()?.companyName }}
-        </p>
       } @else {
         <h2 class="text-lg font-bold text-slate-900">My Resume History</h2>
         @if (totalItems() > 0) {
@@ -50,27 +36,21 @@
   <!-- Full comparison view -->
   @if (activeComparisonId()) {
     <div class="flex-1 overflow-y-auto px-6 py-5">
+      <!--
+        Pass the canonical matchScore block of the active item down so the
+        comparison view's "Job match & keywords" step renders identical
+        numbers to the row that opened it.
+      -->
       <app-resume-comparison
         [resumeGenerationId]="activeComparisonId()!"
+        [matchScore]="activeComparisonItem()?.matchScore ?? null"
         (dismissed)="closeComparison()">
       </app-resume-comparison>
     </div>
   }
 
-  <!-- Full cover letter view -->
-  @if (activeCoverLetterId() && activeCoverLetter()) {
-    <div class="flex-1 overflow-y-auto px-6 py-5">
-      <app-cover-letter-preview
-        [coverLetter]="activeCoverLetter()!"
-        [jobPosition]="activeCoverLetterItem()?.jobPosition ?? ''"
-        [candidateName]="userState.currentUser()?.fullName ?? ''"
-        (dismissed)="closeCoverLetter()">
-      </app-cover-letter-preview>
-    </div>
-  }
-
-  <!-- Search (hidden when comparison or cover letter is active) -->
-  @if (!activeComparisonId() && !activeCoverLetterId()) {
+  <!-- Search (hidden when comparison is active) -->
+  @if (!activeComparisonId()) {
   <div class="px-6 py-3 border-b border-slate-100 shrink-0">
     <div class="relative">
       <svg xmlns="http://www.w3.org/2000/svg" width="15" height="15" viewBox="0 0 24 24" fill="none"
@@ -153,15 +133,15 @@
                 </span>
               }
 
-              <!-- Cover letter button (only when present) -->
+              <!-- Cover letter — direct download when one exists for this resume -->
               @if (item.hasCoverLetter) {
                 <button
                   type="button"
-                  (click)="openCoverLetter(item, $event)"
-                  [disabled]="coverLetterLoadingId() === item.id"
-                  matTooltip="View cover letter"
+                  (click)="downloadCoverLetterPdf(item, $event)"
+                  [disabled]="downloadingCoverLetterId() === item.id"
+                  matTooltip="Download cover letter PDF"
                   class="w-8 h-8 rounded-lg border border-accent-purple-border flex items-center justify-center text-accent-purple hover:text-accent-purple-strong hover:bg-accent-purple-soft transition-all duration-150 disabled:opacity-50 shrink-0">
-                  @if (coverLetterLoadingId() === item.id) {
+                  @if (downloadingCoverLetterId() === item.id) {
                     <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 24 24" fill="none"
                       stroke="currentColor" stroke-width="2" class="animate-spin">
                       <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
@@ -171,8 +151,8 @@
                       stroke="currentColor" stroke-width="2">
                       <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
                       <polyline points="14 2 14 8 20 8"></polyline>
-                      <line x1="16" x2="8" y1="13" y2="13"></line>
-                      <line x1="16" x2="8" y1="17" y2="17"></line>
+                      <path d="M12 18v-6" />
+                      <path d="m9 15 3 3 3-3" />
                     </svg>
                   }
                 </button>
@@ -226,9 +206,12 @@
 
                     <!-- Stats: hero + 3 cards -->
                     <div class="space-y-3">
-                      <!-- Hero match score (from matchScore field or changesDiff fallback) -->
-                      @if (getDetail(item.id)!.matchScore || getDetail(item.id)!.changesDiff?.keywordAnalysis) {
-                        @let ms = getDetail(item.id)!.matchScore ?? { before: getDetail(item.id)!.changesDiff!.keywordAnalysis!.coverageOriginal, after: getDetail(item.id)!.changesDiff!.keywordAnalysis!.coverageOptimized, delta: getDetail(item.id)!.changesDiff!.keywordAnalysis!.coverageOptimized - getDetail(item.id)!.changesDiff!.keywordAnalysis!.coverageOriginal };
+                      <!--
+                        Hero match score — rendered directly from the BE block.
+                        No delta arithmetic, no data-source selection, no
+                        threshold logic in the template.
+                      -->
+                      @if (getDetail(item.id)!.matchScore; as ms) {
                         <div class="flex items-center gap-4 bg-gradient-to-r from-success-soft to-white rounded-xl px-4 py-3 border border-success-softer">
                           <div class="relative w-16 h-16 shrink-0">
                             <svg class="w-16 h-16 -rotate-90 text-slate-200" viewBox="0 0 64 64">
@@ -240,13 +223,17 @@
                                 [attr.stroke-dashoffset]="163.4 - (163.4 * (ms.after / 100))"/>
                             </svg>
                             <div class="absolute inset-0 flex items-center justify-center">
-                              <span class="text-sm font-black text-success-strong">{{ ms.after }}%</span>
+                              <span class="text-sm font-black" [class]="statusColorClass(ms.statusColor)">{{ ms.after }}%</span>
                             </div>
                           </div>
                           <div>
                             <p class="text-sm font-bold text-slate-800">Match Score</p>
                             <p class="text-xs text-slate-500 mt-0.5">{{ ms.before }}% → {{ ms.after }}%</p>
-                            <span class="inline-block mt-1 text-[11px] px-1.5 py-0.5 bg-success-softer text-success-strong rounded font-bold">+{{ ms.delta }}% improvement</span>
+                            <span
+                              class="inline-block mt-1 text-[11px] px-1.5 py-0.5 bg-success-softer rounded font-bold"
+                              [class]="statusColorClass(ms.statusColor)">
+                              {{ ms.improvementMessage }}
+                            </span>
                           </div>
                         </div>
                       }
@@ -328,28 +315,60 @@
                           See full changes
                         </button>
                       }
-                      <!-- View cover letter -->
+                      <!--
+                        Cover-letter action — three mutually exclusive states:
+                          1. Already generated  → Download (no quota, idempotent)
+                          2. Not generated, quota OK → Generate (consumes 1, auto-downloads)
+                          3. Not generated, quota exhausted → Upgrade CTA
+                      -->
                       @if (item.hasCoverLetter) {
                         <button
                           type="button"
-                          (click)="openCoverLetter(item, $event)"
-                          [disabled]="coverLetterLoadingId() === item.id"
+                          (click)="downloadCoverLetterPdf(item, $event)"
+                          [disabled]="downloadingCoverLetterId() === item.id"
+                          matTooltip="Download as PDF (won't use your quota)"
                           class="flex-1 py-2.5 rounded-xl border border-accent-purple-border text-accent-purple-strong text-sm font-semibold hover:bg-accent-purple-soft flex items-center justify-center gap-2 transition-all disabled:opacity-60">
-                          @if (coverLetterLoadingId() === item.id) {
+                          @if (downloadingCoverLetterId() === item.id) {
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                               stroke="currentColor" stroke-width="2" class="animate-spin">
                               <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
                             </svg>
-                            Loading...
+                            Downloading...
+                          } @else {
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                              stroke="currentColor" stroke-width="2">
+                              <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                              <polyline points="7 10 12 15 17 10"></polyline>
+                              <line x1="12" x2="12" y1="15" y2="3"></line>
+                            </svg>
+                            Download cover letter
+                          }
+                        </button>
+                      } @else if (isCoverLetterExhausted()) {
+                        <div class="flex-1">
+                          <app-quota-locked-button [feature]="COVER_LETTER_FEATURE" />
+                        </div>
+                      } @else {
+                        <button
+                          type="button"
+                          (click)="generateCoverLetter(item, $event)"
+                          [disabled]="generatingCoverLetterId() === item.id"
+                          matTooltip="Generate and download a tailored cover letter (uses 1 from your monthly quota)"
+                          class="flex-1 py-2.5 rounded-xl border border-accent-purple-border text-accent-purple-strong text-sm font-semibold hover:bg-accent-purple-soft flex items-center justify-center gap-2 transition-all disabled:opacity-60">
+                          @if (generatingCoverLetterId() === item.id) {
+                            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+                              stroke="currentColor" stroke-width="2" class="animate-spin">
+                              <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+                            </svg>
+                            Generating...
                           } @else {
                             <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
                               stroke="currentColor" stroke-width="2">
                               <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
                               <polyline points="14 2 14 8 20 8"></polyline>
                               <line x1="16" x2="8" y1="13" y2="13"></line>
-                              <line x1="16" x2="8" y1="17" y2="17"></line>
                             </svg>
-                            Cover letter
+                            Generate cover letter
                           }
                         </button>
                       }
@@ -388,7 +407,7 @@
   } <!-- end @if (!activeComparisonId()) -->
 
   <!-- Pagination footer (only when list is visible) -->
-  @if (totalPages() > 1 && !isLoading() && !activeComparisonId() && !activeCoverLetterId()) {
+  @if (totalPages() > 1 && !isLoading() && !activeComparisonId()) {
     <div class="flex items-center justify-between px-6 py-3 border-t border-slate-100 shrink-0">
       <p class="text-xs text-slate-400">
         Page {{ currentPage() }} of {{ totalPages() }}

@@ -1,7 +1,7 @@
 import { Component, inject, signal, OnInit } from '@angular/core';
 import { ActivatedRoute, Router, RouterLink } from '@angular/router';
 import { FormBuilder, FormGroup, Validators, ReactiveFormsModule, AbstractControl, ValidationErrors } from '@angular/forms';
-import { finalize } from 'rxjs';
+import { finalize, take } from 'rxjs';
 import { MatIconModule } from '@angular/material/icon';
 // Components
 import { InputFieldComponent } from '@shared/components/ui/input-field/input-field.component';
@@ -10,6 +10,7 @@ import { InlineAlertComponent } from '@shared/components/ui/inline-alert/inline-
 // Services
 import { AuthService } from '@features/authentication/services/auth.service';
 import { StorageService } from '@shared/services/storage.service';
+import { ApiErrorService } from '@shared/services/api-error.service';
 // States
 import { UserState } from '@core/states/user.state';
 // Enums
@@ -32,6 +33,7 @@ export class SignupComponent implements OnInit {
   private router = inject(Router);
   private route = inject(ActivatedRoute);
   private fb = inject(FormBuilder);
+  private apiErrorService = inject(ApiErrorService);
 
   public signupForm!: FormGroup;
   public errorMessage = signal<string | null>(null);
@@ -58,7 +60,7 @@ export class SignupComponent implements OnInit {
       {
         full_name: ['', [Validators.required, Validators.minLength(2)]],
         email: ['', [Validators.required, Validators.email]],
-        password: ['', [Validators.required, Validators.minLength(6)]],
+        password: ['', [Validators.required, Validators.minLength(8)]],
         confirmPassword: ['', [Validators.required]],
         terms: [false, [Validators.requiredTrue]],
       },
@@ -92,6 +94,26 @@ export class SignupComponent implements OnInit {
   get isTermsInvalid(): boolean {
     const termsControl = this.signupForm.get('terms');
     return termsControl ? termsControl.invalid && termsControl.touched : false;
+  }
+
+  private applyServerFieldErrors(
+    fieldErrors: { field: string; message: string }[],
+  ): void {
+    fieldErrors.forEach(({ field, message }) => {
+      const control = this.signupForm.get(field);
+      if (!control) return;
+      control.setErrors({ ...(control.errors ?? {}), server: message });
+      control.markAsTouched();
+
+      // Auto-clear the server error the moment the user edits the field, so
+      // the red highlight disappears as they fix the input — without waiting
+      // for another submit round-trip.
+      control.valueChanges.pipe(take(1)).subscribe(() => {
+        const next = { ...(control.errors ?? {}) };
+        delete next['server'];
+        control.setErrors(Object.keys(next).length ? next : null);
+      });
+    });
   }
 
   submit(): void {
@@ -142,7 +164,11 @@ export class SignupComponent implements OnInit {
           }
         },
         error: (error) => {
-          this.errorMessage.set(error?.error?.message || error?.message || Messages.SIGNUP_FAILED);
+          const parsed = this.apiErrorService.parse(error, {
+            defaultMessage: Messages.SIGNUP_FAILED,
+          });
+          this.errorMessage.set(parsed.message);
+          this.applyServerFieldErrors(parsed.fieldErrors);
           console.error('Signup failed', error);
         },
       });

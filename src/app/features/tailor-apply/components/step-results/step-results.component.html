@@ -5,6 +5,7 @@
   <div>
     <app-cover-letter-preview
       [coverLetter]="coverLetterResult()!"
+      [resumeGenerationId]="tailoredResume().resumeGenerationId"
       [jobPosition]="tailoredResume().jobPosition"
       [candidateName]="userState.currentUser()?.fullName ?? ''"
       (dismissed)="onCloseCoverLetter()">
@@ -15,7 +16,15 @@
   <!-- Comparison panel — full takeover -->
   @else if (activePanel() === 'comparison' && tailoredResume().resumeGenerationId) {
   <div>
-    <app-resume-comparison [resumeGenerationId]="tailoredResume().resumeGenerationId" (dismissed)="onCloseComparison()">
+    <!--
+      Plumb the canonical matchScore block down so the comparison view
+      renders the same before/after numbers as this surface — no second
+      fetch, no risk of divergence.
+    -->
+    <app-resume-comparison
+      [resumeGenerationId]="tailoredResume().resumeGenerationId"
+      [matchScore]="tailoredResume().matchScore"
+      (dismissed)="onCloseComparison()">
     </app-resume-comparison>
   </div>
   }
@@ -38,12 +47,11 @@
     <div class="space-y-2.5">
 
       <!-- Hero: Match Score — typographic before → after -->
-      @if (tailoredResume().matchScore) {
-      @let ms = tailoredResume().matchScore!;
+      @if (tailoredResume().matchScore; as ms) {
       <div class="result-hero-card">
         <p class="result-section-label">Keyword Match Score</p>
 
-        <!-- Before → After numbers -->
+        <!-- Before → After numbers (rendered directly from the BE block) -->
         <div class="flex items-end justify-center gap-4">
           <div class="text-center">
             <p class="text-2xl font-bold text-slate-400">{{ ms.before }}%</p>
@@ -57,19 +65,15 @@
           </svg>
 
           <div class="text-center">
-            <p class="text-3xl font-extrabold text-success">{{ ms.after }}%</p>
-            <p class="text-[11px] font-semibold mt-0.5 text-success">After</p>
+            <p class="text-3xl font-extrabold" [class]="statusColorClass(ms.statusColor)">{{ ms.after }}%</p>
+            <p class="text-[11px] font-semibold mt-0.5" [class]="statusColorClass(ms.statusColor)">After</p>
           </div>
         </div>
 
-        <!-- Delta badge -->
+        <!-- Improvement headline — straight from the backend, no arithmetic -->
         <div class="flex justify-center mt-2.5">
-          <span class="result-delta-badge">
-            <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none"
-              stroke="currentColor" stroke-width="2.5">
-              <path d="m18 15-6-6-6 6" />
-            </svg>
-            {{ ms.delta >= 0 ? '+' : '' }}{{ ms.delta }}% improvement
+          <span class="result-delta-badge" [class]="statusColorClass(ms.statusColor)">
+            {{ ms.improvementMessage }}
           </span>
         </div>
       </div>

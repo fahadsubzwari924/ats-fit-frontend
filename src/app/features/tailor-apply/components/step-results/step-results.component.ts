@@ -8,6 +8,7 @@ import {
   trigger,
 } from '@angular/animations';
 import { TailoredResume } from '@features/resume-tailoring/models/tailored-resume.model';
+import type { StatusColor } from '@shared/types/match-score-block.model';
 import { TailoringModeBadgeComponent } from '@features/resume-tailoring/components/tailoring-mode-badge/tailoring-mode-badge.component';
 import { ResumeComparisonComponent } from '../resume-comparison/resume-comparison.component';
 import { CoverLetterPreviewComponent } from '../cover-letter-preview/cover-letter-preview.component';
@@ -134,5 +135,19 @@ export class StepResultsComponent {
 
   onCloseCoverLetter(): void {
     this.activePanel.set('none');
+  }
+
+  /**
+   * Maps the backend-supplied semantic status color to a Tailwind palette
+   * token used elsewhere in this surface. Kept in TS so the template stays
+   * free of conditionals.
+   */
+  statusColorClass(color: StatusColor): string {
+    const map: Record<StatusColor, string> = {
+      success: 'text-success-strong',
+      warning: 'text-amber-600',
+      muted: 'text-slate-500',
+    };
+    return map[color];
   }
 }

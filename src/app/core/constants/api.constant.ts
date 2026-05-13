@@ -16,6 +16,8 @@ export const API_ROUTES = {
     DOWNLOAD: 'resume-tailoring/download',
     DIFF: 'resume-tailoring/diff',
     COVER_LETTER: 'resume-tailoring/cover-letter',
+    COVER_LETTER_DOWNLOAD: (generationId: string) =>
+      `resume-tailoring/cover-letter/${generationId}/download`,
     BATCH_GENERATE: 'resume-tailoring/batch-generate',
   },
   JOBS: {

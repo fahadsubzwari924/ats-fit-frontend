@@ -48,9 +48,12 @@
 
         <app-resume-history-card [items]="resumeHistory()" [loading]="resumeHistoryLoading()"
           [downloadingId]="downloadingId()"
+          [downloadingCoverLetterId]="downloadingCoverLetterId()"
           [createDisabled]="tailoringDisabled()" [createDisabledReason]="tailoringDisabledReason()"
           (viewAllClicked)="openResumeHistoryModal()"
-          (createFirstClicked)="openTailorModal()" (downloadItem)="downloadHistoryItem($event)">
+          (createFirstClicked)="openTailorModal()"
+          (downloadItem)="downloadHistoryItem($event)"
+          (downloadCoverLetterItem)="downloadHistoryItemCoverLetter($event)">
         </app-resume-history-card>
 
         <app-tailore-resume-upload

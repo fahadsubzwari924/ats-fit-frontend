@@ -63,13 +63,18 @@
             <p class="text-[11.5px] text-[#94A3B8] mt-0.5">{{ item.createdAt | date: 'MMM d, y' }}</p>
           </div>
           <div class="flex items-center gap-2 flex-shrink-0">
-            @if (item.matchScore) {
+            @if (item.matchScore; as ms) {
+              <!--
+                Styling driven by the BE-supplied `statusColor`. No threshold
+                comparisons in the template — the classification is computed
+                once on the backend and rendered semantically here.
+              -->
               <span
                 class="px-2.5 py-1 rounded-full text-[12px] font-bold"
-                [style.color]="item.matchScore.after >= 70 ? '#16A34A' : item.matchScore.after >= 50 ? '#D97706' : '#64748B'"
-                [style.background]="item.matchScore.after >= 70 ? '#F0FDF4' : item.matchScore.after >= 50 ? '#FFFBEB' : '#F8FAFC'"
-                [style.border]="item.matchScore.after >= 70 ? '1px solid #BBF7D0' : item.matchScore.after >= 50 ? '1px solid #FDE68A' : '1px solid #E2E8F0'">
-                {{ item.matchScore.after }}%
+                [style.color]="statusStyle(ms.statusColor).color"
+                [style.background]="statusStyle(ms.statusColor).background"
+                [style.border]="statusStyle(ms.statusColor).border">
+                {{ ms.after }}%
               </span>
             } @else if (item.atsChecks) {
               <span
@@ -78,6 +83,33 @@
                 {{ item.atsChecks.passed }}/{{ item.atsChecks.total }}
               </span>
             }
+            <!-- Cover-letter download — appears only when a cover letter has
+                 been generated for this resume. Icon-only with tooltip to keep
+                 the row compact; matches the purple accent used everywhere
+                 cover-letter actions surface so users learn the pattern. -->
+            @if (item.hasCoverLetter) {
+              <button
+                type="button"
+                (click)="downloadCoverLetterItem.emit(item); $event.stopPropagation()"
+                [disabled]="downloadingCoverLetterId() === item.id"
+                matTooltip="Download cover letter PDF"
+                aria-label="Download cover letter PDF"
+                class="w-9 h-9 rounded-lg border border-[#E9D5FF] bg-[#FAF5FF] text-[#7C3AED] hover:bg-[#F3E8FF] hover:border-[#D8B4FE] flex items-center justify-center transition-colors disabled:opacity-50 cursor-pointer shrink-0">
+                @if (downloadingCoverLetterId() === item.id) {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" class="animate-spin">
+                    <path d="M21 12a9 9 0 1 1-6.219-8.56"></path>
+                  </svg>
+                } @else {
+                  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M14.5 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V7.5L14.5 2z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                    <path d="M12 18v-6" />
+                    <path d="m9 15 3 3 3-3" />
+                  </svg>
+                }
+              </button>
+            }
+
             <button
               type="button"
               (click)="downloadItem.emit(item); $event.stopPropagation()"

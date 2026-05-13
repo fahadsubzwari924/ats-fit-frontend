@@ -63,15 +63,17 @@
       }
       @case ('completed') {
         <p class="text-xs text-slate-500 mt-0.5">
-          @if (job().result?.matchScoreBefore !== undefined && job().result?.matchScoreAfter !== undefined
-               && job().result!.matchScoreAfter! > job().result!.matchScoreBefore!) {
-            <span class="text-slate-400">{{ job().result!.matchScoreBefore }}%</span>
+          @if (job().result?.matchScore; as ms) {
+            <!--
+              Always render before → after; the color of `after` is driven
+              entirely by the BE-supplied `statusColor`, so a `low-fit`
+              result naturally looks muted without any FE conditional.
+            -->
+            <span class="text-slate-400">{{ ms.before }}%</span>
             <span class="text-slate-300 mx-1" aria-hidden="true">→</span>
-            <span class="text-success-strong font-semibold">{{ job().result!.matchScoreAfter }}% match</span>
-          } @else if (job().result?.matchScoreAfter !== undefined) {
-            <span class="text-success-strong font-semibold">{{ job().result!.matchScoreAfter }}% match</span>
+            <span class="font-semibold" [class]="statusColorClass(ms.statusColor)">{{ ms.after }}% match</span>
           }
-          @if (job().result?.matchScoreAfter !== undefined && job().result?.sectionsChanged !== undefined) {
+          @if (job().result?.matchScore && job().result?.sectionsChanged !== undefined) {
             <span class="text-slate-300 mx-1.5" aria-hidden="true">·</span>
           }
           @if (job().result?.sectionsChanged !== undefined) {

@@ -23,7 +23,7 @@
     </div>
   }
 
-  @if (!isTailorQuotaExhausted()) {
+  @if (!isTailorQuotaExhausted() || currentStep() === 3) {
     <!-- Step indicator (steps 1-2; step 3 is results) -->
     @if (currentStep() < 3) {
       <div class="px-4 sm:px-6 pt-4 pb-2 shrink-0">
