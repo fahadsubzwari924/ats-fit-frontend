@@ -1,6 +1,6 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
-import { map, Observable } from 'rxjs';
+import { map, Observable, switchMap } from 'rxjs';
 import { API_ROUTES } from '@core/constants/api.constant';
 import { ApiResponse } from '@core/models/response/api-response.model';
 import {
@@ -56,6 +56,30 @@ export class CoverLetterService {
         { responseType: 'blob', observe: 'response' },
       )
       .pipe(map((response) => extractDownloadedResume(response)));
+  }
+
+  /**
+   * Single-call API for the dashboard card and history modal:
+   *   - If a cover letter already exists for this generation, just stream the PDF.
+   *   - Otherwise generate the cover letter (consumes 1 quota unit on the server)
+   *     and then stream the PDF in a single chained subscription.
+   *
+   * Callers use the returned `generated` flag to decide whether to notify the
+   * local quota state and flip the row's `hasCoverLetter` to true.
+   */
+  ensureGeneratedAndDownload(
+    resumeGenerationId: string,
+    alreadyGenerated: boolean,
+  ): Observable<{ blob: Blob; filename: string; generated: boolean }> {
+    if (alreadyGenerated) {
+      return this.downloadPdf(resumeGenerationId).pipe(
+        map((d) => ({ ...d, generated: false })),
+      );
+    }
+    return this.generateFromResumeGeneration(resumeGenerationId).pipe(
+      switchMap(() => this.downloadPdf(resumeGenerationId)),
+      map((d) => ({ ...d, generated: true })),
+    );
   }
 
   generateStandalone(
