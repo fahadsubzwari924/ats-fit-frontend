@@ -74,14 +74,12 @@
     <p class="upload-panel__drop-sub">or click to browse from your computer</p>
 
     <div class="upload-panel__formats">
-      <span>PDF</span>
-      <span class="upload-panel__formats-divider"></span>
-      <span>Word (.docx)</span>
+      <span>PDF only</span>
       <span class="upload-panel__formats-divider"></span>
       <span>Max 5 MB</span>
     </div>
 
-    <input #fileInput type="file" accept=".pdf,.docx" class="upload-panel__file-input"
+    <input #fileInput type="file" accept=".pdf,application/pdf" class="upload-panel__file-input"
       (change)="onFileInputChange($event)" />
   </div>
 
