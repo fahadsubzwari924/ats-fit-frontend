@@ -10,10 +10,7 @@ import {
 } from '@angular/core';
 
 const MAX_FILE_SIZE_BYTES = 5 * 1024 * 1024;
-const ALLOWED_MIME_TYPES = [
-  'application/pdf',
-  'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-];
+const ALLOWED_MIME_TYPES = ['application/pdf'];
 
 @Component({
   selector: 'app-onboarding-upload-panel',
@@ -68,10 +65,8 @@ export class OnboardingUploadPanelComponent {
 
   private processFile(file: File): void {
     this.validationError.set(null);
-    const isValidType =
-      ALLOWED_MIME_TYPES.includes(file.type) || file.name.endsWith('.docx');
-    if (!isValidType) {
-      this.validationError.set('Only PDF and DOCX files are supported.');
+    if (!ALLOWED_MIME_TYPES.includes(file.type)) {
+      this.validationError.set('Only PDF files are supported.');
       return;
     }
     if (file.size > MAX_FILE_SIZE_BYTES) {

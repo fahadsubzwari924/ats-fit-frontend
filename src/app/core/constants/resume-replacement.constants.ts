@@ -12,7 +12,7 @@ export const RESUME_REPLACEMENT_COPY = {
       `Your ${count} previous answers will be archived`,
     quotaLine: (used: number, total: number, resetsAt: string) =>
       `Quota: ${used} of ${total} replacements used this period. Resets ${resetsAt}.`,
-    fileDropHint: 'PDF or DOCX, max 5 MB',
+    fileDropHint: 'PDF only, max 5 MB',
     cta: 'Replace resume',
     cancel: 'Cancel',
     sameFileMessage: "That's the same file you already have.",
@@ -59,5 +59,5 @@ export const RESUME_REPLACEMENT_COPY = {
 
 export const RESUME_REPLACEMENT_LIMITS = {
   MAX_FILE_SIZE_BYTES: 5 * 1024 * 1024,
-  ALLOWED_MIME_TYPES: ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document'] as const,
+  ALLOWED_MIME_TYPES: ['application/pdf'] as const,
 } as const;

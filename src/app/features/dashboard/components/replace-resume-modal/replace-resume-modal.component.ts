@@ -48,7 +48,7 @@ export class ReplaceResumeModalComponent {
       return;
     }
     if (!(this.limits.ALLOWED_MIME_TYPES as readonly string[]).includes(file.type)) {
-      this.inlineError.set('Unsupported file type. Use PDF or DOCX.');
+      this.inlineError.set('Only PDF files are supported.');
       return;
     }
     this.selectedFile.set(file);
