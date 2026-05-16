@@ -10,6 +10,10 @@ import { NgClass } from '@angular/common';
 })
 export class StepJobDetailsComponent {
   form = input.required<FormGroup>();
+  /** When true, the form is hidden and a "Checking job fit..." overlay is
+   *  rendered (mirrors the StepTemplateSelectComponent processing pattern). */
+  isProcessing = input<boolean>(false);
+  progress = input<number>(0);
   next = output<void>();
 
   get jobPosition() { return this.form().get('jobPosition'); }

@@ -11,6 +11,7 @@ export const API_ROUTES = {
   },
   RESUME: {
     GENERATE: 'resume-tailoring/generate',
+    RELEVANCE: 'resume-tailoring/relevance',
     TEMPLATE: 'resume-tailoring/templates',
     HISTORY: 'resume-tailoring/history',
     DOWNLOAD: 'resume-tailoring/download',

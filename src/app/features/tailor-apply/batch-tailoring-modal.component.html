@@ -82,7 +82,7 @@
             [retryingJobIds]="retryingJobIds()"
             (tailorAnother)="onTailorAnother()"
             (retry)="onRetryResult($event)"
-            (finishWithTracking)="close()">
+            (finishWithTracking)="onFinishWithTracking()">
           </app-batch-results>
         }
       }
