@@ -1,5 +1,6 @@
 import { TailoringMode } from '@features/dashboard/models/resume-profile.model';
 import type { MatchScoreBlock } from '@shared/types/match-score-block.model';
+import type { JobRelevanceResult } from './job-relevance.model';
 
 export class TailoredResume {
   public blob: Blob;
@@ -16,6 +17,7 @@ export class TailoredResume {
   public matchScore: MatchScoreBlock | null;
   public atsChecks: { passed: number; total: number } | null;
   public bulletsQuantified: { before: number; after: number; total: number } | null;
+  public preGenerationRelevance: JobRelevanceResult | null;
 
   constructor(data: {
     blob: Blob;
@@ -31,6 +33,7 @@ export class TailoredResume {
     matchScore?: MatchScoreBlock | null;
     atsChecks?: { passed: number; total: number } | null;
     bulletsQuantified?: { before: number; after: number; total: number } | null;
+    preGenerationRelevance?: JobRelevanceResult | null;
   }) {
     this.blob = data?.blob;
     this.filename = data?.filename ?? '';
@@ -45,5 +48,6 @@ export class TailoredResume {
     this.matchScore = data?.matchScore ?? null;
     this.atsChecks = data?.atsChecks ?? null;
     this.bulletsQuantified = data?.bulletsQuantified ?? null;
+    this.preGenerationRelevance = data?.preGenerationRelevance ?? null;
   }
 }

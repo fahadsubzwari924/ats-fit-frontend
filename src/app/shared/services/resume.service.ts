@@ -1,13 +1,19 @@
 import { HttpClient } from '@angular/common/http';
 import { inject, Injectable } from '@angular/core';
 import { toSignal } from '@angular/core/rxjs-interop';
-import { BehaviorSubject, map, Observable, of, shareReplay, tap } from 'rxjs';
+import { BehaviorSubject, map, Observable, of, shareReplay, switchMap, tap } from 'rxjs';
 //Constants
 import { API_ROUTES } from '@core/constants/api.constant';
 // Models
 import { ApiResponse } from '@core/models/response/api-response.model';
 import { FeatureUsage } from '@core/models/user/feature-usage.model';
 import { TailoredResume } from '@features/resume-tailoring/models/tailored-resume.model';
+import { GenerateResumeOutcome } from '@features/resume-tailoring/models/generate-resume-outcome.model';
+import {
+  JobRelevanceDimensionLabel,
+  JobRelevanceResult,
+  JobRelevanceVerdict,
+} from '@features/resume-tailoring/models/job-relevance.model';
 import { ResumeTemplate } from '@features/resume-tailoring/models/resume-template.model';
 import { ResumeHistoryItem } from '@features/dashboard/models/resume-history.model';
 import { ReplaceResumeResponse, RestoreArchivedResumeResponse } from '@core/models/resume-replacement.model';
@@ -46,46 +52,56 @@ export class ResumeService {
   public readonly availableTemplates = toSignal(this.templates$, {
     initialValue: [],
   });
-  public generateTailoredResume(payload: FormData | Record<string, unknown>): Observable<TailoredResume> {
+  public generateTailoredResume(payload: FormData | Record<string, unknown>): Observable<GenerateResumeOutcome> {
     return this._http
       .post(API_ROUTES.createAPIRoute(API_ROUTES.RESUME.GENERATE), payload, {
         observe: 'response',
         responseType: 'blob',
       })
       .pipe(
-        map((response) => {
-          const tailoringHeader = response.headers.get('x-tailoring-mode');
-          const tailoringMode = (tailoringHeader ?? 'standard') as import('@features/dashboard/models/resume-profile.model').TailoringMode;
-          const data = {
-            filename: response.headers.get('x-filename') ?? undefined,
-            resumeGenerationId: response.headers.get('x-resume-generation-id') ?? undefined,
-            blob: response.body as Blob,
-            tailoringMode: ['standard', 'enhanced', 'precision', 'none'].includes(tailoringHeader ?? '') ? tailoringMode : 'standard',
-            keywordsAdded: Number(response.headers.get('x-keywords-added') ?? 0),
-            sectionsOptimized: Number(response.headers.get('x-sections-optimized') ?? 0),
-            achievementsQuantified: Number(response.headers.get('x-achievements-quantified') ?? 0),
-            optimizationConfidence: null,
-            matchScore: this.parseMatchScoreFromHeaders(response.headers),
-            atsChecks: (() => {
-              const passed = response.headers.get('x-ats-checks-passed');
-              if (passed === null) return null;
-              return {
-                passed: Number(passed),
-                total: Number(response.headers.get('x-ats-checks-total') ?? 10),
-              };
-            })(),
-            bulletsQuantified: (() => {
-              const before = response.headers.get('x-bullets-quantified-before');
-              if (before === null) return null;
-              return {
-                before: Number(before),
-                after: Number(response.headers.get('x-bullets-quantified-after') ?? 0),
-                total: Number(response.headers.get('x-bullets-quantified-total') ?? 0),
-              };
-            })(),
+        switchMap(async (response): Promise<GenerateResumeOutcome> => {
+          const contentType = response.headers.get('content-type') ?? '';
+          if (contentType.includes('application/json')) {
+            const text = await (response.body as Blob).text();
+            const json = JSON.parse(text) as { relevance: JobRelevanceResult };
+            return { kind: 'low_fit_warning', relevance: json.relevance };
+          }
+          return {
+            kind: 'pdf',
+            resume: new TailoredResume({
+              blob: response.body as Blob,
+              filename: response.headers.get('x-filename') ?? undefined,
+              resumeGenerationId: response.headers.get('x-resume-generation-id') ?? undefined,
+              tailoringMode: (() => {
+                const h = response.headers.get('x-tailoring-mode') ?? 'standard';
+                return (['standard', 'enhanced', 'precision', 'none'].includes(h) ? h : 'standard') as import('@features/dashboard/models/resume-profile.model').TailoringMode;
+              })(),
+              keywordsAdded: Number(response.headers.get('x-keywords-added') ?? 0),
+              sectionsOptimized: Number(response.headers.get('x-sections-optimized') ?? 0),
+              achievementsQuantified: Number(response.headers.get('x-achievements-quantified') ?? 0),
+              optimizationConfidence: null,
+              matchScore: this.parseMatchScoreFromHeaders(response.headers),
+              atsChecks: (() => {
+                const passed = response.headers.get('x-ats-checks-passed');
+                if (passed === null) return null;
+                return {
+                  passed: Number(passed),
+                  total: Number(response.headers.get('x-ats-checks-total') ?? 10),
+                };
+              })(),
+              bulletsQuantified: (() => {
+                const before = response.headers.get('x-bullets-quantified-before');
+                if (before === null) return null;
+                return {
+                  before: Number(before),
+                  after: Number(response.headers.get('x-bullets-quantified-after') ?? 0),
+                  total: Number(response.headers.get('x-bullets-quantified-total') ?? 0),
+                };
+              })(),
+              preGenerationRelevance: this.parseRelevanceFromHeaders(response.headers),
+            }),
           };
-          return new TailoredResume(data);
-        })
+        }),
       );
   }
 
@@ -122,6 +138,73 @@ export class ResumeService {
     const deltaHeader = headers.get('x-match-score-delta');
     const delta = deltaHeader !== null ? Number(deltaHeader) : undefined;
     return classifyMatchScoreBlock(before, after, delta);
+  }
+
+  /**
+   * Lightweight job-fit pre-check. Calls the BE `POST /resume-tailoring/relevance`
+   * endpoint which runs ONLY the relevance scoring pass — no tailoring, no
+   * PDF, no quota consumed. Used by the multi-step tailor flow to preview
+   * fit before the user commits to spending a generation credit.
+   */
+  public checkJobRelevance(
+    payload: FormData | Record<string, unknown>,
+  ): Observable<JobRelevanceResult> {
+    return this._http
+      .post<{ relevance: JobRelevanceResult } | ApiResponse<{ relevance: JobRelevanceResult }>>(
+        API_ROUTES.createAPIRoute(API_ROUTES.RESUME.RELEVANCE),
+        payload,
+      )
+      .pipe(
+        map((response) => {
+          // Tolerate both the bare `{ relevance }` and the
+          // `{ status, data: { relevance } }` envelope shapes — the global
+          // response interceptor wraps some routes but not others.
+          const raw = response as unknown as
+            | { relevance: JobRelevanceResult }
+            | { data: { relevance: JobRelevanceResult } };
+          if (raw && typeof raw === 'object' && 'data' in raw && raw.data) {
+            return (raw.data as { relevance: JobRelevanceResult }).relevance;
+          }
+          return (raw as { relevance: JobRelevanceResult }).relevance;
+        }),
+      );
+  }
+
+  /**
+   * Parses the full pre-generation relevance breakdown from response headers.
+   *
+   * Preference order:
+   *   1. `X-Relevance-Block` — JSON-encoded full JobRelevanceResult (canonical).
+   *   2. Per-field fallback (`x-relevance-score` + `x-relevance-verdict`) for
+   *      legacy BE versions. The fallback fabricates zero-filled dimensions
+   *      so the type contract holds; callers should check dimensions.techStack
+   *      score before relying on the breakdown.
+   */
+  private parseRelevanceFromHeaders(
+    headers: { get(name: string): string | null },
+  ): JobRelevanceResult | null {
+    const block = headers.get('x-relevance-block');
+    if (block) {
+      try {
+        return JSON.parse(block) as JobRelevanceResult;
+      } catch {
+        // fall through to per-field fallback
+      }
+    }
+    const score = headers.get('x-relevance-score');
+    const verdict = headers.get('x-relevance-verdict');
+    if (score === null || verdict === null || verdict === '') return null;
+    return {
+      score: Number(score),
+      verdict: verdict as JobRelevanceVerdict,
+      dimensions: {
+        techStack: { score: 0, label: JobRelevanceDimensionLabel.PARTIAL },
+        roleType: { score: 0, label: JobRelevanceDimensionLabel.PARTIAL },
+        experienceLevel: { score: 0, label: JobRelevanceDimensionLabel.PARTIAL },
+      },
+      gaps: [],
+      strengths: [],
+    };
   }
 
   public getResumeTemplates(): Observable<ResumeTemplate[]> {

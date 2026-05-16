@@ -150,4 +150,5 @@ export class StepResultsComponent {
     };
     return map[color];
   }
+
 }
