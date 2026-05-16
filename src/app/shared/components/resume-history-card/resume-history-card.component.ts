@@ -24,10 +24,22 @@ export class ResumeHistoryCardComponent {
   downloadingId = input<string | null>(null);
   /**
    * ID of the row currently downloading its cover letter PDF. Tracked
-   * separately from `downloadingId` (the resume PDF) so the spinners on each
+   * separately from `generatingCoverLetterId` so the spinners on each
    * affordance stay independent.
    */
   downloadingCoverLetterId = input<string | null>(null);
+  /**
+   * ID of the row currently generating-then-downloading its cover letter.
+   * Drives a distinct spinner so a row in `Generate` state does not visually
+   * collide with `Ready`-state downloads happening on other rows.
+   */
+  generatingCoverLetterId = input<string | null>(null);
+  /**
+   * When true and a row has no cover letter yet, the row shows an `Upgrade`
+   * affordance instead of the `Generate` icon. Computed by the parent from
+   * `QuotaState.quotaFor(COVER_LETTER)`.
+   */
+  coverLetterQuotaExhausted = input<boolean>(false);
   /** When true, disables the empty-state "Create your first one" CTA. */
   createDisabled = input<boolean>(false);
   createDisabledReason = input<string>('');
@@ -35,7 +47,11 @@ export class ResumeHistoryCardComponent {
   viewAllClicked = output<void>();
   createFirstClicked = output<void>();
   downloadItem = output<ResumeHistoryItem>();
-  downloadCoverLetterItem = output<ResumeHistoryItem>();
+  /**
+   * Single channel for all cover-letter row clicks. The parent dispatches the
+   * correct action based on `item.hasCoverLetter` and the quota state.
+   */
+  coverLetterAction = output<ResumeHistoryItem>();
 
   /**
    * Maps the backend-supplied semantic `statusColor` to the inline `{ color,

@@ -12,13 +12,10 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { takeUntilDestroyed } from '@angular/core/rxjs-interop';
 import {
-  catchError,
   debounceTime,
   distinctUntilChanged,
-  EMPTY,
   Subject,
   switchMap,
-  tap,
 } from 'rxjs';
 import { saveAs } from 'file-saver';
 
@@ -257,16 +254,8 @@ export class ResumeHistoryModalComponent implements OnInit {
   /**
    * Retroactively generate a cover letter for a tailored resume that didn't
    * get one at tailoring time, then immediately stream the rendered PDF.
-   *
-   * The backend reuses the stored job_analysis + candidate_content from the
-   * original tailoring run, so we don't have to re-collect any inputs from
-   * the user. Consumes one COVER_LETTER quota unit on success.
-   *
-   * Chained as generate -> mark-success -> download so the click is a single
-   * deliverable from the user's perspective. If the download leg fails after
-   * generation succeeded, we explain that distinctly — the cover letter is
-   * now saved and can be re-downloaded from the button which has already
-   * flipped to its "Download" state.
+   * Delegates the network chain to CoverLetterService for parity with the
+   * dashboard card.
    */
   generateCoverLetter(item: ResumeHistoryItem, event: Event): void {
     event.stopPropagation();
@@ -278,32 +267,17 @@ export class ResumeHistoryModalComponent implements OnInit {
 
     this.generatingCoverLetterId.set(item.id);
     this.coverLetterService
-      .generateFromResumeGeneration(item.id)
-      .pipe(
-        tap(() => {
-          this.markItemHasCoverLetter(item.id);
-          this.quotaState.notifyFeatureConsumed(FeatureType.COVER_LETTER);
-        }),
-        switchMap(() =>
-          this.coverLetterService.downloadPdf(item.id).pipe(
-            catchError((dlErr) => {
-              this.generatingCoverLetterId.set(null);
-              const parsed = this.apiErrorService.parse(dlErr, {
-                defaultMessage:
-                  'Cover letter was generated. Click Download to retry the PDF.',
-              });
-              this.snackbar.showError(parsed.message);
-              return EMPTY;
-            }),
-          ),
-        ),
-        takeUntilDestroyed(this.destroyRef),
-      )
+      .ensureGeneratedAndDownload(item.id, false)
+      .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ blob, filename }) => {
+        next: ({ blob, filename, generated }) => {
           saveAs(blob, filename);
           this.generatingCoverLetterId.set(null);
-          this.snackbar.showSuccess('Cover letter ready — downloaded as PDF.');
+          if (generated) {
+            this.markItemHasCoverLetter(item.id);
+            this.quotaState.notifyFeatureConsumed(FeatureType.COVER_LETTER);
+            this.snackbar.showSuccess('Cover letter ready — downloaded as PDF.');
+          }
         },
         error: (err) => {
           this.generatingCoverLetterId.set(null);

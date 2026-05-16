@@ -44,6 +44,9 @@ import { ResumeHistoryCardComponent } from '@shared/components/resume-history-ca
 import { UpgradeFeatureDialogComponent } from '@shared/components/upgrade-feature-dialog/upgrade-feature-dialog.component';
 import { DashboardPostTailorUpgradeBannerComponent } from '@features/dashboard/components/dashboard-post-tailor-upgrade-banner/dashboard-post-tailor-upgrade-banner.component';
 import { ExtractionFailedBannerComponent } from '@features/dashboard/components/extraction-failed-banner/extraction-failed-banner.component';
+import { QuotaState } from '@core/states/quota.state';
+import { FeatureType } from '@core/enums/feature-type.enum';
+import { BillingNavigationService } from '@shared/services/billing-navigation.service';
 
 const POLL_INTERVAL_MS = 5000;
 const POST_TAILOR_UPGRADE_SUPPRESS_MS = 7 * 24 * 60 * 60 * 1000;
@@ -86,6 +89,15 @@ export class DashboardComponent implements OnInit {
   private jobService = inject(JobService);
   private resumeService = inject(ResumeService);
   private coverLetterService = inject(CoverLetterService);
+  private quotaState = inject(QuotaState);
+  private billingNav = inject(BillingNavigationService);
+
+  protected readonly COVER_LETTER_FEATURE = FeatureType.COVER_LETTER;
+  readonly isCoverLetterExhausted = computed(
+    () =>
+      this.quotaState.quotaFor(this.COVER_LETTER_FEATURE)()?.status ===
+      'exhausted',
+  );
   private apiErrorService = inject(ApiErrorService);
   private snackbarService = inject(SnackbarService);
   private profileQuestionsService = inject(ProfileQuestionsService);
@@ -102,6 +114,12 @@ export class DashboardComponent implements OnInit {
   public resumeHistoryLoading = signal(false);
   public downloadingId = signal<string | null>(null);
   public downloadingCoverLetterId = signal<string | null>(null);
+  /**
+   * Per-row spinner for retroactive cover-letter generation. Separate from
+   * `downloadingCoverLetterId` so a Generate-state row can spin without
+   * affecting another row's Ready-state download.
+   */
+  public generatingCoverLetterId = signal<string | null>(null);
 
   /** Shown after a successful tailor when user is not premium and has not dismissed recently. */
   showPostTailorUpgradeNudge = signal(false);
@@ -446,26 +464,72 @@ export class DashboardComponent implements OnInit {
   }
 
   /**
-   * Quota-free download of an existing cover-letter PDF for a recent tailored
-   * resume. The card only emits this event when item.hasCoverLetter is true,
-   * but we still defend against double-clicks via the per-row spinner state.
+   * Unified cover-letter row handler:
+   *   - Ready    (hasCoverLetter): stream the existing PDF (no quota cost)
+   *   - Generate (no letter, quota OK): generate → mark hasCoverLetter → download
+   *   - Upgrade  (no letter, quota exhausted): open the plans section
+   *
+   * Spinner state is split so each state runs independently per row.
+   * After a successful generation we mutate the local list and call
+   * QuotaState.notifyFeatureConsumed so the rest of the UI updates without
+   * a refetch.
    */
-  public downloadHistoryItemCoverLetter(item: ResumeHistoryItem): void {
-    if (this.downloadingCoverLetterId() === item.id) return;
-    this.downloadingCoverLetterId.set(item.id);
-    this.coverLetterService.downloadPdf(item.id).pipe(takeUntilDestroyed(this.destroyRef)).subscribe({
-      next: ({ blob, filename }) => {
-        saveAs(blob, filename);
-        this.downloadingCoverLetterId.set(null);
-      },
-      error: (err) => {
-        this.downloadingCoverLetterId.set(null);
-        const parsed = this.apiErrorService.parse(err, {
-          defaultMessage: 'Could not download cover letter. Please try again.',
-        });
-        this.snackbarService.showError(parsed.message);
-      },
-    });
+  public onCoverLetterAction(item: ResumeHistoryItem): void {
+    // Upgrade state — let the user act on the lock icon
+    if (!item.hasCoverLetter && this.isCoverLetterExhausted()) {
+      this.billingNav.goToPlansSection();
+      return;
+    }
+
+    // Guard against double-clicks in either spinner
+    if (
+      this.downloadingCoverLetterId() === item.id ||
+      this.generatingCoverLetterId() === item.id
+    ) {
+      return;
+    }
+
+    const wasGenerated = item.hasCoverLetter;
+    if (wasGenerated) {
+      this.downloadingCoverLetterId.set(item.id);
+    } else {
+      this.generatingCoverLetterId.set(item.id);
+    }
+
+    this.coverLetterService
+      .ensureGeneratedAndDownload(item.id, wasGenerated)
+      .pipe(takeUntilDestroyed(this.destroyRef))
+      .subscribe({
+        next: ({ blob, filename, generated }) => {
+          saveAs(blob, filename);
+          this.downloadingCoverLetterId.set(null);
+          this.generatingCoverLetterId.set(null);
+
+          if (generated) {
+            this.markItemHasCoverLetter(item.id);
+            this.quotaState.notifyFeatureConsumed(FeatureType.COVER_LETTER);
+            this.snackbarService.showSuccess(
+              'Cover letter ready — downloaded as PDF.',
+            );
+          }
+        },
+        error: (err) => {
+          this.downloadingCoverLetterId.set(null);
+          this.generatingCoverLetterId.set(null);
+          const parsed = this.apiErrorService.parse(err, {
+            defaultMessage: wasGenerated
+              ? 'Could not download cover letter. Please try again.'
+              : 'Could not generate cover letter. Please try again in a moment.',
+          });
+          this.snackbarService.showError(parsed.message);
+        },
+      });
+  }
+
+  private markItemHasCoverLetter(id: string): void {
+    this.resumeHistory.update((list) =>
+      list.map((it) => (it.id === id ? { ...it, hasCoverLetter: true } : it)),
+    );
   }
 
   public onJobStatusChange(job: JobApplication): void {

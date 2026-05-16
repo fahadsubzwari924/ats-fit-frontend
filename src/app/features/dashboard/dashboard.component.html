@@ -49,11 +49,13 @@
         <app-resume-history-card [items]="resumeHistory()" [loading]="resumeHistoryLoading()"
           [downloadingId]="downloadingId()"
           [downloadingCoverLetterId]="downloadingCoverLetterId()"
+          [generatingCoverLetterId]="generatingCoverLetterId()"
+          [coverLetterQuotaExhausted]="isCoverLetterExhausted()"
           [createDisabled]="tailoringDisabled()" [createDisabledReason]="tailoringDisabledReason()"
           (viewAllClicked)="openResumeHistoryModal()"
           (createFirstClicked)="openTailorModal()"
           (downloadItem)="downloadHistoryItem($event)"
-          (downloadCoverLetterItem)="downloadHistoryItemCoverLetter($event)">
+          (coverLetterAction)="onCoverLetterAction($event)">
         </app-resume-history-card>
 
         <app-tailore-resume-upload
