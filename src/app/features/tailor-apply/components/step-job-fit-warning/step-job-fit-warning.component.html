@@ -1,0 +1,120 @@
+<div class="space-y-4">
+
+  <!-- Score circle + headline -->
+  <div class="flex items-center gap-3.5">
+    <div class="w-14 h-14 rounded-full border-[3px] flex items-center justify-center shrink-0 transition-colors"
+      [class]="circleClass()">
+      <span class="text-xl font-bold leading-none">{{ relevance().score }}</span>
+    </div>
+    <div>
+      <p class="text-base font-semibold leading-tight" [class]="headlineClass()">{{ verdictLabel() }}</p>
+      <p class="text-xs text-slate-500 mt-0.5 leading-snug">
+        How closely your profile matches this role before AI optimisation.
+      </p>
+    </div>
+  </div>
+
+  <!-- Dimension breakdown -->
+  <div class="bg-white border border-slate-200 rounded-xl p-4 space-y-3.5 shadow-sm">
+    <div class="flex items-center gap-2">
+      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+        stroke="currentColor" stroke-width="2" class="text-slate-500">
+        <line x1="18" x2="18" y1="20" y2="10"></line>
+        <line x1="12" x2="12" y1="20" y2="4"></line>
+        <line x1="6" x2="6" y1="20" y2="14"></line>
+      </svg>
+      <p class="text-[11px] font-bold uppercase tracking-wider text-slate-500">Breakdown</p>
+    </div>
+
+    @for (row of dimensionRows(); track row.name) {
+    <div>
+      <div class="flex justify-between text-xs mb-1.5">
+        <span class="font-medium text-slate-700">{{ row.name }}</span>
+        <span class="font-semibold" [class]="row.labelClass">{{ row.label }}</span>
+      </div>
+      <div class="bg-slate-100 rounded-full h-1.5 overflow-hidden">
+        <div class="h-full rounded-full transition-[width] duration-[400ms] ease-out"
+          [class]="row.barClass"
+          [style.width]="animated() ? row.score + '%' : '0%'">
+        </div>
+      </div>
+    </div>
+    }
+  </div>
+
+  <!-- Gaps + Strengths -->
+  <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+
+    <!-- Gaps card -->
+    <div class="rounded-xl border-2 border-destructive/20 bg-destructive/5 p-4 shadow-sm">
+      <div class="flex items-center gap-2.5 mb-3">
+        <div class="w-8 h-8 rounded-lg bg-destructive/12 border border-destructive/25 flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" class="text-destructive">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+        </div>
+        <div class="leading-tight">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-destructive">Gaps</p>
+          <p class="text-[10px] text-slate-500 mt-0.5">
+            {{ relevance().gaps.length }}
+            {{ relevance().gaps.length === 1 ? 'missing requirement' : 'missing requirements' }}
+          </p>
+        </div>
+      </div>
+      @if (relevance().gaps.length > 0) {
+      <ul class="space-y-2">
+        @for (gap of relevance().gaps; track gap) {
+        <li class="flex items-start gap-2 text-xs text-slate-700 leading-relaxed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="3" class="text-destructive shrink-0 mt-[3px]">
+            <path d="M18 6 6 18"></path>
+            <path d="m6 6 12 12"></path>
+          </svg>
+          <span>{{ gap }}</span>
+        </li>
+        }
+      </ul>
+      } @else {
+      <p class="text-xs text-slate-400 italic">No critical gaps identified.</p>
+      }
+    </div>
+
+    <!-- Strengths card -->
+    <div class="rounded-xl border-2 border-success/20 bg-success/5 p-4 shadow-sm">
+      <div class="flex items-center gap-2.5 mb-3">
+        <div class="w-8 h-8 rounded-lg bg-success/12 border border-success/25 flex items-center justify-center shrink-0">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="2.5" class="text-success-strong">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+        </div>
+        <div class="leading-tight">
+          <p class="text-[11px] font-bold uppercase tracking-wider text-success-strong">Strengths</p>
+          <p class="text-[10px] text-slate-500 mt-0.5">
+            {{ relevance().strengths.length }}
+            {{ relevance().strengths.length === 1 ? 'match' : 'matches' }}
+          </p>
+        </div>
+      </div>
+      @if (relevance().strengths.length > 0) {
+      <ul class="space-y-2">
+        @for (strength of relevance().strengths; track strength) {
+        <li class="flex items-start gap-2 text-xs text-slate-700 leading-relaxed">
+          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none"
+            stroke="currentColor" stroke-width="3" class="text-success-strong shrink-0 mt-[3px]">
+            <polyline points="20 6 9 17 4 12"></polyline>
+          </svg>
+          <span>{{ strength }}</span>
+        </li>
+        }
+      </ul>
+      } @else {
+      <p class="text-xs text-slate-400 italic">No clear strengths identified.</p>
+      }
+    </div>
+
+  </div>
+
+</div>

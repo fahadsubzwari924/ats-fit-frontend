@@ -17,18 +17,18 @@
   </div>
 
   <!-- Quota banner — Layer 2: only on form steps, never on results -->
-  @if (currentStep() !== 3) {
+  @if (currentStep() !== 4) {
     <div class="px-4 sm:px-6 pt-4 shrink-0">
       <app-quota-alert-banner [features]="TAILOR_FEATURES" />
     </div>
   }
 
-  @if (!isTailorQuotaExhausted() || currentStep() === 3) {
-    <!-- Step indicator (steps 1-2; step 3 is results) -->
-    @if (currentStep() < 3) {
+  @if (!isTailorQuotaExhausted() || currentStep() === 4) {
+    <!-- Step indicator (steps 1-3; step 4 is results, no indicator shown there) -->
+    @if (currentStep() < 4) {
       <div class="px-4 sm:px-6 pt-4 pb-2 shrink-0">
         <div class="flex items-center gap-1.5">
-          @for (step of [1, 2]; track step) {
+          @for (step of [1, 2, 3]; track step) {
             <button
               (click)="goToStep($any(step))"
               class="flex items-center gap-1.5 text-xs font-medium transition-colors"
@@ -50,7 +50,7 @@
               </div>
               <span class="hidden sm:inline">{{ STEP_LABELS[step] }}</span>
             </button>
-            @if (step < 2) {
+            @if (step < 3) {
               <div class="flex-1 h-px"
                 [ngClass]="step < currentStep() ? 'bg-primary-soft-border' : 'bg-slate-100'">
               </div>
@@ -67,20 +67,29 @@
         @case (1) {
           <app-step-job-details
             [form]="form"
-            (next)="onNext()">
+            [isProcessing]="isProcessing()"
+            [progress]="progress()"
+            (next)="onCheckRelevance()">
           </app-step-job-details>
         }
         @case (2) {
+          @if (pendingRelevance()) {
+            <app-step-job-fit-warning
+              [relevance]="pendingRelevance()!">
+            </app-step-job-fit-warning>
+          }
+        }
+        @case (3) {
           <app-step-template-select
             [form]="form"
             [isProcessing]="isProcessing()"
             [progress]="progress()"
-            (generate)="onGenerate()"
+            (generate)="onConfirmGenerate()"
             (answerQuestionsFirst)="onAnswerQuestionsFirst()"
             (minimize)="onMinimize()">
           </app-step-template-select>
         }
-        @case (3) {
+        @case (4) {
           @if (tailoredResume()) {
             <app-step-results
               [tailoredResume]="tailoredResume()!"
@@ -93,6 +102,24 @@
       }
 
     </div>
+
+    <!-- Step 2 sticky footer — lives outside the scrollable area so the
+         Back/Continue buttons are always visible regardless of breakdown
+         content length. -->
+    @if (currentStep() === 2 && pendingRelevance()) {
+      <div class="shrink-0 px-4 sm:px-6 py-3 border-t border-slate-200 bg-white">
+        <div class="flex gap-2.5 justify-end">
+          <button (click)="onBackToDetails()"
+            class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-500 hover:text-slate-700 hover:border-slate-300 transition-colors">
+            Back
+          </button>
+          <button (click)="onContinueToTemplate()"
+            class="px-5 py-2.5 rounded-xl bg-gradient-to-r from-primary to-accent-purple hover:from-primary-hover hover:to-accent-purple-strong text-sm font-semibold text-white shadow-md shadow-primary/20 transition-all">
+            Continue to Template →
+          </button>
+        </div>
+      </div>
+    }
   } @else {
     <div class="flex-1 flex items-end justify-center px-4 sm:px-6 pb-6">
       <button (click)="closeModal()"
