@@ -24,4 +24,12 @@ export enum Messages {
   RESET_PASSWORD_SUCCESS = 'Password updated! You can now sign in with your new password.',
   RESET_PASSWORD_FAILED = 'This reset link is invalid or has expired. Please request a new one.',
   FORGOT_PASSWORD_FAILED = 'Something went wrong. Please try again.',
+
+  // Job-relevance "unavailable" sentinel messages — keyed by JobRelevanceSkipReason.
+  // Resolved in modal via mapJobFitUnavailableMessage() so each cause has a
+  // targeted CTA (upload, re-upload, try later) instead of a generic toast.
+  JOB_FIT_UNAVAILABLE_NO_PROFILE = 'Add a resume to your profile first so we can score how well it fits this role.',
+  JOB_FIT_UNAVAILABLE_EMPTY_PROFILE = 'Your resume profile looks empty. Please re-upload your resume to enable the fit check.',
+  JOB_FIT_UNAVAILABLE_FEATURE_DISABLED = 'Job fit check is temporarily unavailable. Please try again later.',
+  JOB_FIT_UNAVAILABLE_DEFAULT = 'Job fit check is unavailable for your profile right now.',
 }

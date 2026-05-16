@@ -13,22 +13,31 @@ interface DimensionRow {
   labelClass: string;
 }
 
+// The UNAVAILABLE entry is a defensive fallback only — the tailor modal
+// short-circuits in `onCheckRelevance()` when it receives UNAVAILABLE, so this
+// component should never actually render with that verdict. Neutral slate
+// styling here just keeps the Record<JobRelevanceVerdict, ...> exhaustive
+// for the type checker and prevents a confusing-color render if the guard
+// is ever bypassed.
 const VERDICT_CIRCLE_CLASS: Record<JobRelevanceVerdict, string> = {
   [JobRelevanceVerdict.LOW]: 'border-destructive bg-destructive/10 text-destructive',
   [JobRelevanceVerdict.MEDIUM]: 'border-amber-500 bg-amber-500/10 text-amber-700',
   [JobRelevanceVerdict.HIGH]: 'border-success bg-success/10 text-success-strong',
+  [JobRelevanceVerdict.UNAVAILABLE]: 'border-slate-300 bg-slate-100 text-slate-500',
 };
 
 const VERDICT_HEADLINE_CLASS: Record<JobRelevanceVerdict, string> = {
   [JobRelevanceVerdict.LOW]: 'text-destructive',
   [JobRelevanceVerdict.MEDIUM]: 'text-amber-700',
   [JobRelevanceVerdict.HIGH]: 'text-success-strong',
+  [JobRelevanceVerdict.UNAVAILABLE]: 'text-slate-500',
 };
 
 const VERDICT_LABEL: Record<JobRelevanceVerdict, string> = {
   [JobRelevanceVerdict.LOW]: 'Low Job Fit',
   [JobRelevanceVerdict.MEDIUM]: 'Medium Job Fit',
   [JobRelevanceVerdict.HIGH]: 'High Job Fit',
+  [JobRelevanceVerdict.UNAVAILABLE]: 'Fit Check Unavailable',
 };
 
 const DIMENSION_LABEL_CLASS: Record<JobRelevanceDimensionLabel, string> = {
