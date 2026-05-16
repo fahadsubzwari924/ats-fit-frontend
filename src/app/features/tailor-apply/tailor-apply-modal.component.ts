@@ -8,7 +8,11 @@ import { SnackbarService } from '@shared/services/snackbar.service';
 import { JobService } from '@features/apply-new-job/services/job.service';
 import { JobApplicationCreatePayload } from '@features/apply-new-job/models/job-application-create-payload.model';
 import { TailoredResume } from '@features/resume-tailoring/models/tailored-resume.model';
-import { JobRelevanceResult } from '@features/resume-tailoring/models/job-relevance.model';
+import {
+  JobRelevanceResult,
+  JobRelevanceSkipReason,
+  JobRelevanceVerdict,
+} from '@features/resume-tailoring/models/job-relevance.model';
 import { TailorApplyStep } from './models/tailor-apply-form.model';
 import { TailoringModalCloseResult } from './models/tailoring-modal-close-result.model';
 import { StepJobDetailsComponent } from './components/step-job-details/step-job-details.component';
@@ -97,6 +101,18 @@ export class TailorApplyModalComponent implements OnInit {
         await new Promise((r) => setTimeout(r, 350));
         this.isProcessing.set(false);
         this.progress.set(0);
+
+        // BE returns an UNAVAILABLE sentinel when scoring couldn't run
+        // (feature disabled, no profile, empty profile). Surface a targeted
+        // warning and keep the user on step 1 — moving to step 2 would
+        // render a meaningless 0/MISMATCH breakdown.
+        if (relevance.verdict === JobRelevanceVerdict.UNAVAILABLE) {
+          this.snackbar.showWarning(
+            this.mapJobFitUnavailableMessage(relevance.unavailableReason),
+          );
+          return;
+        }
+
         this.pendingRelevance.set(relevance);
         this.currentStep.set(2);
       },
@@ -106,6 +122,26 @@ export class TailorApplyModalComponent implements OnInit {
         this.snackbar.showError(err?.error?.message ?? Messages.ERROR_UPLOADING_RESUME);
       },
     });
+  }
+
+  /**
+   * Maps the BE-supplied skip reason to a user-facing message. Keeps the
+   * mapping in one place so the modal HTML stays free of switch logic and
+   * future reasons land here without touching the call sites.
+   */
+  private mapJobFitUnavailableMessage(
+    reason: JobRelevanceSkipReason | undefined,
+  ): string {
+    switch (reason) {
+      case JobRelevanceSkipReason.NO_PROFILE:
+        return Messages.JOB_FIT_UNAVAILABLE_NO_PROFILE;
+      case JobRelevanceSkipReason.EMPTY_PROFILE:
+        return Messages.JOB_FIT_UNAVAILABLE_EMPTY_PROFILE;
+      case JobRelevanceSkipReason.FEATURE_DISABLED:
+        return Messages.JOB_FIT_UNAVAILABLE_FEATURE_DISABLED;
+      default:
+        return Messages.JOB_FIT_UNAVAILABLE_DEFAULT;
+    }
   }
 
   /** Step 2 (Job Fit) → step 3 (Template). No API call. */
