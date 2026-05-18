@@ -28,14 +28,29 @@ export class DashboardHeroComponent {
   readonly displayName = computed(() => this.userName() || 'User');
 
   /**
-   * Single primary quota stat for the hero: tailored resumes per month.
-   * Single tailoring + every resume produced in a batch share this same pool,
-   * so we surface ONE clear number instead of duplicating it per action card.
-   * Returns null when usage hasn't loaded yet (hides the strip until ready).
+   * Tailored-resume quota (RESUME_GENERATION). Single + batch share this
+   * pool, so we surface one number for "how many resumes I can still
+   * tailor this month".
    */
   readonly tailoredResumesQuota = this.quotaState.quotaFor(
     FeatureType.RESUME_GENERATION,
   );
 
-  readonly quotaStatus = computed(() => this.tailoredResumesQuota()?.status ?? 'healthy');
+  /**
+   * Job-fit-scoring quota (JOB_RELEVANCE_SCORE). Shared between standalone
+   * fit-check previews and the orchestrator-internal call inside tailoring.
+   * Cache hits don't burn quota. When exhausted, tailoring still works but
+   * skips the Job Fit step in the modal.
+   */
+  readonly jobFitQuota = this.quotaState.quotaFor(
+    FeatureType.JOB_RELEVANCE_SCORE,
+  );
+
+  readonly quotaStatus = computed(() => {
+    const tailorStatus = this.tailoredResumesQuota()?.status ?? 'healthy';
+    const fitStatus = this.jobFitQuota()?.status ?? 'healthy';
+    if (tailorStatus === 'exhausted' || fitStatus === 'exhausted') return 'exhausted';
+    if (tailorStatus === 'approaching' || fitStatus === 'approaching') return 'approaching';
+    return 'healthy';
+  });
 }

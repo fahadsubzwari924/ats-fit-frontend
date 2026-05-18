@@ -6,11 +6,8 @@ import { forkJoin, of } from 'rxjs';
 import { catchError, map } from 'rxjs/operators';
 import { BatchGenerateResponse, BatchJobResult } from '@features/tailor-apply/models/batch-tailoring.model';
 import { BatchTailoringService } from '@features/tailor-apply/services/batch-tailoring.service';
-import { JobApplicationCreatePayload } from '@features/apply-new-job/models/job-application-create-payload.model';
-import { JobService } from '@features/apply-new-job/services/job.service';
 import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
-import { trackedApplicationAppliedAtIso } from '@features/applications/lib/date-input-helpers';
 import { ResumeComparisonComponent } from '@features/tailor-apply/components/resume-comparison/resume-comparison.component';
 import type {
   MatchScoreBlock,
@@ -26,7 +23,6 @@ import type {
 export class BatchResultsComponent {
   private readonly batchService = inject(BatchTailoringService);
   private readonly resumeService = inject(ResumeService);
-  private readonly jobService = inject(JobService);
   private readonly snackbar = inject(SnackbarService);
   private readonly destroyRef = inject(DestroyRef);
 
@@ -87,8 +83,6 @@ export class BatchResultsComponent {
 
   downloadingIndex = signal<number | null>(null);
   isZipping = signal(false);
-  isTracking = signal(false);
-  tracked = signal(false);
 
   get succeeded(): BatchJobResult[] {
     return this.batchResponse().results.filter((r) => r.status === 'success');
@@ -254,58 +248,8 @@ export class BatchResultsComponent {
     return map[color];
   }
 
-  trackAllApplications(): void {
-    if (this.tracked() || this.isTracking()) return;
-    const items = this.succeeded.filter(
-      (r) =>
-        !!r.resumeGenerationId?.trim() &&
-        (r.jobDescription?.trim().length ?? 0) >= 20,
-    );
-    if (!items.length) {
-      this.snackbar.showWarning(
-        'Cannot track: each completed job needs a job description (re-run batch with full descriptions).',
-      );
-      return;
-    }
-
-    this.isTracking.set(true);
-    const appliedAt = trackedApplicationAppliedAtIso();
-    const requests = items.map((r) => {
-      const payload: JobApplicationCreatePayload = {
-        application_source: 'tailored_resume',
-        company_name: r.companyName,
-        job_position: r.jobPosition,
-        job_description: r.jobDescription!.trim(),
-        applied_at: appliedAt,
-        resume_generation_id: r.resumeGenerationId,
-      };
-      return this.jobService.applyNewJobs(payload).pipe(
-        map(() => true as const),
-        catchError(() => of(false as const)),
-      );
-    });
-
-    forkJoin(requests).subscribe({
-      next: (outcomes) => {
-        this.isTracking.set(false);
-        const ok = outcomes.filter(Boolean).length;
-        const bad = outcomes.length - ok;
-        if (ok > 0) {
-          this.tracked.set(true);
-          const suffix = bad > 0 ? ` (${bad} failed)` : '';
-          this.snackbar.showSuccess(
-            `${ok} application${ok > 1 ? 's' : ''} tracked!${suffix}`,
-          );
-          this.finishWithTracking.emit();
-        }
-        if (ok === 0) {
-          this.snackbar.showError('Could not track applications. Please try again.');
-        }
-      },
-      error: () => {
-        this.isTracking.set(false);
-        this.snackbar.showError('Some applications could not be tracked.');
-      },
-    });
+  /** Close the modal — backend already tracked every succeeded row. */
+  finish(): void {
+    this.finishWithTracking.emit();
   }
 }

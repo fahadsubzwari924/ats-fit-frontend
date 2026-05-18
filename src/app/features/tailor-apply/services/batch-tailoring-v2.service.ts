@@ -15,12 +15,11 @@ export class BatchTailoringV2Service {
 
   enqueueBatch(payload: BatchGenerateRequest): Observable<EnqueueBatchV2Response> {
     const baseUrl = environment.baseUrl.replace(/\/$/, '');
-    return this.http
-      .post<ApiResponse<EnqueueBatchV2Response>>(
-        `${baseUrl}/resume-tailoring/batch/v2/generate`,
-        payload,
-      )
-      .pipe(map((res) => res.data as EnqueueBatchV2Response));
+    // BE returns raw { batchId, totalJobs } as 202 (no ApiResponse wrapper).
+    return this.http.post<EnqueueBatchV2Response>(
+      `${baseUrl}/resume-tailoring/batch/v2/generate`,
+      payload,
+    );
   }
 
   getStatus(batchId: string): Observable<BatchSnapshot> {

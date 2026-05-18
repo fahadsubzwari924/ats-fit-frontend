@@ -102,6 +102,24 @@ export class BatchTailoringFlowController {
     this.currentPayload = payload;
     this._status.set('enqueueing');
 
+    // Optimistic UI — render the user-typed job rows immediately while we
+    // wait for the enqueue HTTP response + first SSE snapshot to land. The
+    // real snapshot from the BE replaces this when it arrives. Without this,
+    // the processing view sits empty for 1–3s while the network round-trip
+    // completes, which feels broken.
+    this.state.applySnapshot({
+      batchId: '',
+      totalJobs: payload.jobs.length,
+      status: 'queued',
+      jobs: payload.jobs.map((j, i) => ({
+        index: i,
+        jobPosition: j.jobPosition,
+        companyName: j.companyName,
+        state: 'queued',
+        retryCount: 0,
+      })),
+    });
+
     this.v2Service
       .enqueueBatch(payload)
       .pipe(takeUntilDestroyed(this.destroyRef))

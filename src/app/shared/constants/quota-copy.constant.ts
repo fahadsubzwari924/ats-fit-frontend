@@ -30,6 +30,7 @@ export const FEATURE_NOUNS: Record<FeatureType, string> = {
   [FeatureType.COVER_LETTER]: 'cover letter',
   [FeatureType.RESUME_BATCH_GENERATION]: 'batch job',
   [FeatureType.JOB_APPLICATION_TRACKING]: 'application',
+  [FeatureType.JOB_RELEVANCE_SCORE]: 'job fit check',
 };
 
 export const QUOTA_COPY: Record<UserTier, QuotaCopyEntry> = {

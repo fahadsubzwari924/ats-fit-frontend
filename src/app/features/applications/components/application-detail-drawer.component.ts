@@ -34,6 +34,7 @@ import { JobService } from '@features/apply-new-job/services/job.service';
 import { ApplicationStatusSelectComponent } from '@features/applications/components/application-status-select.component';
 import { PipelineSectionComponent } from '@features/applications/components/sections/pipeline-section.component';
 import { fromDateInputToIso, toDateInputValue } from '@features/applications/lib/date-input-helpers';
+import { ApiErrorService } from '@shared/services/api-error.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { ModalService } from '@shared/services/modal.service';
 import { DiscardChangesDialogComponent } from '@features/applications/components/discard-changes-dialog.component';
@@ -91,6 +92,7 @@ const drawerAnimations: AnimationTriggerMetadata[] = [
 export class ApplicationDetailDrawerComponent implements OnDestroy {
   private readonly jobService = inject(JobService);
   private readonly snackbar = inject(SnackbarService);
+  private readonly apiErrorService = inject(ApiErrorService);
   private readonly modalService = inject(ModalService);
   private readonly fb = inject(FormBuilder);
   private readonly destroyRef = inject(DestroyRef);
@@ -173,7 +175,7 @@ export class ApplicationDetailDrawerComponent implements OnDestroy {
         .pipe(
           catchError((err: unknown) => {
             this.isLoading.set(false);
-            this.snackbar.showError(this.httpErrorMessage(err, 'Could not load application.'));
+            this.snackbar.showError(this.apiErrorService.parse(err, { defaultMessage: 'Could not load application.' }).message);
             this.beginClose();
             return of(null);
           }),
@@ -364,7 +366,7 @@ export class ApplicationDetailDrawerComponent implements OnDestroy {
       .pipe(
         catchError((err: unknown) => {
           this.saving.set(false);
-          this.snackbar.showError(this.httpErrorMessage(err, 'Could not save changes.'));
+          this.snackbar.showError(this.apiErrorService.parse(err, { defaultMessage: 'Could not save changes.' }).message);
           return of(null);
         }),
         takeUntilDestroyed(this.destroyRef),
@@ -646,13 +648,4 @@ export class ApplicationDetailDrawerComponent implements OnDestroy {
     }
   }
 
-  private httpErrorMessage(err: unknown, fallback: string): string {
-    if (err && typeof err === 'object' && 'error' in err) {
-      const e = (err as { error?: { message?: string } }).error?.message;
-      if (e) {
-        return e;
-      }
-    }
-    return fallback;
-  }
 }

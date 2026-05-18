@@ -5,8 +5,6 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
-import { JobService } from '@features/apply-new-job/services/job.service';
-import { JobApplicationCreatePayload } from '@features/apply-new-job/models/job-application-create-payload.model';
 import { TailoredResume } from '@features/resume-tailoring/models/tailored-resume.model';
 import {
   JobRelevanceResult,
@@ -20,7 +18,6 @@ import { StepTemplateSelectComponent } from './components/step-template-select/s
 import { StepJobFitWarningComponent } from './components/step-job-fit-warning/step-job-fit-warning.component';
 import { StepResultsComponent } from './components/step-results/step-results.component';
 import { Messages } from '@core/enums/messages.enum';
-import { trackedApplicationAppliedAtIso } from '@features/applications/lib/date-input-helpers';
 import { QuotaAlertBannerComponent } from '@shared/components/quota-alert-banner/quota-alert-banner.component';
 import { FeatureType } from '@core/enums/feature-type.enum';
 import { QuotaState } from '@core/states/quota.state';
@@ -44,7 +41,6 @@ export class TailorApplyModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly resumeService = inject(ResumeService);
   private readonly snackbar = inject(SnackbarService);
-  private readonly jobService = inject(JobService);
   private readonly quotaState = inject(QuotaState);
   readonly dialogRef = inject(MatDialogRef<TailorApplyModalComponent>);
 
@@ -226,18 +222,11 @@ export class TailorApplyModalComponent implements OnInit {
   }
 
   onCreateAnother(): void {
-    // If the user hadn't yet tracked the previous tailoring (e.g. they clicked
-    // "Create Another" directly without using Done), record it now so the
-    // application isn't silently dropped on reset.
-    if (this.tailoredResume() !== null && !this.appTracked) {
-      this.fireTrackingInBackground();
-    }
     this.form.reset();
     this.tailoredResume.set(null);
     this.pendingRelevance.set(null);
     this.isProcessing.set(false);
     this.progress.set(0);
-    this.appTracked = false;
     this.currentStep.set(1);
   }
 
@@ -246,89 +235,8 @@ export class TailorApplyModalComponent implements OnInit {
     this.dialogRef.close(payload);
   }
 
-  /**
-   * Marks whether the current tailored resume has already been recorded as a
-   * job application — set by `onTrackApplication(true)` after a successful
-   * `applyNewJobs` call. Guards `closeModal()` from double-tracking when the
-   * user clicks the X icon after already clicking Done.
-   */
-  private appTracked = false;
-
-  onTrackApplication(track: boolean): void {
-    const afterTailorClose: TailoringModalCloseResult = {
-      refreshDashboard: true,
-      tailoringCompleted: true,
-    };
-    if (!track) {
-      this.dialogRef.close(afterTailorClose);
-      return;
-    }
-    const payload = this.buildTrackingPayload();
-    if (!payload) {
-      this.dialogRef.close(afterTailorClose);
-      return;
-    }
-    this.jobService.applyNewJobs(payload).subscribe({
-      next: () => {
-        this.appTracked = true;
-        this.dialogRef.close(afterTailorClose);
-      },
-      error: (err) => {
-        this.snackbar.showError(this.trackApplicationErrorMessage(err));
-        this.dialogRef.close(afterTailorClose);
-      },
-    });
-  }
-
-  private buildTrackingPayload(): JobApplicationCreatePayload | null {
-    const resume = this.tailoredResume();
-    if (!resume) return null;
-    const v = this.form.value;
-    return {
-      application_source: 'tailored_resume',
-      company_name: v.companyName,
-      job_position: v.jobPosition,
-      job_description: v.jobDescription,
-      applied_at: trackedApplicationAppliedAtIso(),
-      resume_generation_id: resume.resumeGenerationId,
-    };
-  }
-
-  /**
-   * Fire-and-forget tracking used when the user dismisses the modal via the
-   * X icon. The modal closes immediately; the application record is created
-   * in the background. Errors are swallowed because there's no longer a UI
-   * surface to show them on — the dashboard refresh that follows will
-   * reflect whether the call landed.
-   */
-  private fireTrackingInBackground(): void {
-    const payload = this.buildTrackingPayload();
-    if (!payload) return;
-    this.jobService.applyNewJobs(payload).subscribe({
-      error: () => undefined,
-    });
-  }
-
-  private trackApplicationErrorMessage(err: unknown): string {
-    const message = (err as { error?: { message?: string | string[] } })?.error?.message;
-    if (Array.isArray(message)) {
-      return message.filter(Boolean).join(', ');
-    }
-    if (typeof message === 'string' && message.trim()) {
-      return message;
-    }
-    return 'Could not save application to tracker.';
-  }
-
   closeModal(): void {
     const hasTailored = this.currentStep() === 4 && this.tailoredResume() !== null;
-    if (hasTailored && !this.appTracked) {
-      // Default policy: every successful tailor counts as a job application.
-      // Even when the user dismisses via the X icon (rather than the explicit
-      // Done button), record the application in the background so the
-      // dashboard accurately reflects what was tailored.
-      this.fireTrackingInBackground();
-    }
     const result: TailoringModalCloseResult | undefined = hasTailored
       ? { refreshDashboard: true, tailoringCompleted: true }
       : undefined;

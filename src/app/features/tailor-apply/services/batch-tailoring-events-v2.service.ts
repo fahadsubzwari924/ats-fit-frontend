@@ -64,7 +64,15 @@ export class BatchTailoringV2EventsService {
       }
 
       source.onerror = () => {
-        this.zone.run(() => this.connectionStatus.set('reconnecting'));
+        this.zone.run(() => {
+          // When `batch_completed` fires we intentionally `source.close()` and
+          // flip the status to 'closed'. The browser then triggers `onerror`
+          // as a side effect of that close — without this guard, the UI would
+          // briefly flash a "Reconnecting…" banner right after a successful
+          // batch finishes, which looks like a regression to the user.
+          if (this.connectionStatus() === 'closed') return;
+          this.connectionStatus.set('reconnecting');
+        });
       };
     };
 

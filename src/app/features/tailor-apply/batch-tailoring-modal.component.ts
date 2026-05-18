@@ -19,9 +19,6 @@ import { BatchTailoringV2State } from './state/batch-tailoring-v2.state';
 import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { BlobDownloadService } from '@shared/services/blob-download.service';
-import { JobService } from '@features/apply-new-job/services/job.service';
-import { JobApplicationCreatePayload } from '@features/apply-new-job/models/job-application-create-payload.model';
-import { trackedApplicationAppliedAtIso } from '@features/applications/lib/date-input-helpers';
 import { ResumeTemplate } from '@features/resume-tailoring/models/resume-template.model';
 import { QuotaAlertBannerComponent } from '@shared/components/quota-alert-banner/quota-alert-banner.component';
 import { FeatureType } from '@core/enums/feature-type.enum';
@@ -54,7 +51,6 @@ export class BatchTailoringModalComponent implements OnInit {
   private readonly destroyRef = inject(DestroyRef);
   private readonly quotaState = inject(QuotaState);
   private readonly downloader = inject(BlobDownloadService);
-  private readonly jobService = inject(JobService);
   readonly dialogRef = inject(MatDialogRef<BatchTailoringModalComponent>);
 
   readonly flow = inject(BatchTailoringFlowController);
@@ -246,74 +242,30 @@ export class BatchTailoringModalComponent implements OnInit {
     this.batchResponse.set(null);
     this.step.set('input');
     this.flow.reset();
-    this.appsTracked = false;
   }
 
   /**
-   * Flips to `true` when batch-results emits `finishWithTracking` — i.e. the
-   * user explicitly clicked "Track All" and the API calls landed. Guards
-   * `close()` from re-firing the tracking calls on the X icon dismiss.
-   */
-  private appsTracked = false;
-
-  /**
-   * Wired to batch-results' `finishWithTracking` event. The batch-results
-   * component has already submitted each application; we just mark them
-   * tracked and close the modal.
+   * Wired to batch-results' `finishWithTracking` event. Backend already owns
+   * application creation for every successful batch row (see
+   * BatchTailoringV2Processor — auto-track on completion), so we just close
+   * the modal.
    */
   onFinishWithTracking(): void {
-    this.appsTracked = true;
     this.close();
   }
 
   /**
-   * Fire-and-forget tracking for every successful batch row that wasn't
-   * already tracked via the explicit "Track All" button. Mirrors the filter
-   * batch-results applies so we don't post rows with empty descriptions or
-   * missing generation IDs.
+   * Close the modal and signal the dashboard to refresh. The backend already
+   * created `job_applications` rows for every successful row in this batch
+   * (see BatchTailoringV2Processor — auto-track on completion), so the
+   * modal does not need to fire any tracking POSTs on close.
    */
-  private fireBatchTrackingInBackground(): void {
-    const response = this.batchResponse();
-    if (!response) return;
-    const items = response.results.filter(
-      (r) =>
-        r.status === 'success' &&
-        !!r.resumeGenerationId?.trim() &&
-        (r.jobDescription?.trim().length ?? 0) >= 20,
-    );
-    if (!items.length) return;
-
-    const appliedAt = trackedApplicationAppliedAtIso();
-    for (const r of items) {
-      const payload: JobApplicationCreatePayload = {
-        application_source: 'tailored_resume',
-        company_name: r.companyName,
-        job_position: r.jobPosition,
-        job_description: r.jobDescription!.trim(),
-        applied_at: appliedAt,
-        resume_generation_id: r.resumeGenerationId,
-      };
-      // Modal is being torn down — no UI to surface per-row failure on, and
-      // the dashboard refresh will reflect what landed.
-      this.jobService.applyNewJobs(payload).subscribe({
-        error: () => undefined,
-      });
-    }
-  }
-
   close(): void {
     const summary = this.batchResponse()?.summary;
     const shouldRefresh =
       this.step() === 'results' &&
       summary !== undefined &&
       summary.succeeded > 0;
-    if (shouldRefresh && !this.appsTracked) {
-      // Default policy: every successful batch row counts as a job
-      // application. Track them in the background before the modal closes so
-      // the dashboard reflects them even when the user dismisses via the X
-      // icon instead of clicking "Track All".
-      this.fireBatchTrackingInBackground();
-    }
     const result: TailoringModalCloseResult | undefined = shouldRefresh
       ? { refreshDashboard: true, tailoringCompleted: true }
       : undefined;
