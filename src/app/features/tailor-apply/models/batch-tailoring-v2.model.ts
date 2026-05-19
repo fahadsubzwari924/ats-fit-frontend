@@ -1,4 +1,5 @@
 import type { BatchJobError, BatchJobResult } from './batch-tailoring.model';
+import type { JobRelevanceResult } from '@features/resume-tailoring/models/job-relevance.model';
 
 export type BatchJobState =
   | 'queued'
@@ -44,6 +45,40 @@ export interface BatchSnapshot {
   status: BatchRunStatus;
   jobs: BatchJobLiveState[];
 }
+
+/**
+ * Per-job relevance breakdown returned in the batch low-fit warning payload.
+ * Mirrors the BE shape `{ jobIndex, relevance: JobRelevanceResult }` so the
+ * FE warning step can render score / verdict / gaps / strengths for every
+ * job in the batch (not just the low-scoring ones).
+ */
+export interface BatchLowFitWarningJob {
+  jobIndex: number;
+  relevance: JobRelevanceResult;
+}
+
+/**
+ * Returned by `POST /resume-tailoring/batch/v2/generate` (HTTP 200) when at
+ * least one job in the batch scored `verdict === 'low'` AND the caller did
+ * not pass `acknowledgeLowFit: true`. The FE detects this via the discriminant
+ * `type === 'batch_low_fit_warning'` and shows a confirmation step before
+ * re-submitting with `acknowledgeLowFit: true`.
+ */
+export interface BatchLowFitWarningResponse {
+  type: 'batch_low_fit_warning';
+  jobs: BatchLowFitWarningJob[];
+}
+
+/**
+ * Discriminated union for the v2 enqueue endpoint response. Callers MUST
+ * narrow via the `type` property OR the presence of `batchId` before
+ * accessing fields — otherwise low-fit responses silently produce
+ * `batchId === undefined` and SSE opens at `/batch/v2/undefined/events`,
+ * which Postgres rejects with `invalid input syntax for type uuid`.
+ */
+export type EnqueueBatchV2ApiResponse =
+  | EnqueueBatchV2Response
+  | BatchLowFitWarningResponse;
 
 export interface EnqueueBatchV2Response {
   batchId: string;

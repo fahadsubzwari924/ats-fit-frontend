@@ -7,6 +7,7 @@ import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
 import { TailoredResume } from '@features/resume-tailoring/models/tailored-resume.model';
 import {
+  JobRelevanceEngine,
   JobRelevanceResult,
   JobRelevanceSkipReason,
   JobRelevanceVerdict,
@@ -63,6 +64,17 @@ export class TailorApplyModalComponent implements OnInit {
   tailoredResume = signal<TailoredResume | null>(null);
   pendingRelevance = signal<JobRelevanceResult | null>(null);
 
+  /**
+   * True when the BE rejected the standalone /relevance call with 403 (quota
+   * exhausted via @RateLimitFeature) OR returned the UNAVAILABLE sentinel
+   * with `unavailableReason: 'quota_exhausted'` (only the orchestrator path
+   * uses this — kept for symmetry). When true, the Job Fit step is skipped
+   * entirely and an inline banner explains the graceful degradation on the
+   * Template step. Tailoring itself stays available — the user's tailoring
+   * quota is independent.
+   */
+  jobFitQuotaExhausted = signal(false);
+
   readonly STEP_LABELS = ['', 'Job Details', 'Job Fit', 'Template', 'Results'];
 
   ngOnInit(): void {
@@ -99,10 +111,19 @@ export class TailorApplyModalComponent implements OnInit {
         this.progress.set(0);
 
         // BE returns an UNAVAILABLE sentinel when scoring couldn't run
-        // (feature disabled, no profile, empty profile). Surface a targeted
-        // warning and keep the user on step 1 — moving to step 2 would
-        // render a meaningless 0/MISMATCH breakdown.
+        // (feature disabled, no profile, empty profile, quota exhausted).
         if (relevance.verdict === JobRelevanceVerdict.UNAVAILABLE) {
+          // Quota-exhausted is a graceful-degradation case: skip the Job Fit
+          // step entirely and proceed to Template. Tailoring is independent
+          // and still available — the user's tailoring quota is untouched.
+          if (relevance.unavailableReason === JobRelevanceSkipReason.QUOTA_EXHAUSTED) {
+            this.jobFitQuotaExhausted.set(true);
+            this.currentStep.set(3);
+            return;
+          }
+          // Other unavailable reasons (no profile, empty profile, feature
+          // disabled) keep the user on step 1 with a targeted warning —
+          // moving to step 2 would render a meaningless 0/MISMATCH breakdown.
           this.snackbar.showWarning(
             this.mapJobFitUnavailableMessage(relevance.unavailableReason),
           );
@@ -111,10 +132,33 @@ export class TailorApplyModalComponent implements OnInit {
 
         this.pendingRelevance.set(relevance);
         this.currentStep.set(2);
+
+        // Decrement the local Job Fit quota optimistically so the dashboard
+        // hero + billing usage card update without a page refresh. Only
+        // fires for `engine === 'llm'` — cache hits and fast-path skips
+        // don't burn quota on the BE (see JobRelevanceService.score:
+        // recordUsage is gated on engine === LLM), so an optimistic
+        // decrement would briefly show a false +1 before the silent
+        // /users/me refresh reverts it. QuotaState handles the refresh
+        // internally; we just need to nudge it.
+        if (relevance.engine === JobRelevanceEngine.LLM) {
+          this.quotaState.notifyFeatureConsumed(
+            FeatureType.JOB_RELEVANCE_SCORE,
+          );
+        }
       },
       error: (err) => {
         this.isProcessing.set(false);
         this.progress.set(0);
+        // Standalone /relevance endpoint returns 403 via @RateLimitFeature
+        // when the user has exhausted their JOB_RELEVANCE_SCORE quota for
+        // the month. Treat this as the graceful-degradation case (skip Job
+        // Fit, advance to Template). The banner on step 3 explains why.
+        if (err?.status === 403) {
+          this.jobFitQuotaExhausted.set(true);
+          this.currentStep.set(3);
+          return;
+        }
         this.snackbar.showError(err?.error?.message ?? Messages.ERROR_UPLOADING_RESUME);
       },
     });
@@ -135,6 +179,8 @@ export class TailorApplyModalComponent implements OnInit {
         return Messages.JOB_FIT_UNAVAILABLE_EMPTY_PROFILE;
       case JobRelevanceSkipReason.FEATURE_DISABLED:
         return Messages.JOB_FIT_UNAVAILABLE_FEATURE_DISABLED;
+      case JobRelevanceSkipReason.QUOTA_EXHAUSTED:
+        return Messages.JOB_FIT_UNAVAILABLE_QUOTA_EXHAUSTED;
       default:
         return Messages.JOB_FIT_UNAVAILABLE_DEFAULT;
     }
@@ -147,6 +193,9 @@ export class TailorApplyModalComponent implements OnInit {
 
   /** Step 2 → step 1 (let the user revise the JD). */
   onBackToDetails(): void {
+    // Clear the graceful-skip flag when the user returns to Job Details —
+    // a new JD may succeed (e.g., quota reset, different cached state).
+    this.jobFitQuotaExhausted.set(false);
     this.currentStep.set(1);
   }
 
@@ -225,6 +274,7 @@ export class TailorApplyModalComponent implements OnInit {
     this.form.reset();
     this.tailoredResume.set(null);
     this.pendingRelevance.set(null);
+    this.jobFitQuotaExhausted.set(false);
     this.isProcessing.set(false);
     this.progress.set(0);
     this.currentStep.set(1);

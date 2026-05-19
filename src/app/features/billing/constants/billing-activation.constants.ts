@@ -71,6 +71,7 @@ export const ACTIVATION_CTA = {
 export const PREMIUM_HIGHLIGHTS: readonly string[] = [
   '30 tailored resumes / month',
   '15 cover letters / month',
+  '100 job-fit checks / month',
   'Batch tailoring (up to 3 resumes per job)',
   'All premium templates',
   'Full generation history',

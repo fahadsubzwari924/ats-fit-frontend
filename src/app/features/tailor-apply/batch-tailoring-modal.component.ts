@@ -106,6 +106,13 @@ export class BatchTailoringModalComponent implements OnInit {
             );
           }
         }
+      } else if (status === 'low_fit_warning') {
+        // BE rejected the enqueue because one or more jobs scored verdict=low
+        // without acknowledgeLowFit. Show a confirmation step listing each
+        // job's fit so the user can decide to tailor anyway or pick different
+        // jobs. NOT a failure path — quota wasn't burned, payload is cached
+        // for retry by the flow controller.
+        this.step.set('low_fit_warning');
       } else if (status === 'failed') {
         const err = this.flow.error();
         if (err) this.snackbar.showError(err);
@@ -126,6 +133,18 @@ export class BatchTailoringModalComponent implements OnInit {
     this.step.set('processing');
     this.quotaNotifiedForRun = false;
     this.flow.start(payload);
+  }
+
+  /** "Tailor anyway" — user has reviewed the low-fit jobs and wants to proceed. */
+  onAcknowledgeLowFit(): void {
+    this.step.set('processing');
+    this.flow.acknowledgeAndRetry();
+  }
+
+  /** "Pick different jobs" — abandon the batch, return to input step. */
+  onAbandonLowFit(): void {
+    this.flow.reset();
+    this.step.set('input');
   }
 
   onDownloadJob(job: BatchJobLiveState): void {
