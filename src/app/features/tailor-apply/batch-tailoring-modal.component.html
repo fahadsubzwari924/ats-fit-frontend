@@ -1,4 +1,14 @@
-<div class="flex flex-col bg-white rounded-2xl" style="height: 85vh; max-height: 700px;">
+<!--
+  Modal sizing — responsive, content-driven height:
+    - max-h-[90vh] never exceeds viewport on any screen (covers mobile too).
+    - min-h-[20rem] (~320px) keeps the modal feeling intentional on tiny
+      payloads (e.g. low-fit warning with 1 job).
+    - No fixed height — the content's `flex-1 overflow-y-auto` content area
+      drives the actual height so a 3-job batch doesn't stretch into empty
+      space (the original bug — fixed 85vh / 700px left ~50% empty).
+  On large desktop the modal naturally caps at 90vh; on mobile it scrolls.
+-->
+<div class="flex flex-col bg-white rounded-2xl max-h-[90vh] min-h-[20rem]">
 
   <!-- Header -->
   <div class="flex items-center justify-between px-4 sm:px-6 pt-5 pb-4 border-b border-slate-100 shrink-0">
@@ -10,6 +20,7 @@
       <p class="text-xs text-slate-500 mt-0.5">
         @switch (step()) {
           @case ('input') { Generate tailored resumes for multiple jobs at once }
+          @case ('low_fit_warning') { Some jobs may not be the strongest match — review before tailoring }
           @case ('processing') { AI is optimizing your resumes... }
           @case ('results') { Your tailored resumes are ready }
         }
@@ -63,6 +74,87 @@
             </button>
           </div>
         }
+      }
+
+      @case ('low_fit_warning') {
+        <!--
+          Low-fit warning step. Renders the per-job relevance breakdown
+          returned by `POST /batch/v2/generate` when one or more jobs
+          scored verdict=low without `acknowledgeLowFit`. No quota has
+          been burned yet — `acknowledgeAndRetry()` re-submits the same
+          payload with the ack flag set, `reset()` returns to input.
+        -->
+        <div class="space-y-4">
+          <div class="rounded-2xl border border-amber-200 bg-amber-50 p-4">
+            <div class="flex items-start gap-3">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24"
+                   fill="none" stroke="currentColor" stroke-width="2"
+                   class="mt-0.5 shrink-0 text-amber-700">
+                <path d="M10.29 3.86 1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0Z"/>
+                <line x1="12" y1="9" x2="12" y2="13"/>
+                <line x1="12" y1="17" x2="12.01" y2="17"/>
+              </svg>
+              <div class="flex-1">
+                <h4 class="text-sm font-semibold text-amber-900">Some jobs are a weak fit</h4>
+                <p class="mt-1 text-xs text-amber-800/90">
+                  Tailoring against a poor-fit job still works, but the AI will need to bridge larger gaps —
+                  the resulting resume may emphasize transferable skills over direct matches.
+                </p>
+              </div>
+            </div>
+          </div>
+
+          <ul class="space-y-3">
+            @for (job of flow.lowFitJobs(); track job.jobIndex) {
+              <li class="rounded-xl border border-slate-200 bg-white p-3 flex items-center gap-3">
+                <!--
+                  Score badge — adds `%` suffix so the integer reads as a
+                  percentage (was bare "58" → now "58%"). The tooltip
+                  explains what the number represents so users don't have
+                  to infer from context.
+                -->
+                <div class="w-12 h-10 rounded-lg flex items-center justify-center text-sm font-semibold shrink-0 cursor-help"
+                     [class.bg-red-100]="job.relevance.verdict === 'low'"
+                     [class.text-red-700]="job.relevance.verdict === 'low'"
+                     [class.bg-amber-100]="job.relevance.verdict === 'medium'"
+                     [class.text-amber-700]="job.relevance.verdict === 'medium'"
+                     [class.bg-emerald-100]="job.relevance.verdict === 'high'"
+                     [class.text-emerald-700]="job.relevance.verdict === 'high'"
+                     matTooltip="Job-fit score — how strongly your profile matches this job. Higher is better."
+                     matTooltipPosition="above">
+                  {{ job.relevance.score }}%
+                </div>
+                <div class="flex-1 min-w-0">
+                  <p class="text-sm font-medium text-slate-800">
+                    Job {{ job.jobIndex + 1 }}
+                    <span class="ml-1 text-xs uppercase tracking-wide font-semibold"
+                          [class.text-red-600]="job.relevance.verdict === 'low'"
+                          [class.text-amber-600]="job.relevance.verdict === 'medium'"
+                          [class.text-emerald-600]="job.relevance.verdict === 'high'">
+                      {{ job.relevance.verdict }}
+                    </span>
+                  </p>
+                  @if (job.relevance.gaps.length) {
+                    <p class="text-xs text-slate-500 mt-0.5 truncate">
+                      Missing: {{ job.relevance.gaps.join(', ') }}
+                    </p>
+                  }
+                </div>
+              </li>
+            }
+          </ul>
+
+          <div class="flex flex-col gap-2 sm:flex-row sm:justify-end pt-1">
+            <button type="button" (click)="onAbandonLowFit()"
+              class="px-4 py-2.5 rounded-xl border border-slate-200 bg-white text-sm font-medium text-slate-600 hover:text-slate-800 hover:border-slate-300 transition-colors">
+              Pick different jobs
+            </button>
+            <button type="button" (click)="onAcknowledgeLowFit()"
+              class="px-5 py-2.5 rounded-xl bg-slate-900 text-white text-sm font-semibold hover:bg-slate-800 transition-colors">
+              Tailor anyway →
+            </button>
+          </div>
+        </div>
       }
 
       @case ('processing') {

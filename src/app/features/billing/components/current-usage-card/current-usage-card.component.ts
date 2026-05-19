@@ -7,10 +7,9 @@ import { FeatureTitles } from '@features/dashboard/constants/feature-title.const
   selector: 'app-current-usage-card',
   imports: [NgClass],
   templateUrl: './current-usage-card.component.html',
-  styleUrl: './current-usage-card.component.scss'
+  styleUrl: './current-usage-card.component.scss',
 })
 export class CurrentUsageCardComponent {
-
   public usage = input<FeatureUsage>();
 
   public featureTitles = FeatureTitles;
@@ -19,6 +18,8 @@ export class CurrentUsageCardComponent {
     switch (feature) {
       case 'resume_generation':
         return 'from-emerald-50 to-teal-50 border-emerald-200';
+      case 'job_relevance_score':
+        return 'from-sky-50 to-indigo-50 border-sky-200';
       default:
         return 'from-emerald-50 to-teal-50 border-emerald-200';
     }
@@ -28,6 +29,8 @@ export class CurrentUsageCardComponent {
     switch (feature) {
       case 'resume_generation':
         return 'text-emerald-700';
+      case 'job_relevance_score':
+        return 'text-sky-700';
       default:
         return 'text-emerald-700';
     }
@@ -37,6 +40,8 @@ export class CurrentUsageCardComponent {
     switch (feature) {
       case 'resume_generation':
         return 'text-emerald-900';
+      case 'job_relevance_score':
+        return 'text-sky-900';
       default:
         return 'text-emerald-900';
     }
@@ -49,5 +54,4 @@ export class CurrentUsageCardComponent {
     }
     return '';
   }
-
 }

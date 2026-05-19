@@ -31,5 +31,6 @@ export enum Messages {
   JOB_FIT_UNAVAILABLE_NO_PROFILE = 'Add a resume to your profile first so we can score how well it fits this role.',
   JOB_FIT_UNAVAILABLE_EMPTY_PROFILE = 'Your resume profile looks empty. Please re-upload your resume to enable the fit check.',
   JOB_FIT_UNAVAILABLE_FEATURE_DISABLED = 'Job fit check is temporarily unavailable. Please try again later.',
+  JOB_FIT_UNAVAILABLE_QUOTA_EXHAUSTED = "You've used all your job-fit checks this month. We'll skip the fit preview — tailoring still works, and your fit checks reset next month.",
   JOB_FIT_UNAVAILABLE_DEFAULT = 'Job fit check is unavailable for your profile right now.',
 }

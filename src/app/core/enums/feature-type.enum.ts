@@ -3,4 +3,5 @@ export enum FeatureType {
   COVER_LETTER = 'cover_letter',
   RESUME_BATCH_GENERATION = 'resume_batch_generation',
   JOB_APPLICATION_TRACKING = 'job_application_tracking',
+  JOB_RELEVANCE_SCORE = 'job_relevance_score',
 }

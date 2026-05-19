@@ -21,7 +21,26 @@ import type {
   BatchGenerateRequest,
   BatchGenerateResponse,
 } from '../models/batch-tailoring.model';
-import type { BatchSnapshot } from '../models/batch-tailoring-v2.model';
+import type {
+  BatchLowFitWarningJob,
+  BatchLowFitWarningResponse,
+  EnqueueBatchV2ApiResponse,
+  BatchSnapshot,
+} from '../models/batch-tailoring-v2.model';
+
+/**
+ * Explicit type predicate — TypeScript's `'type' in obj` narrowing failed
+ * to propagate because `EnqueueBatchV2Response` doesn't declare a `type`
+ * field at all (open structural type). A predicate function carries the
+ * narrowed type forward across the early-return correctly.
+ */
+function isBatchLowFitWarning(
+  response: EnqueueBatchV2ApiResponse,
+): response is BatchLowFitWarningResponse {
+  return (
+    (response as { type?: string }).type === 'batch_low_fit_warning'
+  );
+}
 
 const POLLING_DELAY_MS = 10_000;
 const POLLING_INTERVAL_MS = 2_000;
@@ -31,7 +50,15 @@ export type FlowStatus =
   | 'enqueueing'
   | 'streaming'
   | 'completed'
-  | 'failed';
+  | 'failed'
+  /**
+   * The BE rejected the initial enqueue because at least one job in the
+   * batch had `verdict === 'low'` AND `acknowledgeLowFit` was false. The
+   * per-job relevance breakdown is exposed via `lowFitJobs()`. To proceed,
+   * the UI calls `acknowledgeAndRetry()` (which re-submits the same payload
+   * with `acknowledgeLowFit: true`). To abandon, the UI calls `reset()`.
+   */
+  | 'low_fit_warning';
 
 /**
  * Component-scoped controller that owns the full v2 batch lifecycle:
@@ -55,6 +82,15 @@ export class BatchTailoringFlowController {
 
   private readonly _error = signal<string | null>(null);
   readonly error = this._error.asReadonly();
+
+  /**
+   * Per-job low-fit breakdown surfaced when status === 'low_fit_warning'.
+   * Empty array in any other status. Consumed by the modal's warning step
+   * to render score / verdict / gaps for each job before the user decides
+   * whether to acknowledge and proceed.
+   */
+  private readonly _lowFitJobs = signal<BatchLowFitWarningJob[]>([]);
+  readonly lowFitJobs = this._lowFitJobs.asReadonly();
 
   /**
    * Re-exposed so consumers (e.g. the modal template) do not need to inject
@@ -102,14 +138,43 @@ export class BatchTailoringFlowController {
     this.currentPayload = payload;
     this._status.set('enqueueing');
 
+    // Optimistic UI — render the user-typed job rows immediately while we
+    // wait for the enqueue HTTP response + first SSE snapshot to land. The
+    // real snapshot from the BE replaces this when it arrives. Without this,
+    // the processing view sits empty for 1–3s while the network round-trip
+    // completes, which feels broken.
+    this.state.applySnapshot({
+      batchId: '',
+      totalJobs: payload.jobs.length,
+      status: 'queued',
+      jobs: payload.jobs.map((j, i) => ({
+        index: i,
+        jobPosition: j.jobPosition,
+        companyName: j.companyName,
+        state: 'queued',
+        retryCount: 0,
+      })),
+    });
+
     this.v2Service
       .enqueueBatch(payload)
       .pipe(takeUntilDestroyed(this.destroyRef))
       .subscribe({
-        next: ({ batchId }) => {
-          this.batchId = batchId;
+        next: (response) => {
+          // Discriminate on the `type` field — when the BE detects one or
+          // more jobs with verdict=low and the caller did NOT acknowledge,
+          // it returns `{ type: 'batch_low_fit_warning', jobs }` instead
+          // of `{ batchId, totalJobs }`. Opening SSE on the warning shape
+          // produces `batchId === undefined` → Postgres rejects with
+          // "invalid input syntax for type uuid". Guard here.
+          if (isBatchLowFitWarning(response)) {
+            this._lowFitJobs.set(response.jobs);
+            this._status.set('low_fit_warning');
+            return;
+          }
+          this.batchId = response.batchId;
           this._status.set('streaming');
-          this.openSse(batchId, payload);
+          this.openSse(response.batchId, payload);
         },
         error: (err: { error?: { message?: string } }) => {
           this._error.set(
@@ -121,8 +186,28 @@ export class BatchTailoringFlowController {
       });
   }
 
-  /** Reset to idle (used when the user picks "Tailor Another Set"). */
+  /**
+   * Re-submit the cached payload with `acknowledgeLowFit: true`, telling
+   * the BE to bypass the low-fit guard. Used by the modal's warning step
+   * when the user explicitly clicks "Tailor anyway". No-op if there is no
+   * cached payload (defensive — shouldn't fire outside `low_fit_warning`).
+   */
+  acknowledgeAndRetry(): void {
+    if (!this.currentPayload) return;
+    const payload: BatchGenerateRequest = {
+      ...this.currentPayload,
+      acknowledgeLowFit: true,
+    };
+    // `start()` calls `reset()` internally — that clears `_lowFitJobs`
+    // and `_status`, so the warning step naturally tears down as the new
+    // enqueue request fires.
+    this.start(payload);
+  }
+
+  /** Reset to idle (used when the user picks "Tailor Another Set" or
+   * abandons the low-fit warning step). */
   reset(): void {
+    this._lowFitJobs.set([]);
     this.sseSub?.unsubscribe();
     this.stopPolling();
     this.sseSub = undefined;

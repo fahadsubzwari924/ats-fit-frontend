@@ -97,6 +97,13 @@ export interface BatchGenerateRequest {
   jobs: BatchJobInput[];
   templateId: string;
   resumeId?: string;
+  /**
+   * Mirror of the BE `EnqueueBatchV2Dto.acknowledgeLowFit` flag. Set to
+   * `true` after the user explicitly clicks "Tailor anyway" on the low-fit
+   * warning step — tells the BE to bypass the per-job low-fit guard and
+   * proceed with the batch. Defaults to `false` on first submission.
+   */
+  acknowledgeLowFit?: boolean;
 }
 
 export interface BatchGenerateResponse {
@@ -110,4 +117,8 @@ export interface BatchGenerateResponse {
   };
 }
 
-export type BatchTailoringStep = 'input' | 'processing' | 'results';
+export type BatchTailoringStep =
+  | 'input'
+  | 'low_fit_warning'
+  | 'processing'
+  | 'results';

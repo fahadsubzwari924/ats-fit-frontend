@@ -5,10 +5,9 @@ import { MatDialogRef } from '@angular/material/dialog';
 import { MatTooltipModule } from '@angular/material/tooltip';
 import { ResumeService } from '@shared/services/resume.service';
 import { SnackbarService } from '@shared/services/snackbar.service';
-import { JobService } from '@features/apply-new-job/services/job.service';
-import { JobApplicationCreatePayload } from '@features/apply-new-job/models/job-application-create-payload.model';
 import { TailoredResume } from '@features/resume-tailoring/models/tailored-resume.model';
 import {
+  JobRelevanceEngine,
   JobRelevanceResult,
   JobRelevanceSkipReason,
   JobRelevanceVerdict,
@@ -20,7 +19,6 @@ import { StepTemplateSelectComponent } from './components/step-template-select/s
 import { StepJobFitWarningComponent } from './components/step-job-fit-warning/step-job-fit-warning.component';
 import { StepResultsComponent } from './components/step-results/step-results.component';
 import { Messages } from '@core/enums/messages.enum';
-import { trackedApplicationAppliedAtIso } from '@features/applications/lib/date-input-helpers';
 import { QuotaAlertBannerComponent } from '@shared/components/quota-alert-banner/quota-alert-banner.component';
 import { FeatureType } from '@core/enums/feature-type.enum';
 import { QuotaState } from '@core/states/quota.state';
@@ -44,7 +42,6 @@ export class TailorApplyModalComponent implements OnInit {
   private readonly fb = inject(FormBuilder);
   private readonly resumeService = inject(ResumeService);
   private readonly snackbar = inject(SnackbarService);
-  private readonly jobService = inject(JobService);
   private readonly quotaState = inject(QuotaState);
   readonly dialogRef = inject(MatDialogRef<TailorApplyModalComponent>);
 
@@ -66,6 +63,17 @@ export class TailorApplyModalComponent implements OnInit {
   progress = signal(0);
   tailoredResume = signal<TailoredResume | null>(null);
   pendingRelevance = signal<JobRelevanceResult | null>(null);
+
+  /**
+   * True when the BE rejected the standalone /relevance call with 403 (quota
+   * exhausted via @RateLimitFeature) OR returned the UNAVAILABLE sentinel
+   * with `unavailableReason: 'quota_exhausted'` (only the orchestrator path
+   * uses this — kept for symmetry). When true, the Job Fit step is skipped
+   * entirely and an inline banner explains the graceful degradation on the
+   * Template step. Tailoring itself stays available — the user's tailoring
+   * quota is independent.
+   */
+  jobFitQuotaExhausted = signal(false);
 
   readonly STEP_LABELS = ['', 'Job Details', 'Job Fit', 'Template', 'Results'];
 
@@ -103,10 +111,19 @@ export class TailorApplyModalComponent implements OnInit {
         this.progress.set(0);
 
         // BE returns an UNAVAILABLE sentinel when scoring couldn't run
-        // (feature disabled, no profile, empty profile). Surface a targeted
-        // warning and keep the user on step 1 — moving to step 2 would
-        // render a meaningless 0/MISMATCH breakdown.
+        // (feature disabled, no profile, empty profile, quota exhausted).
         if (relevance.verdict === JobRelevanceVerdict.UNAVAILABLE) {
+          // Quota-exhausted is a graceful-degradation case: skip the Job Fit
+          // step entirely and proceed to Template. Tailoring is independent
+          // and still available — the user's tailoring quota is untouched.
+          if (relevance.unavailableReason === JobRelevanceSkipReason.QUOTA_EXHAUSTED) {
+            this.jobFitQuotaExhausted.set(true);
+            this.currentStep.set(3);
+            return;
+          }
+          // Other unavailable reasons (no profile, empty profile, feature
+          // disabled) keep the user on step 1 with a targeted warning —
+          // moving to step 2 would render a meaningless 0/MISMATCH breakdown.
           this.snackbar.showWarning(
             this.mapJobFitUnavailableMessage(relevance.unavailableReason),
           );
@@ -115,10 +132,33 @@ export class TailorApplyModalComponent implements OnInit {
 
         this.pendingRelevance.set(relevance);
         this.currentStep.set(2);
+
+        // Decrement the local Job Fit quota optimistically so the dashboard
+        // hero + billing usage card update without a page refresh. Only
+        // fires for `engine === 'llm'` — cache hits and fast-path skips
+        // don't burn quota on the BE (see JobRelevanceService.score:
+        // recordUsage is gated on engine === LLM), so an optimistic
+        // decrement would briefly show a false +1 before the silent
+        // /users/me refresh reverts it. QuotaState handles the refresh
+        // internally; we just need to nudge it.
+        if (relevance.engine === JobRelevanceEngine.LLM) {
+          this.quotaState.notifyFeatureConsumed(
+            FeatureType.JOB_RELEVANCE_SCORE,
+          );
+        }
       },
       error: (err) => {
         this.isProcessing.set(false);
         this.progress.set(0);
+        // Standalone /relevance endpoint returns 403 via @RateLimitFeature
+        // when the user has exhausted their JOB_RELEVANCE_SCORE quota for
+        // the month. Treat this as the graceful-degradation case (skip Job
+        // Fit, advance to Template). The banner on step 3 explains why.
+        if (err?.status === 403) {
+          this.jobFitQuotaExhausted.set(true);
+          this.currentStep.set(3);
+          return;
+        }
         this.snackbar.showError(err?.error?.message ?? Messages.ERROR_UPLOADING_RESUME);
       },
     });
@@ -139,6 +179,8 @@ export class TailorApplyModalComponent implements OnInit {
         return Messages.JOB_FIT_UNAVAILABLE_EMPTY_PROFILE;
       case JobRelevanceSkipReason.FEATURE_DISABLED:
         return Messages.JOB_FIT_UNAVAILABLE_FEATURE_DISABLED;
+      case JobRelevanceSkipReason.QUOTA_EXHAUSTED:
+        return Messages.JOB_FIT_UNAVAILABLE_QUOTA_EXHAUSTED;
       default:
         return Messages.JOB_FIT_UNAVAILABLE_DEFAULT;
     }
@@ -151,6 +193,9 @@ export class TailorApplyModalComponent implements OnInit {
 
   /** Step 2 → step 1 (let the user revise the JD). */
   onBackToDetails(): void {
+    // Clear the graceful-skip flag when the user returns to Job Details —
+    // a new JD may succeed (e.g., quota reset, different cached state).
+    this.jobFitQuotaExhausted.set(false);
     this.currentStep.set(1);
   }
 
@@ -226,18 +271,12 @@ export class TailorApplyModalComponent implements OnInit {
   }
 
   onCreateAnother(): void {
-    // If the user hadn't yet tracked the previous tailoring (e.g. they clicked
-    // "Create Another" directly without using Done), record it now so the
-    // application isn't silently dropped on reset.
-    if (this.tailoredResume() !== null && !this.appTracked) {
-      this.fireTrackingInBackground();
-    }
     this.form.reset();
     this.tailoredResume.set(null);
     this.pendingRelevance.set(null);
+    this.jobFitQuotaExhausted.set(false);
     this.isProcessing.set(false);
     this.progress.set(0);
-    this.appTracked = false;
     this.currentStep.set(1);
   }
 
@@ -246,89 +285,8 @@ export class TailorApplyModalComponent implements OnInit {
     this.dialogRef.close(payload);
   }
 
-  /**
-   * Marks whether the current tailored resume has already been recorded as a
-   * job application — set by `onTrackApplication(true)` after a successful
-   * `applyNewJobs` call. Guards `closeModal()` from double-tracking when the
-   * user clicks the X icon after already clicking Done.
-   */
-  private appTracked = false;
-
-  onTrackApplication(track: boolean): void {
-    const afterTailorClose: TailoringModalCloseResult = {
-      refreshDashboard: true,
-      tailoringCompleted: true,
-    };
-    if (!track) {
-      this.dialogRef.close(afterTailorClose);
-      return;
-    }
-    const payload = this.buildTrackingPayload();
-    if (!payload) {
-      this.dialogRef.close(afterTailorClose);
-      return;
-    }
-    this.jobService.applyNewJobs(payload).subscribe({
-      next: () => {
-        this.appTracked = true;
-        this.dialogRef.close(afterTailorClose);
-      },
-      error: (err) => {
-        this.snackbar.showError(this.trackApplicationErrorMessage(err));
-        this.dialogRef.close(afterTailorClose);
-      },
-    });
-  }
-
-  private buildTrackingPayload(): JobApplicationCreatePayload | null {
-    const resume = this.tailoredResume();
-    if (!resume) return null;
-    const v = this.form.value;
-    return {
-      application_source: 'tailored_resume',
-      company_name: v.companyName,
-      job_position: v.jobPosition,
-      job_description: v.jobDescription,
-      applied_at: trackedApplicationAppliedAtIso(),
-      resume_generation_id: resume.resumeGenerationId,
-    };
-  }
-
-  /**
-   * Fire-and-forget tracking used when the user dismisses the modal via the
-   * X icon. The modal closes immediately; the application record is created
-   * in the background. Errors are swallowed because there's no longer a UI
-   * surface to show them on — the dashboard refresh that follows will
-   * reflect whether the call landed.
-   */
-  private fireTrackingInBackground(): void {
-    const payload = this.buildTrackingPayload();
-    if (!payload) return;
-    this.jobService.applyNewJobs(payload).subscribe({
-      error: () => undefined,
-    });
-  }
-
-  private trackApplicationErrorMessage(err: unknown): string {
-    const message = (err as { error?: { message?: string | string[] } })?.error?.message;
-    if (Array.isArray(message)) {
-      return message.filter(Boolean).join(', ');
-    }
-    if (typeof message === 'string' && message.trim()) {
-      return message;
-    }
-    return 'Could not save application to tracker.';
-  }
-
   closeModal(): void {
     const hasTailored = this.currentStep() === 4 && this.tailoredResume() !== null;
-    if (hasTailored && !this.appTracked) {
-      // Default policy: every successful tailor counts as a job application.
-      // Even when the user dismisses via the X icon (rather than the explicit
-      // Done button), record the application in the background so the
-      // dashboard accurately reflects what was tailored.
-      this.fireTrackingInBackground();
-    }
     const result: TailoringModalCloseResult | undefined = hasTailored
       ? { refreshDashboard: true, tailoringCompleted: true }
       : undefined;
